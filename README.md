@@ -39,20 +39,22 @@ On a phone, the left thumb walks, the right thumb aims, and on-screen buttons fi
 In `index.html`, find `const PROPOSAL_URL = '';` and paste the link between the quotes. The title card then reads
 "Either play your way through our proposal, or simply view it here" and gains a "View the proposal" menu item.
 
-## Using real screenshots on the office screens
+## The office screens
 
-The three site screens are drawn in code by default. To use your own screenshots, add the image files to this
-folder (for example `screens/borebuddy.png`) and put their paths in `const SCREENSHOTS = { bb: '', nemo: '', sw: '' };`
-in `index.html`. The top of each image is cropped to 4:3. Only add screenshots you have the right to publish.
+Each site's screen shows a screenshot file where one is listed in `const SCREENSHOTS = { ... };` in `index.html`,
+and a simplified drawing in that site's colours otherwise. To add or swap one, put the image in `screens/` and set
+its path there, for example `bb: 'screens/borebuddy.jpg'`. The top-left of the image is cropped to 4:3, which keeps
+the logo in view. Only add screenshots you have the right to publish.
 
 ## Files
 
 - `index.html` is the whole game: markup, styles and script in one file. It loads three.js r128 from cdnjs and the Press Start 2P font from Google Fonts.
 - `borebuddy-logo.png` is BoreBuddy's logo, shown on the title card.
+- `screens/` holds the homepage screenshots shown on the office computers.
 
 ## Credits
 
 The BoreBuddy name and logo belong to BoreBuddy and appear here as part of a proposal prepared for them.
-NEMO Arms and Smith & Wesson are named on the office screens; those names belong to their owners. The screens are
-simplified drawings in each site's colours, not screenshots.
+The office screens show the BoreBuddy, NEMO Arms and Smith & Wesson homepages, as supplied screenshots or as
+simplified drawings. Those sites, names and marks belong to their owners.
 The game's models and sounds are original; the look is a tribute to 8-bit light-gun games.

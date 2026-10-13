@@ -465,7 +465,8 @@ function desk(x, y0, z) {
   flat(O(tape, 44, 0.1, 0.1, 0, 5.9, -66.1, false)); for (let x = -22; x <= 22; x += 4.4) flat(O(tape, 0.1, 1.1, 0.1, x, 5.35, -66.1, false));
   for (const d of [[-8, 0, -18], [7, 0, -23], [-17, 0, -31], [24, 0, -50], [-4, 0, -53], [-18, 0, -60], [9, 4.8, -69], [-11, 4.8, -69]]) desk(d[0], d[1], d[2]);
 }
-// What is on each screen. These are simplified drawings in each site's colours, labelled by name: not screenshots.
+// What is on each screen: a screenshot file where one is listed in SCREENSHOTS below, otherwise a simplified
+// drawing in that site's colours, labelled by name.
 const screens = {};
 for (const k of ['bb', 'nemo', 'sw', 'off']) {
   const c = document.createElement('canvas'); c.width = 96; c.height = 72;
@@ -506,15 +507,15 @@ function drawScreens() {
 drawScreens();
 bbLogo.onload = drawScreens; bbLogo.src = 'borebuddy-logo.png';
 if (document.fonts && document.fonts.load) document.fonts.load('8px "Press Start 2P"').then(drawScreens, () => {});
-// To show your own screenshots instead of the drawings, add the image files next to this page and put their
-// paths between the quotes, for example bb: 'screens/borebuddy.png'. The top of each image is cropped to 4:3.
-const SCREENSHOTS = { bb: '', nemo: '', sw: '' };
+// Screenshot files replace the drawings. Add the image next to this page and put its path between the quotes,
+// for example bb: 'screens/borebuddy.jpg'. The top-left of each image is cropped to 4:3, which keeps the logo.
+const SCREENSHOTS = { bb: '', nemo: '', sw: 'screens/smith-wesson.jpg' };
 for (const k in SCREENSHOTS) if (SCREENSHOTS[k]) {
   const im = new Image();
   im.onload = () => {
-    const sc = screens[k], w = im.naturalWidth, h = Math.min(im.naturalHeight, w * 0.75), cw = h / 0.75;
-    sc.shot = true; sc.c.width = 192; sc.c.height = 144;
-    sc.c.getContext('2d').drawImage(im, (w - cw) / 2, 0, cw, h, 0, 0, 192, 144);
+    const sc = screens[k], w = im.naturalWidth, h = Math.min(im.naturalHeight, w * 0.75), cw = Math.min(w, h / 0.75);
+    sc.shot = true; sc.c.width = 256; sc.c.height = 192;
+    sc.c.getContext('2d').drawImage(im, 0, 0, cw, h, 0, 0, 256, 192);
     sc.t.needsUpdate = true;
   };
   im.src = SCREENSHOTS[k];
