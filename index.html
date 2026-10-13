@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="A playable proposal for BoreBuddy: an 8-bit rifle range, then an office full of computers to pick the right homepage from.">
+<meta name="description" content="A playable proposal for BoreBuddy: an 8-bit rifle range, then an office full of computers showing competitor sites to shoot.">
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16'/%3E%3Crect x='1' y='1' width='14' height='14' fill='%23fcfcfc'/%3E%3Crect x='2' y='2' width='12' height='12' fill='%23f83800'/%3E%3Crect x='4' y='4' width='8' height='8' fill='%23fcfcfc'/%3E%3Crect x='6' y='6' width='4' height='4' fill='%23f83800'/%3E%3C/svg%3E">
 <title>Block Season</title>
@@ -109,6 +109,10 @@ body.playing #view{cursor:crosshair}
 .card a{color:var(--orange)}
 .card a:hover,.card a:focus-visible{color:var(--white)}
 a.mode{display:block;text-decoration:none}
+.card .big{font-size:clamp(22px,6.4vw,40px);line-height:1.3;color:var(--white);max-width:none}
+.mode.cta{color:var(--white)}
+.mode.cta::before{border-left-color:var(--orange)}
+#pitchcard{outline:none}
 .card h2{margin:0;font-size:clamp(18px,5vw,28px);font-weight:400;color:var(--blue);text-shadow:3px 3px 0 #0c48b8}
 .card p{margin:0;font-size:clamp(8px,1.9vw,10px);line-height:1.9;max-width:46ch}
 .modes{display:flex;flex-direction:column;gap:2px;align-self:center}
@@ -185,7 +189,7 @@ a.mode{display:block;text-decoration:none}
       <div><dt>Fire</dt><dd>Shoot</dd></div>
       <div><dt>Scope</dt><dd>Zoom in</dd></div>
     </dl>
-    <p>First the range: five moving targets from 30 to 120 yards. Then the office: ten computers, and only three show the BoreBuddy homepage. Scope in to tell them apart.</p>
+    <p>First the range: five moving targets from 30 to 120 yards. Then the office: ten computers. Scope in, shoot the six showing competitor sites, and leave the three showing BoreBuddy alone.</p>
     <p class="top">Top score = <span id="top">000000</span></p>
     <p id="last" hidden>Last game = <span id="lastv">000000</span></p>
     <p id="fatal" hidden></p>
@@ -197,6 +201,15 @@ a.mode{display:block;text-decoration:none}
     <div class="modes">
       <button class="mode" id="resume" type="button">Continue</button>
       <button class="mode" id="quit" type="button">Quit to title</button>
+    </div>
+  </section>
+
+  <section class="card" id="pitchcard" hidden tabindex="-1" aria-labelledby="pc-title">
+    <h2 id="pc-title">Want to stand out?</h2>
+    <p class="big">Go with Mox</p>
+    <div class="modes">
+      <a class="mode cta" id="pc-view" href="#" target="_blank" rel="noopener" hidden>View proposal</a>
+      <button class="mode" id="pc-next" type="button">Keep playing</button>
     </div>
   </section>
 </div>
@@ -213,7 +226,8 @@ const TAU = Math.PI * 2, YD = 1.09361, EYE = 1.7, GRAV = 22, PR = 0.45, SHOT_GAP
 const WORLD_R = 16, GRASS_IN = 8, GRASS_OUT = 75, DOG_S = 1.5;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const canvas = $('view');
-// Paste the proposal link between the quotes to switch on "view it here" and the second menu item.
+// Paste the proposal link between the quotes. It switches on "view it here" on the title card and
+// "View proposal" on the card that follows the office.
 const PROPOSAL_URL = '';
 if (PROPOSAL_URL) {
   const pitch = $('pitch'), a = document.createElement('a');
@@ -221,6 +235,7 @@ if (PROPOSAL_URL) {
   pitch.textContent = 'Either play your way through our proposal, or simply ';
   pitch.appendChild(a); pitch.appendChild(document.createTextNode('.'));
   $('viewbtn').href = PROPOSAL_URL; $('viewbtn').hidden = false;
+  $('pc-view').href = PROPOSAL_URL; $('pc-view').hidden = false; // the card after the office gets its link too
 }
 const menuItems = [...document.querySelectorAll('#menu .mode')].filter(el => !el.hidden);
 
@@ -424,7 +439,7 @@ function updateRange(dt) {
   }
 }
 
-// ---------- the office: a warehouse floor with ten computers, three of them showing the BoreBuddy homepage ----------
+// ---------- the office: a warehouse floor with ten computers. Six show competitor sites (the targets), three show BoreBuddy ----------
 const officeSolids = [];
 function O(hex, w, h, d, x, y, z, solid) { const m = B(officeWorld, hex, w, h, d, x, y, z); m.receiveShadow = true; if (solid !== false) officeSolids.push(m); return m; }
 function desk(x, y0, z) {
@@ -723,7 +738,7 @@ let locked = false, everLocked = false, pendingLock = false, dragLook = false, l
 try { top = parseInt(localStorage.getItem('blockseason.top'), 10) || 0; } catch (e) { top = 0; }
 const pad6 = n => String(Math.max(0, Math.round(n))).padStart(6, '0');
 const tier = () => round <= 5 ? 1 : round <= 10 ? 1.6 : 2;
-const needFor = r => stage === 'office' ? 3 : Math.min(5, 3 + Math.floor((r - 1) / 3));
+const needFor = r => stage === 'office' ? Math.min(6, 4 + Math.floor((r - 1) / 2)) : Math.min(5, 3 + Math.floor((r - 1) / 3));
 const shotsFor = r => Math.max(5, 8 - Math.floor((r - 1) / 3));
 
 // ---------- HUD ----------
@@ -762,13 +777,13 @@ function popup(world, text) {
 
 function setState(s) {
   state = s;
-  $('menu').hidden = s !== 'menu'; $('pause').hidden = s !== 'paused';
+  $('menu').hidden = s !== 'menu'; $('pause').hidden = s !== 'paused'; $('pitchcard').hidden = s !== 'pitch';
   $('hud').hidden = !(s === 'playing' || s === 'paused');
   $('touch').hidden = !(s === 'playing' && touchMode);
   $('pausebtn').hidden = !(touchMode || dragLook);
   document.body.classList.toggle('playing', s === 'playing');
   if (s !== 'playing') { for (const k in keys) keys[k] = false; scopeHeld = false; joy.x = joy.y = 0; $('stick').hidden = true; }
-  if (s === 'menu') { scopeToggle = false; scopeT = 0; scopeOn = false; $('scope').hidden = true; $('cross').hidden = false; $('top').textContent = pad6(top); }
+  if (s === 'menu' || s === 'pitch') { scopeToggle = false; scopeT = 0; scopeOn = false; $('scope').hidden = true; $('cross').hidden = false; $('top').textContent = pad6(top); }
 }
 
 // ---------- rounds: each one is the range out in the field, then the office ----------
@@ -797,10 +812,10 @@ function beginRound() {
   showMsg('Round\n' + round); renderHud();
 }
 function beginOffice() {
-  slots = new Array(3).fill(0); maxShots = Math.max(4, 6 - Math.floor((round - 1) / 2)); shots = maxShots;
+  slots = new Array(6).fill(0); maxShots = Math.max(7, 9 - Math.floor((round - 1) / 2)); shots = maxShots;
   $('timer').hidden = true; phase = 'intro'; phaseT = 0; phaseDur = 3.4; sfx.next();
   dealPcs();
-  showMsg('The office\nShoot the 3\nBoreBuddy\nhomepages'); renderHud();
+  showMsg('The office\nShoot the\ncompetitors\nNot BoreBuddy'); renderHud();
 }
 function openStage() {
   phase = 'active'; phaseT = 0; shots = maxShots; outT = 0; shownT = -1; $('timer').hidden = false;
@@ -811,8 +826,8 @@ function openStage() {
     duckAt = [rnd(2.5, timeLeft * 0.4)]; if (round >= 3) duckAt.push(rnd(timeLeft * 0.5, timeLeft * 0.8));
     sfx.rustle();
   } else {
-    timeLeft = Math.max(26, 50 - round * 4);
-    tip(touchMode ? 'Scope in. Shoot only the BoreBuddy homepages' : 'Scope in and zoom to read the screens. Shoot only the BoreBuddy homepages', 9);
+    timeLeft = Math.max(36, 64 - round * 4);
+    tip(touchMode ? 'Scope in. Shoot the competitors, never BoreBuddy' : 'Scope in and zoom to read the screens. Shoot NEMO and Smith & Wesson, never BoreBuddy', 9);
     for (const pc of pcs) hittables.push(pc.g);
     duckAt = [];
     sfx.thud();
@@ -843,8 +858,18 @@ function startTally() {
   renderHud();
 }
 function swapTo(w) { phase = 'swap'; phaseT = 0; swapNext = w; swapped = false; fadeEl.style.opacity = '1'; } // cut to black, change the scenery, cut back
+function saveTop() { if (score > top) { top = score; try { localStorage.setItem('blockseason.top', String(top)); } catch (e) {} } }
+// The office always ends on the pitch: "Want to stand out? Go with Mox", then on to the proposal or back to the game.
+let pitchPass = false;
+function showPitch(pass) {
+  pitchPass = pass; saveTop();
+  $('pc-next').textContent = pass ? 'Keep playing' : 'Play again';
+  setState('pitch');
+  if (locked && document.exitPointerLock) document.exitPointerLock();
+  $('pitchcard').focus({ preventScroll: true });
+}
 function toTitle() {
-  if (score > top) { top = score; try { localStorage.setItem('blockseason.top', String(top)); } catch (e) {} }
+  saveTop();
   hideMsg(); fadeEl.style.opacity = '0';
   $('lastv').textContent = pad6(score); $('last').hidden = false;
   setState('menu');
@@ -898,13 +923,13 @@ function updateGame(dt) {
     const tl = Math.max(0, Math.ceil(timeLeft)); if (tl !== shownT) { shownT = tl; $('timer').textContent = 'T=' + tl; }
     if (duckAt.length && phaseT >= duckAt[0]) { duckAt.shift(); spawnDuck().life = 6.5; sfx.rustle(); sfx.quack(); }
     if (shots === 0) outT += dt;
-    const left = stage === 'field' ? range.some(r => r.live) : pcs.some(pc => pc.alive && pc.site === 'bb');
+    const left = stage === 'field' ? range.some(r => r.live) : pcs.some(pc => pc.alive && (pc.site === 'nemo' || pc.site === 'sw'));
     if (!left) endStage('');
     else if (timeLeft <= 0) endStage('Time up');
     else if (shots === 0 && outT > 0.7) endStage('Out of shots');
   }
   else if (phase === 'result') { if (phaseT >= phaseDur) { hideMsg(); startTally(); } }
-  else if (phase === 'tally') { if (phaseT >= phaseDur) { hideMsg(); if (tallyPass) swapTo(stage === 'field' ? 'office' : 'field'); else toTitle(); } }
+  else if (phase === 'tally') { if (phaseT >= phaseDur) { hideMsg(); if (stage === 'office') showPitch(tallyPass); else if (tallyPass) swapTo('office'); else toTitle(); } }
   else if (phase === 'swap') {
     if (!swapped && phaseT >= 0.4) { swapped = true; if (swapNext === 'field') round++; setWorld(swapNext); fadeEl.style.opacity = '0'; }
     if (phaseT >= 0.75) { if (swapNext === 'office') beginOffice(); else beginRound(); }
@@ -1019,6 +1044,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden && sta
 $('play').addEventListener('click', () => { initAudio(); startGame(); begin(); });
 $('resume').addEventListener('click', begin);
 $('quit').addEventListener('click', toTitle);
+$('pc-next').addEventListener('click', () => { if (pitchPass) swapTo('field'); else startGame(); begin(); });
 $('pausebtn').addEventListener('click', () => { if (state === 'playing') setState('paused'); });
 window.addEventListener('touchstart', () => {
   if (touchMode) return;
@@ -1141,16 +1167,17 @@ function onHit(h) {
   if (pc) {
     if (!pc.alive || phase !== 'active') return;
     pc.alive = false; pc.g.visible = false; unhit(pc.g);
-    const p = pc.g.position, sc = pc.size, good = pc.site === 'bb';
-    const cols = [0xd8ccb0, 0xb0a488, 0x202428, good ? 0xf0641e : pc.site === 'sw' ? 0x1c4ca0 : pc.site === 'nemo' ? 0xd81c24 : 0x0c1c8c, 0xfcfcfc];
+    const p = pc.g.position, sc = pc.size, rival = pc.site === 'nemo' || pc.site === 'sw';
+    const cols = [0xd8ccb0, 0xb0a488, 0x202428, pc.site === 'bb' ? 0xf0641e : pc.site === 'sw' ? 0x1c4ca0 : pc.site === 'nemo' ? 0xd81c24 : 0x0c1c8c, 0xfcfcfc];
     for (let i = 0; i < 14; i++) { // the whole machine goes to blocks
       const m = new THREE.Mesh(BOX, mat(cols[i % cols.length])); m.scale.setScalar(rnd(0.25, 0.5) * sc);
       m.position.set(p.x + rnd(-0.6, 0.6) * sc, p.y + rnd(0.2, 1.3) * sc, p.z + rnd(-0.5, 0.5) * sc);
       addDebris(m, rnd(-4, 4) + dir.x * 3, rnd(2, 7), rnd(-3, 3) + dir.z * 3, rnd(1.6, 2.8));
     }
     v2.set(p.x, p.y + 0.8 * sc, p.z); sfx.wood();
-    if (good) { const pts = Math.round(1500 * tier() / 100) * 100, i = slots.indexOf(0); score += pts; if (i >= 0) slots[i] = 1; popup(v2, String(pts)); sfx.gotcha(); }
-    else { score = Math.max(0, score - 500); popup(v2, 'Wrong site -500'); sfx.wrong(); }
+    if (rival) { const pts = Math.round(1500 * tier() / 100) * 100, i = slots.indexOf(0); score += pts; if (i >= 0) slots[i] = 1; popup(v2, String(pts)); sfx.gotcha(); }
+    else if (pc.site === 'bb') { score = Math.max(0, score - 1000); popup(v2, 'Own site -1000'); sfx.wrong(); } // their own homepage costs them
+    else popup(v2, 'No signal');
     renderHud();
   } else if (rg) {
     if (!rg.live || phase !== 'active') return;

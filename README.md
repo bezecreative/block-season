@@ -11,12 +11,12 @@ You get eight shots and a clock, and need at least three of the five to move on.
 Ducks flush out of the grass for bonus points, and the dog fetches the ones you hit.
 
 **Stage two, the office.** The scene cuts to a warehouse office with ten computers: on desks, up on a mezzanine and
-riding a conveyor. Three screens show the BoreBuddy homepage, three show NEMO Arms, three show Smith & Wesson and one
-is dead. Scope in to read them and shoot only the three BoreBuddy screens. You get six shots; a wrong screen costs 500 points.
+riding a conveyor. Three screens show NEMO Arms, three show Smith & Wesson, three show BoreBuddy's own homepage and one
+is dead. Scope in to read them and shoot the six competitor screens. You get nine shots and need at least four.
+Hitting a BoreBuddy screen costs 1,000 points.
 
-Clear the office and the next round starts back at the range, faster.
-
-- The rifle is modelled on BoreBuddy's Complete AR22 Apogee Match upper in FDE.
+**The pitch.** When the office ends, a card reads "Want to stand out? Go with Mox", with a link to the proposal and a
+button to keep playing. Carrying on starts the next round back at the range, faster.
 
 ## Controls
 
@@ -36,8 +36,9 @@ On a phone, the left thumb walks, the right thumb aims, and on-screen buttons fi
 
 ## Adding the proposal link
 
-In `index.html`, find `const PROPOSAL_URL = '';` and paste the link between the quotes. The title card then reads
-"Either play your way through our proposal, or simply view it here" and gains a "View the proposal" menu item.
+In `index.html`, find `const PROPOSAL_URL = '';` and paste the link between the quotes. That switches on two things:
+the title card reads "Either play your way through our proposal, or simply view it here" with a "View the proposal"
+menu item, and the card after the office gains its "View proposal" link.
 
 ## The office screens
 
