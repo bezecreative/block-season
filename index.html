@@ -474,32 +474,51 @@ for (const k of ['bb', 'nemo', 'sw', 'off']) {
 }
 const bbLogo = new Image();
 function drawScreens() {
-  const pen = k => { const x = screens[k].c.getContext('2d'); x.font = '8px "Press Start 2P", monospace'; x.textBaseline = 'top'; return x; };
   const box = (x, col, a, b, w, h) => { x.fillStyle = col; x.fillRect(a, b, w, h); };
   const say = (x, col, str, a, b) => { x.fillStyle = col; x.fillText(str, a, b); };
-  let x = pen('bb'); // pale header with the logo, black hero, orange blocks
-  box(x, '#16181a', 0, 0, 96, 72); box(x, '#e8e8e8', 0, 0, 96, 24);
-  if (bbLogo.complete && bbLogo.naturalWidth) x.drawImage(bbLogo, 3, 2, 90, 19); else say(x, '#000000', 'BOREBUDDY', 12, 8);
-  say(x, '#fcfcfc', 'RIMFIRE', 4, 28); say(x, '#fcfcfc', 'PERFECTED', 4, 38);
-  box(x, '#f0641e', 4, 52, 24, 8); box(x, '#16181a', 5, 53, 22, 6); box(x, '#f0641e', 4, 62, 24, 8);
-  box(x, '#f0641e', 50, 50, 42, 20); box(x, '#b84008', 56, 55, 22, 6); box(x, '#b84008', 62, 63, 24, 4);
-  x = pen('nemo'); // white header with a red mark, dark warm hero
-  box(x, '#3a1408', 0, 0, 96, 72); box(x, '#7c2c0c', 0, 44, 96, 28); box(x, '#c05c14', 52, 32, 40, 30); box(x, '#3a1408', 58, 40, 30, 6);
-  box(x, '#fcfcfc', 0, 0, 96, 20); box(x, '#d81c24', 5, 4, 12, 12); box(x, '#fcfcfc', 5, 4, 3, 3); box(x, '#fcfcfc', 14, 13, 3, 3);
-  say(x, '#000000', 'NEMO ARMS', 21, 6);
-  box(x, '#fcfcfc', 4, 28, 44, 5); box(x, '#fcfcfc', 4, 36, 34, 5);
-  x = pen('sw'); // blue strip, black header, grey hero, blue button
-  box(x, '#4c4c4c', 0, 0, 96, 72); box(x, '#8c8c8c', 48, 34, 44, 28); box(x, '#2c2c2c', 0, 62, 96, 10);
-  box(x, '#1c4ca0', 0, 0, 96, 6); box(x, '#000000', 0, 6, 96, 22);
-  say(x, '#fcfcfc', 'SMITH &', 4, 8); say(x, '#fcfcfc', 'WESSON', 4, 18);
-  box(x, '#fcfcfc', 4, 34, 36, 4); box(x, '#fcfcfc', 4, 41, 28, 4); box(x, '#1c4ca0', 4, 50, 28, 9);
-  x = pen('off'); // the tenth machine has nothing on it
-  box(x, '#0c1c8c', 0, 0, 96, 72); say(x, '#fcfcfc', 'NO SIGNAL', 12, 32);
-  for (const k in screens) screens[k].t.needsUpdate = true;
+  const art = {
+    bb(x) { // pale header with the logo, black hero, orange blocks
+      box(x, '#16181a', 0, 0, 96, 72); box(x, '#e8e8e8', 0, 0, 96, 24);
+      if (bbLogo.complete && bbLogo.naturalWidth) x.drawImage(bbLogo, 3, 2, 90, 19); else say(x, '#000000', 'BOREBUDDY', 12, 8);
+      say(x, '#fcfcfc', 'RIMFIRE', 4, 28); say(x, '#fcfcfc', 'PERFECTED', 4, 38);
+      box(x, '#f0641e', 4, 52, 24, 8); box(x, '#16181a', 5, 53, 22, 6); box(x, '#f0641e', 4, 62, 24, 8);
+      box(x, '#f0641e', 50, 50, 42, 20); box(x, '#b84008', 56, 55, 22, 6); box(x, '#b84008', 62, 63, 24, 4);
+    },
+    nemo(x) { // white header with a red mark, dark warm hero
+      box(x, '#3a1408', 0, 0, 96, 72); box(x, '#7c2c0c', 0, 44, 96, 28); box(x, '#c05c14', 52, 32, 40, 30); box(x, '#3a1408', 58, 40, 30, 6);
+      box(x, '#fcfcfc', 0, 0, 96, 20); box(x, '#d81c24', 5, 4, 12, 12); box(x, '#fcfcfc', 5, 4, 3, 3); box(x, '#fcfcfc', 14, 13, 3, 3);
+      say(x, '#000000', 'NEMO ARMS', 21, 6);
+      box(x, '#fcfcfc', 4, 28, 44, 5); box(x, '#fcfcfc', 4, 36, 34, 5);
+    },
+    sw(x) { // blue strip, black header, grey hero, blue button
+      box(x, '#4c4c4c', 0, 0, 96, 72); box(x, '#8c8c8c', 48, 34, 44, 28); box(x, '#2c2c2c', 0, 62, 96, 10);
+      box(x, '#1c4ca0', 0, 0, 96, 6); box(x, '#000000', 0, 6, 96, 22);
+      say(x, '#fcfcfc', 'SMITH &', 4, 8); say(x, '#fcfcfc', 'WESSON', 4, 18);
+      box(x, '#fcfcfc', 4, 34, 36, 4); box(x, '#fcfcfc', 4, 41, 28, 4); box(x, '#1c4ca0', 4, 50, 28, 9);
+    },
+    off(x) { box(x, '#0c1c8c', 0, 0, 96, 72); say(x, '#fcfcfc', 'NO SIGNAL', 12, 32); } // the tenth machine has nothing on it
+  };
+  for (const k in screens) if (!screens[k].shot) {
+    const x = screens[k].c.getContext('2d'); x.font = '8px "Press Start 2P", monospace'; x.textBaseline = 'top';
+    art[k](x); screens[k].t.needsUpdate = true;
+  }
 }
 drawScreens();
 bbLogo.onload = drawScreens; bbLogo.src = 'borebuddy-logo.png';
 if (document.fonts && document.fonts.load) document.fonts.load('8px "Press Start 2P"').then(drawScreens, () => {});
+// To show your own screenshots instead of the drawings, add the image files next to this page and put their
+// paths between the quotes, for example bb: 'screens/borebuddy.png'. The top of each image is cropped to 4:3.
+const SCREENSHOTS = { bb: '', nemo: '', sw: '' };
+for (const k in SCREENSHOTS) if (SCREENSHOTS[k]) {
+  const im = new Image();
+  im.onload = () => {
+    const sc = screens[k], w = im.naturalWidth, h = Math.min(im.naturalHeight, w * 0.75), cw = h / 0.75;
+    sc.shot = true; sc.c.width = 192; sc.c.height = 144;
+    sc.c.getContext('2d').drawImage(im, (w - cw) / 2, 0, cw, h, 0, 0, 192, 144);
+    sc.t.needsUpdate = true;
+  };
+  im.src = SCREENSHOTS[k];
+}
 // six on desks, two up on the mezzanine, two riding the conveyor: [x, y, z, size, belt slot]
 const pcs = [[-8, 1.06, -18, 1.25], [7, 1.06, -23, 1.25], [-17, 1.06, -31, 1.3], [24, 1.06, -50, 1.4], [-4, 1.06, -53, 1.45], [-18, 1.06, -60, 1.5],
   [9, 5.86, -69, 1.7], [-11, 5.86, -69, 1.7], [0, 1.03, -38, 1.3, 0], [0, 1.03, -38, 1.3, 1]].map(sp => {

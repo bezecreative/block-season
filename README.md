@@ -39,6 +39,12 @@ On a phone, the left thumb walks, the right thumb aims, and on-screen buttons fi
 In `index.html`, find `const PROPOSAL_URL = '';` and paste the link between the quotes. The title card then reads
 "Either play your way through our proposal, or simply view it here" and gains a "View the proposal" menu item.
 
+## Using real screenshots on the office screens
+
+The three site screens are drawn in code by default. To use your own screenshots, add the image files to this
+folder (for example `screens/borebuddy.png`) and put their paths in `const SCREENSHOTS = { bb: '', nemo: '', sw: '' };`
+in `index.html`. The top of each image is cropped to 4:3. Only add screenshots you have the right to publish.
+
 ## Files
 
 - `index.html` is the whole game: markup, styles and script in one file. It loads three.js r128 from cdnjs and the Press Start 2P font from Google Fonts.
