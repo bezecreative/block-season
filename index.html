@@ -509,7 +509,7 @@ bbLogo.onload = drawScreens; bbLogo.src = 'borebuddy-logo.png';
 if (document.fonts && document.fonts.load) document.fonts.load('8px "Press Start 2P"').then(drawScreens, () => {});
 // Screenshot files replace the drawings. Add the image next to this page and put its path between the quotes,
 // for example bb: 'screens/borebuddy.jpg'. The top-left of each image is cropped to 4:3, which keeps the logo.
-const SCREENSHOTS = { bb: '', nemo: '', sw: 'screens/smith-wesson.jpg' };
+const SCREENSHOTS = { bb: '', nemo: 'screens/nemo-arms.jpg', sw: 'screens/smith-wesson.jpg' };
 for (const k in SCREENSHOTS) if (SCREENSHOTS[k]) {
   const im = new Image();
   im.onload = () => {
