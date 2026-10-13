@@ -55,6 +55,6 @@ the logo in view. Only add screenshots you have the right to publish.
 ## Credits
 
 The BoreBuddy name and logo belong to BoreBuddy and appear here as part of a proposal prepared for them.
-The office screens show the BoreBuddy, NEMO Arms and Smith & Wesson homepages, as supplied screenshots or as
-simplified drawings. Those sites, names and marks belong to their owners.
+The office screens show supplied screenshots of the BoreBuddy, NEMO Arms and Smith & Wesson homepages. Those sites,
+names and marks belong to their owners.
 The game's models and sounds are original; the look is a tribute to 8-bit light-gun games.
