@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="A playable proposal for BoreBuddy: an 8-bit rifle range with five moving targets you scope in on.">
+<meta name="description" content="A playable proposal for BoreBuddy: an 8-bit rifle range, then an office full of computers to pick the right homepage from.">
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16'/%3E%3Crect x='1' y='1' width='14' height='14' fill='%23fcfcfc'/%3E%3Crect x='2' y='2' width='12' height='12' fill='%23f83800'/%3E%3Crect x='4' y='4' width='8' height='8' fill='%23fcfcfc'/%3E%3Crect x='6' y='6' width='4' height='4' fill='%23f83800'/%3E%3C/svg%3E">
 <title>Block Season</title>
@@ -75,6 +75,7 @@ body.playing #view{cursor:crosshair}
 #arrR{right:16px;border-left-color:var(--white);border-right-width:0}
 
 /* ---------- scope ---------- */
+#fade{position:absolute;inset:0;z-index:1;background:#000;opacity:0;pointer-events:none;transition:opacity .3s linear}
 #scope{position:absolute;inset:0;z-index:1;pointer-events:none;transform-origin:50% 50%;will-change:opacity,transform;background:radial-gradient(circle closest-side at 50% 50%,transparent 0 83%,#000 83.5%)}
 #scope::before,#scope::after{content:"";position:absolute;background:#000}
 #scope::before{left:0;right:0;top:50%;height:2px;margin-top:-1px}
@@ -150,6 +151,7 @@ a.mode{display:block;text-decoration:none}
   </div>
 
   <div id="scope" hidden><i class="pl"></i><i class="pr"></i><i class="pb"></i><span id="range">-- yd</span></div>
+  <div id="fade"></div>
 
   <div id="touch" hidden>
     <div id="stick" hidden><b id="knob"></b></div>
@@ -183,7 +185,7 @@ a.mode{display:block;text-decoration:none}
       <div><dt>Fire</dt><dd>Shoot</dd></div>
       <div><dt>Scope</dt><dd>Zoom in</dd></div>
     </dl>
-    <p>Five moving targets from 30 to 120 yards, eight shots and a clock. Scope in for the far ones. Ducks are a bonus.</p>
+    <p>First the range: five moving targets from 30 to 120 yards. Then the office: ten computers, and only three show the BoreBuddy homepage. Scope in to tell them apart.</p>
     <p class="top">Top score = <span id="top">000000</span></p>
     <p id="last" hidden>Last game = <span id="lastv">000000</span></p>
     <p id="fatal" hidden></p>
@@ -240,12 +242,14 @@ const srnd = (a, b) => a + srand() * (b - a);
 // ---------- scene ----------
 renderer.setClearColor(0x5cb8ff);
 const scene = new THREE.Scene();
+const fieldWorld = new THREE.Group(), officeWorld = new THREE.Group(); // the range outdoors, then the office
+officeWorld.visible = false; scene.add(fieldWorld, officeWorld);
 const camera = new THREE.PerspectiveCamera(72, 1, 0.1, 500);
 camera.rotation.order = 'YXZ';
 let baseFov = 72, scopeMag = 4;
 const scopeFov = () => 2 * Math.atan(Math.tan(baseFov * Math.PI / 360) / scopeMag) * 180 / Math.PI;
 
-scene.add(new THREE.HemisphereLight(0xffffff, 0x9cc060, 0.86));
+const hemi = new THREE.HemisphereLight(0xffffff, 0x9cc060, 0.86); scene.add(hemi);
 const sunDir = new THREE.Vector3(-0.4, 0.8, 0.45).normalize();
 const sun = new THREE.DirectionalLight(0xffffff, 0.5);
 sun.castShadow = true;
@@ -268,7 +272,7 @@ const solids = [];
 
 // ground: one flat field to the horizon, plus square tiles around the clearing
 const field = new THREE.Mesh(new THREE.PlaneGeometry(900, 900).rotateX(-Math.PI / 2), mat(0x80d010));
-field.receiveShadow = true; scene.add(field); solids.push(field);
+field.receiveShadow = true; fieldWorld.add(field); solids.push(field);
 {
   let g = new THREE.PlaneGeometry(120, 120, 60, 60); g.rotateX(-Math.PI / 2); g = g.toNonIndexed();
   const gp = g.attributes.position, gc = new Float32Array(gp.count * 3), c = new THREE.Color();
@@ -281,7 +285,7 @@ field.receiveShadow = true; scene.add(field); solids.push(field);
   }
   g.setAttribute('color', new THREE.BufferAttribute(gc, 3));
   const tiles = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true }));
-  tiles.position.y = 0.02; tiles.receiveShadow = true; scene.add(tiles);
+  tiles.position.y = 0.02; tiles.receiveShadow = true; fieldWorld.add(tiles);
 }
 
 // trees and bushes: fat trunk, leaf blobs on the branch ends
@@ -298,14 +302,14 @@ function makeTree(x, z, s, yaw) {
   B(g, trunk, 2.6, 0.5, 0.5, -1.4, 4.4, 0).rotation.z = -0.5;
   B(g, trunk, 2.4, 0.5, 0.5, 1.3, 5.6, 0).rotation.z = 0.6;
   blob(g, -2.7, 5.7, 0, 1, leaf, under); blob(g, 2.5, 6.9, 0.3, 0.9, leaf, under); blob(g, 0, 8.6, -0.2, 1.1, leaf, under);
-  scene.add(g); g.traverse(o => { if (o.isMesh) { o.receiveShadow = true; solids.push(o); } });
+  fieldWorld.add(g); g.traverse(o => { if (o.isMesh) { o.receiveShadow = true; solids.push(o); } });
   if (Math.hypot(x, z) < WORLD_R + 2) colliders.push({ x, z, r: 0.62 * s });
 }
 function makeBush(x, z, s, yaw) {
   const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = yaw; g.scale.setScalar(s);
   const leaf = 0x48a808, under = 0x2c7c04;
   B(g, under, 2.9, 0.5, 2.3, 0, 0.25, 0); B(g, leaf, 2.7, 1.3, 2.1, 0, 0.95, 0); B(g, leaf, 1.7, 0.8, 1.6, -0.2, 1.9, 0); B(g, leaf, 1.3, 0.9, 1.5, 1.5, 0.75, 0.1);
-  scene.add(g); g.traverse(o => { if (o.isMesh) { o.receiveShadow = true; solids.push(o); } });
+  fieldWorld.add(g); g.traverse(o => { if (o.isMesh) { o.receiveShadow = true; solids.push(o); } });
   if (Math.hypot(x, z) < WORLD_R + 2) colliders.push({ x, z, r: 1.35 * s });
 }
 const farFrom = (x, z, list, min) => { for (const p of list) { const dx = p.x - x, dz = p.z - z; if (dx * dx + dz * dz < min * min) return false; } return true; };
@@ -330,7 +334,7 @@ makeTree(-34, -138, 1.7, 0.4); makeTree(6, -150, 1.8, 2.1); makeTree(38, -132, 1
     dummy.position.set(Math.cos(a) * r, h / 2, Math.sin(a) * r); dummy.rotation.set(0, srnd(0, TAU), 0); dummy.scale.set(srnd(0.3, 0.6), h, srnd(0.3, 0.6)); dummy.updateMatrix();
     grass.setMatrixAt(i, dummy.matrix); c.setHex(COLS[(srand() * COLS.length) | 0]); grass.setColorAt(i, c);
   }
-  grass.receiveShadow = true; grass.frustumCulled = false; scene.add(grass);
+  grass.receiveShadow = true; grass.frustumCulled = false; fieldWorld.add(grass);
 }
 
 let hittables = solids.slice();
@@ -370,7 +374,7 @@ const boardMats = (() => {
   return [side, side, side, side, face, face];
 })();
 const SW = { x: -19.5, y: 5.85, z: -43, L: 3.4 }, WH = { x: 10, y: 4.4, z: -80, R: 2.5 };
-const rangeProps = new THREE.Group(); scene.add(rangeProps);
+const rangeProps = new THREE.Group(); fieldWorld.add(rangeProps);
 const rope = new THREE.Group(), arm = new THREE.Group();
 {
   const wood = 0xa8601c, dark = 0x7c4410;
@@ -387,7 +391,7 @@ const rope = new THREE.Group(), arm = new THREE.Group();
 const range = [['slider', 500, 1.5], ['swing', 800, 1.3], ['popup', 1000, 1.4], ['wheel', 1500, 1.4], ['runner', 2500, 1.6]].map((d, i) => {
   const board = new THREE.Mesh(BOX, boardMats); board.scale.set(d[2], d[2], 0.14); board.castShadow = true; board.visible = false;
   const r = { kind: d[0], pts: d[1], size: d[2], i, board, live: false, t: i * 1.7, ph: 'hidden', pt: 0.5, px: 0, pz: -60 };
-  board.userData.range = r; scene.add(board); return r;
+  board.userData.range = r; fieldWorld.add(board); return r;
 });
 function setRange(on, hot) {
   for (const r of range) {
@@ -417,6 +421,110 @@ function updateRange(dt) {
     else { const u = (r.t * 6.5 / 36) % 2; x = -18 + (u < 1 ? u : 2 - u) * 36; y = 2.2; z = -110; }
     r.board.position.set(x, y, z);
     r.board.rotation.set(0, Math.atan2(P.pos.x - x, P.pos.z - z), roll);
+  }
+}
+
+// ---------- the office: a warehouse floor with ten computers, three of them showing the BoreBuddy homepage ----------
+const officeSolids = [];
+function O(hex, w, h, d, x, y, z, solid) { const m = B(officeWorld, hex, w, h, d, x, y, z); m.receiveShadow = true; if (solid !== false) officeSolids.push(m); return m; }
+function desk(x, y0, z) {
+  O(0xd8a048, 2.6, 0.12, 1.4, x, y0 + 1.0, z);
+  for (const sx of [-1.2, 1.2]) for (const sz of [-0.6, 0.6]) O(0x7c4410, 0.12, 0.94, 0.12, x + sx, y0 + 0.47, z + sz, false);
+  O(0xa8b0bc, 3.4, 1.7, 0.12, x, y0 + 0.85, z - 1.0); // partition behind it
+  O(0x3c50d8, 0.7, 0.12, 0.7, x + 0.2, y0 + 0.55, z + 1.4, false); O(0x3c50d8, 0.7, 0.8, 0.12, x + 0.2, y0 + 0.95, z + 1.75, false);
+}
+{
+  const wall = 0xa8b0bc, wallD = 0x6c7684, steel = 0x586070, tape = 0xf8b800, rackB = 0x2038a8, rackO = 0xfc9838, card = 0xc88c3c, cardD = 0xa86c20;
+  const flat = m => { m.castShadow = false; return m; };
+  flat(O(0x8c8c8c, 60, 0.2, 92, 0, -0.1, -34));           // floor: 60 m wide, 92 m long
+  flat(O(0x3c4450, 60, 0.3, 92, 0, 12.15, -34, false));   // roof, 12 m up
+  for (const a of [[60, 0.4, 0, -80], [60, 0.4, 0, 12], [0.4, 92, -30, -34], [0.4, 92, 30, -34]]) {
+    flat(O(wall, a[0], 12, a[1], a[2], 6, a[3])); flat(O(wallD, a[0] + 0.1, 2.4, a[1] + 0.1, a[2], 1.2, a[3], false));
+  }
+  flat(O(0xd09848, 14, 8, 0.3, 14, 4, -79.7, false)); for (let y = 1; y < 8; y += 1.4) flat(O(0xa86c20, 14, 0.12, 0.34, 14, y, -79.7, false)); // roller door
+  const lampMat = new THREE.MeshBasicMaterial({ color: 0xfcfcd8 });
+  for (let z = -74; z <= 8; z += 11.5) {
+    flat(O(steel, 60, 0.5, 0.5, 0, 11.6, z, false));
+    for (const x of [-18, 0, 18]) { const l = new THREE.Mesh(BOX, lampMat); l.scale.set(4, 0.16, 0.7); l.position.set(x, 11.2, z); officeWorld.add(l); }
+  }
+  flat(O(tape, 28, 0.02, 0.3, 0, 0.02, -10.5, false)); // the line you shoot from
+  for (const x of [-22, 22]) flat(O(tape, 0.25, 0.02, 60, x, 0.02, -44, false));
+  for (const x of [-27, 27]) { // pallet racking down both side walls
+    for (let z = -74; z <= -8; z += 6) { O(rackB, 0.25, 9, 0.25, x - 1.1, 4.5, z, false); O(rackB, 0.25, 9, 0.25, x + 1.1, 4.5, z, false); }
+    for (const y of [0, 3, 6]) {
+      if (y) O(rackO, 2.4, 0.2, 66, x, y, -41);
+      for (let z = -72; z < -10; z += srnd(3, 5)) { const h = srnd(1.0, 2.2); O(srand() < 0.5 ? card : cardD, srnd(1.3, 1.9), h, srnd(1.4, 2.2), x, y + 0.12 + h / 2, z); }
+    }
+  }
+  O(0x30343c, 31, 0.25, 1.7, 0, 0.9, -38); // conveyor across the middle, with a hatch at each end
+  flat(O(tape, 31, 0.1, 0.1, 0, 1.08, -37.1, false)); flat(O(tape, 31, 0.1, 0.1, 0, 1.08, -38.9, false));
+  for (let x = -14; x <= 14; x += 7) O(steel, 0.3, 0.8, 1.4, x, 0.4, -38, false);
+  for (const x of [-15.2, 15.2]) O(steel, 4.4, 3.4, 2.8, x, 1.7, -38);
+  O(steel, 44, 0.4, 12, 0, 4.6, -72); // mezzanine across the back
+  for (let x = -20; x <= 20; x += 10) O(0x3c4450, 0.5, 4.4, 0.5, x, 2.2, -66.4, false);
+  flat(O(tape, 44, 0.1, 0.1, 0, 5.9, -66.1, false)); for (let x = -22; x <= 22; x += 4.4) flat(O(tape, 0.1, 1.1, 0.1, x, 5.35, -66.1, false));
+  for (const d of [[-8, 0, -18], [7, 0, -23], [-17, 0, -31], [24, 0, -50], [-4, 0, -53], [-18, 0, -60], [9, 4.8, -69], [-11, 4.8, -69]]) desk(d[0], d[1], d[2]);
+}
+// What is on each screen. These are simplified drawings in each site's colours, labelled by name: not screenshots.
+const screens = {};
+for (const k of ['bb', 'nemo', 'sw', 'off']) {
+  const c = document.createElement('canvas'); c.width = 96; c.height = 72;
+  const t = new THREE.CanvasTexture(c); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
+  screens[k] = { c, t, mat: new THREE.MeshBasicMaterial({ map: t }) };
+}
+const bbLogo = new Image();
+function drawScreens() {
+  const pen = k => { const x = screens[k].c.getContext('2d'); x.font = '8px "Press Start 2P", monospace'; x.textBaseline = 'top'; return x; };
+  const box = (x, col, a, b, w, h) => { x.fillStyle = col; x.fillRect(a, b, w, h); };
+  const say = (x, col, str, a, b) => { x.fillStyle = col; x.fillText(str, a, b); };
+  let x = pen('bb'); // pale header with the logo, black hero, orange blocks
+  box(x, '#16181a', 0, 0, 96, 72); box(x, '#e8e8e8', 0, 0, 96, 24);
+  if (bbLogo.complete && bbLogo.naturalWidth) x.drawImage(bbLogo, 3, 2, 90, 19); else say(x, '#000000', 'BOREBUDDY', 12, 8);
+  say(x, '#fcfcfc', 'RIMFIRE', 4, 28); say(x, '#fcfcfc', 'PERFECTED', 4, 38);
+  box(x, '#f0641e', 4, 52, 24, 8); box(x, '#16181a', 5, 53, 22, 6); box(x, '#f0641e', 4, 62, 24, 8);
+  box(x, '#f0641e', 50, 50, 42, 20); box(x, '#b84008', 56, 55, 22, 6); box(x, '#b84008', 62, 63, 24, 4);
+  x = pen('nemo'); // white header with a red mark, dark warm hero
+  box(x, '#3a1408', 0, 0, 96, 72); box(x, '#7c2c0c', 0, 44, 96, 28); box(x, '#c05c14', 52, 32, 40, 30); box(x, '#3a1408', 58, 40, 30, 6);
+  box(x, '#fcfcfc', 0, 0, 96, 20); box(x, '#d81c24', 5, 4, 12, 12); box(x, '#fcfcfc', 5, 4, 3, 3); box(x, '#fcfcfc', 14, 13, 3, 3);
+  say(x, '#000000', 'NEMO ARMS', 21, 6);
+  box(x, '#fcfcfc', 4, 28, 44, 5); box(x, '#fcfcfc', 4, 36, 34, 5);
+  x = pen('sw'); // blue strip, black header, grey hero, blue button
+  box(x, '#4c4c4c', 0, 0, 96, 72); box(x, '#8c8c8c', 48, 34, 44, 28); box(x, '#2c2c2c', 0, 62, 96, 10);
+  box(x, '#1c4ca0', 0, 0, 96, 6); box(x, '#000000', 0, 6, 96, 22);
+  say(x, '#fcfcfc', 'SMITH &', 4, 8); say(x, '#fcfcfc', 'WESSON', 4, 18);
+  box(x, '#fcfcfc', 4, 34, 36, 4); box(x, '#fcfcfc', 4, 41, 28, 4); box(x, '#1c4ca0', 4, 50, 28, 9);
+  x = pen('off'); // the tenth machine has nothing on it
+  box(x, '#0c1c8c', 0, 0, 96, 72); say(x, '#fcfcfc', 'NO SIGNAL', 12, 32);
+  for (const k in screens) screens[k].t.needsUpdate = true;
+}
+drawScreens();
+bbLogo.onload = drawScreens; bbLogo.src = 'borebuddy-logo.png';
+if (document.fonts && document.fonts.load) document.fonts.load('8px "Press Start 2P"').then(drawScreens, () => {});
+// six on desks, two up on the mezzanine, two riding the conveyor: [x, y, z, size, belt slot]
+const pcs = [[-8, 1.06, -18, 1.25], [7, 1.06, -23, 1.25], [-17, 1.06, -31, 1.3], [24, 1.06, -50, 1.4], [-4, 1.06, -53, 1.45], [-18, 1.06, -60, 1.5],
+  [9, 5.86, -69, 1.7], [-11, 5.86, -69, 1.7], [0, 1.03, -38, 1.3, 0], [0, 1.03, -38, 1.3, 1]].map(sp => {
+  const g = new THREE.Group(), beige = 0xd8ccb0, beigeD = 0xb0a488;
+  B(g, beigeD, 0.7, 0.14, 0.7, 0, 0.07, 0); B(g, beige, 1.5, 1.2, 1.2, 0, 0.74, 0); B(g, beigeD, 1.3, 1.0, 0.3, 0, 0.74, -0.7);
+  B(g, 0x202428, 1.26, 0.96, 0.02, 0, 0.78, 0.6); B(g, 0x80d010, 0.08, 0.05, 0.02, 0.6, 0.22, 0.605);
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.9), screens.off.mat); screen.position.set(0, 0.78, 0.615); g.add(screen);
+  const pc = { g, screen, site: 'off', alive: false, size: sp[3], belt: sp[4], t: 0 };
+  g.traverse(o => { if (o.isMesh) o.userData.pc = pc; });
+  g.position.set(sp[0], sp[1], sp[2]); g.scale.setScalar(sp[3]); g.visible = false; officeWorld.add(g);
+  return pc;
+});
+function setPcs(on) { for (const pc of pcs) { pc.alive = on; pc.g.visible = on; unhit(pc.g); } }
+function dealPcs() { // three of each site and one dead screen, shuffled onto the ten machines
+  const deck = ['bb', 'bb', 'bb', 'nemo', 'nemo', 'nemo', 'sw', 'sw', 'sw', 'off'];
+  for (let i = deck.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0, t = deck[i]; deck[i] = deck[j]; deck[j] = t; }
+  pcs.forEach((pc, i) => { pc.site = deck[i]; pc.screen.material = screens[deck[i]].mat; });
+  setPcs(true);
+}
+function updatePcs(dt) {
+  const k = 1 + (round - 1) * 0.12;
+  for (const pc of pcs) {
+    const p = pc.g.position;
+    if (pc.belt !== undefined) { pc.t += dt * k; p.x = -15.5 + ((pc.t * 2.4 + pc.belt * 15.5) % 31); }
+    pc.g.rotation.y = Math.atan2(P.pos.x - p.x, P.pos.z - p.z);
   }
 }
 
@@ -562,6 +670,7 @@ const tune = (notes, step, vol, type) => notes.forEach((f, i) => { if (f) tone(f
 const sfx = {
   shot() { noise(0.22, 'lowpass', 6000, 500, 0.8); noise(0.06, 'highpass', 2500, 5000, 0.35); },
   dry() { tone(1400, 900, 0.03, 0.08); },
+  wrong() { tone(180, 120, 0.25, 0.16); tone(140, 90, 0.3, 0.16, 0.14); },
   hit() { tone(880, 220, 0.12, 0.14); },
   quack() { tone(640, 470, 0.07, 0.07); tone(580, 410, 0.09, 0.07, 0.1); },
   fall(d) { tone(1300, 260, Math.max(0.2, d), 0.08); },
@@ -582,7 +691,7 @@ const sfx = {
 
 // ---------- state ----------
 const P = { pos: new THREE.Vector3(), vx: 0, vz: 0, vy: 0, yaw: 0, pitch: 0, onGround: true };
-let state = 'menu', phase = 'demo', phaseT = 0, phaseDur = 0;
+let state = 'menu', stage = 'field', phase = 'demo', phaseT = 0, phaseDur = 0, swapNext = 'office', swapped = false;
 let round = 1, score = 0, top = 0, shots = 8, maxShots = 8, outT = 0, slots = new Array(5).fill(0), timeLeft = 0, shownT = -1, duckAt = [], tallyPass = false;
 const targets = [];
 let cooldown = 0, gunKick = 0, flashT = 0, recoilP = 0;
@@ -594,25 +703,30 @@ let locked = false, everLocked = false, pendingLock = false, dragLook = false, l
 try { top = parseInt(localStorage.getItem('blockseason.top'), 10) || 0; } catch (e) { top = 0; }
 const pad6 = n => String(Math.max(0, Math.round(n))).padStart(6, '0');
 const tier = () => round <= 5 ? 1 : round <= 10 ? 1.6 : 2;
-const needFor = r => Math.min(5, 3 + Math.floor((r - 1) / 3));
+const needFor = r => stage === 'office' ? 3 : Math.min(5, 3 + Math.floor((r - 1) / 3));
 const shotsFor = r => Math.max(5, 8 - Math.floor((r - 1) / 3));
 
 // ---------- HUD ----------
-let hudShots = -1;
-{
-  const rows = ['.XXXXX.', 'X.....X', 'X.XXX.X', 'X.XXX.X', 'X.XXX.X', 'X.....X', '.XXXXX.'];
-  let svg = '<svg viewBox="0 0 7 7" aria-hidden="true">';
-  rows.forEach((r, y) => { for (let x = 0; x < 7; x++) if (r[x] === 'X') svg += '<rect x="' + x + '" y="' + y + '" width="1.04" height="1.04"/>'; });
-  $('hits').innerHTML = ('<i>' + svg + '</svg></i>').repeat(5);
-  $('need').innerHTML = '<i></i>'.repeat(5);
-}
+const ICONS = {
+  target: ['.XXXXX.', 'X.....X', 'X.XXX.X', 'X.XXX.X', 'X.XXX.X', 'X.....X', '.XXXXX.'],
+  screen: ['XXXXXXX', 'X.....X', 'X.....X', 'X.....X', 'XXXXXXX', '..XXX..', '.XXXXX.']
+};
+let hudKey = '';
 function renderHud() {
-  if (hudShots !== maxShots) { hudShots = maxShots; $('shots').innerHTML = '<i></i>'.repeat(maxShots); }
+  const icon = stage === 'office' ? 'screen' : 'target', n = slots.length, key = icon + n + '/' + maxShots;
+  if (key !== hudKey) {
+    hudKey = key;
+    let svg = '<svg viewBox="0 0 7 7" aria-hidden="true">';
+    ICONS[icon].forEach((r, y) => { for (let x = 0; x < 7; x++) if (r[x] === 'X') svg += '<rect x="' + x + '" y="' + y + '" width="1.04" height="1.04"/>'; });
+    $('hits').innerHTML = ('<i>' + svg + '</svg></i>').repeat(n);
+    $('need').innerHTML = '<i></i>'.repeat(n);
+    $('shots').innerHTML = '<i></i>'.repeat(maxShots);
+  }
   $('round').textContent = 'R=' + round;
   $('score').textContent = pad6(score);
   const sh = $('shots').children; for (let i = 0; i < sh.length; i++) sh[i].classList.toggle('used', i >= shots);
   const hs = $('hits').children, nd = $('need').children, need = needFor(round);
-  for (let i = 0; i < 5; i++) { hs[i].className = slots[i] === 1 ? 'hit' : slots[i] === 2 ? 'miss' : ''; nd[i].classList.toggle('off', i >= need); }
+  for (let i = 0; i < n; i++) { hs[i].className = slots[i] === 1 ? 'hit' : slots[i] === 2 ? 'miss' : ''; nd[i].classList.toggle('off', i >= need); }
 }
 function showMsg(s) { const m = $('msg'); m.textContent = s; m.hidden = false; }
 function hideMsg() { $('msg').hidden = true; }
@@ -637,55 +751,85 @@ function setState(s) {
   if (s === 'menu') { scopeToggle = false; scopeT = 0; scopeOn = false; $('scope').hidden = true; $('cross').hidden = false; $('top').textContent = pad6(top); }
 }
 
-// ---------- rounds ----------
+// ---------- rounds: each one is the range out in the field, then the office ----------
+const fadeEl = $('fade');
 function clearTargets() { for (const t of targets) { scene.remove(t.g); unhit(t.g); } targets.length = 0; }
 function hideDog() { dog.mode = 'hidden'; dogUp.visible = dogWalk.visible = false; dogUp.position.y = -4; }
+function setWorld(w) {
+  stage = w;
+  fieldWorld.visible = w === 'field'; officeWorld.visible = w === 'office';
+  renderer.setClearColor(w === 'field' ? 0x5cb8ff : 0x20242c);
+  hemi.groundColor.setHex(w === 'field' ? 0x9cc060 : 0x8c8c94);
+  clearTargets(); hideDog(); setRange(false); setPcs(false);
+  clearTimeout(tipTimer); $('tip').hidden = true;
+  hittables = w === 'field' ? solids.concat([dogUp]) : officeSolids.slice();
+  P.pos.set(0, 0, 0); P.vx = P.vz = P.vy = 0; P.yaw = 0; P.pitch = 0.04; scopeToggle = false; $('tb-scope').classList.remove('on');
+}
 function startGame() {
-  round = 1; score = 0; hideDog(); $('pops').textContent = '';
-  P.pos.set(0, 0, 0); P.vx = P.vz = P.vy = 0; P.yaw = 0; P.pitch = 0.04; scopeMag = 4; scopeToggle = false; scopeT = 0;
-  beginRound();
+  round = 1; score = 0; $('pops').textContent = ''; scopeMag = 4; scopeT = 0;
+  setWorld('field'); beginRound();
 }
 function beginRound() {
   slots = new Array(5).fill(0); maxShots = shotsFor(round); shots = maxShots;
-  clearTargets(); setRange(false); $('timer').hidden = true;
-  phase = 'intro'; phaseT = 0;
+  $('timer').hidden = true; phase = 'intro'; phaseT = 0;
   if (round === 1) { phaseDur = 3.7; dogIntro(true); sfx.intro(); }
   else { phaseDur = 1.7; dogIntro(false); sfx.next(); }
   showMsg('Round\n' + round); renderHud();
 }
-function openRange() {
-  phase = 'active'; phaseT = 0; shots = maxShots; outT = 0;
-  timeLeft = Math.max(24, 48 - round * 3); shownT = -1; $('timer').hidden = false;
-  if (round === 1) tip(touchMode ? 'Far targets: tap scope to zoom in' : 'Far targets: hold right-click to scope, scroll to zoom in closer', 8);
-  setRange(true, true);
-  duckAt = [rnd(2.5, timeLeft * 0.4)]; if (round >= 3) duckAt.push(rnd(timeLeft * 0.5, timeLeft * 0.8));
-  sfx.rustle(); renderHud();
+function beginOffice() {
+  slots = new Array(3).fill(0); maxShots = Math.max(4, 6 - Math.floor((round - 1) / 2)); shots = maxShots;
+  $('timer').hidden = true; phase = 'intro'; phaseT = 0; phaseDur = 3.4; sfx.next();
+  dealPcs();
+  showMsg('The office\nShoot the 3\nBoreBuddy\nhomepages'); renderHud();
 }
-function endRange(msg) {
-  for (const r of range) if (r.live) { slots[r.i] = 2; r.live = false; r.board.visible = false; unhit(r.board); }
-  for (const t of targets) if (t.state === 'fly') flyAway(t);
+function openStage() {
+  phase = 'active'; phaseT = 0; shots = maxShots; outT = 0; shownT = -1; $('timer').hidden = false;
+  if (stage === 'field') {
+    timeLeft = Math.max(24, 48 - round * 3);
+    if (round === 1) tip(touchMode ? 'Far targets: tap scope to zoom in' : 'Far targets: hold right-click to scope, scroll to zoom in closer', 8);
+    setRange(true, true);
+    duckAt = [rnd(2.5, timeLeft * 0.4)]; if (round >= 3) duckAt.push(rnd(timeLeft * 0.5, timeLeft * 0.8));
+    sfx.rustle();
+  } else {
+    timeLeft = Math.max(26, 50 - round * 4);
+    tip(touchMode ? 'Scope in. Shoot only the BoreBuddy homepages' : 'Scope in and zoom to read the screens. Shoot only the BoreBuddy homepages', 9);
+    for (const pc of pcs) hittables.push(pc.g);
+    duckAt = [];
+    sfx.thud();
+  }
+  renderHud();
+}
+function endStage(msg) {
+  if (stage === 'field') {
+    for (const r of range) if (r.live) { slots[r.i] = 2; r.live = false; r.board.visible = false; unhit(r.board); }
+    for (const t of targets) if (t.state === 'fly') flyAway(t);
+  } else {
+    for (let i = 0; i < slots.length; i++) if (slots[i] === 0) slots[i] = 2;
+    for (const pc of pcs) unhit(pc.g);
+  }
   phase = 'result'; phaseT = 0; phaseDur = msg ? 1.6 : 0.9; $('timer').hidden = true;
   if (msg) showMsg(msg);
   renderHud();
 }
 function startTally() {
-  const hits = slots.filter(s => s === 1).length;
+  const hits = slots.filter(s => s === 1).length, n = slots.length;
   phase = 'tally'; phaseT = 0; tallyPass = hits >= needFor(round);
-  if (tallyPass && hits === 5) { const bonus = 5000 * tier(); score += bonus; showMsg('Perfect!!\n' + bonus); sfx.perfect(); phaseDur = 2.8; }
-  else if (tallyPass) { showMsg('Good!!\n' + hits + ' of 5'); sfx.clear(); phaseDur = 2.4; }
+  if (tallyPass && hits === n) { const bonus = n * 1000 * tier(); score += bonus; showMsg('Perfect!!\n' + bonus); sfx.perfect(); phaseDur = 2.8; }
+  else if (tallyPass) { showMsg('Good!!\n' + hits + ' of ' + n); sfx.clear(); phaseDur = 2.4; }
   else {
-    showMsg('Game over\n' + hits + ' of 5'); sfx.over(); phaseDur = 3.6;
-    dogPop('laugh', { x: P.pos.x - Math.sin(P.yaw) * 10, z: P.pos.z - Math.cos(P.yaw) * 10 }, null, 3.2); sfx.laugh();
+    showMsg('Game over\n' + hits + ' of ' + n); sfx.over(); phaseDur = 3.6;
+    if (stage === 'field') { dogPop('laugh', { x: P.pos.x - Math.sin(P.yaw) * 10, z: P.pos.z - Math.cos(P.yaw) * 10 }, null, 3.2); sfx.laugh(); }
   }
   renderHud();
 }
+function swapTo(w) { phase = 'swap'; phaseT = 0; swapNext = w; swapped = false; fadeEl.style.opacity = '1'; } // cut to black, change the scenery, cut back
 function toTitle() {
   if (score > top) { top = score; try { localStorage.setItem('blockseason.top', String(top)); } catch (e) {} }
-  hideMsg(); hideDog();
+  hideMsg(); fadeEl.style.opacity = '0';
   $('lastv').textContent = pad6(score); $('last').hidden = false;
   setState('menu');
   if (locked && document.exitPointerLock) document.exitPointerLock();
-  P.pos.set(0, 0, 0); P.vx = P.vz = P.vy = 0; P.yaw = 0; P.pitch = 0.04; phase = 'demo'; spawnDemo();
+  setWorld('field'); phase = 'demo'; spawnDemo();
   $('play').focus({ preventScroll: true });
 }
 function spawnDemo() { setRange(true, false); $('timer').hidden = true; clearTargets(); round = 1; for (let i = 0; i < 2; i++) { const t = spawnDuck(); unhit(t.g); t.t = 1; t.g.position.y = rnd(5, 10); } }
@@ -728,18 +872,23 @@ function updateGame(dt) {
     else if (t.state === 'landed') { if (phase !== 'tally') { dogPop('hold', t.land, [t.kind], 1.6); sfx.gotcha(); } scene.remove(t.g); targets.splice(i, 1); }
     else if (t.state === 'gone') { scene.remove(t.g); targets.splice(i, 1); }
   }
-  if (phase === 'intro') { if (phaseT >= phaseDur) { hideMsg(); openRange(); } }
+  if (phase === 'intro') { if (phaseT >= phaseDur) { hideMsg(); openStage(); } }
   else if (phase === 'active') {
     timeLeft -= dt;
     const tl = Math.max(0, Math.ceil(timeLeft)); if (tl !== shownT) { shownT = tl; $('timer').textContent = 'T=' + tl; }
     if (duckAt.length && phaseT >= duckAt[0]) { duckAt.shift(); spawnDuck().life = 6.5; sfx.rustle(); sfx.quack(); }
     if (shots === 0) outT += dt;
-    if (!range.some(r => r.live)) endRange('');
-    else if (timeLeft <= 0) endRange('Time up');
-    else if (shots === 0 && outT > 0.7) endRange('Out of shots');
+    const left = stage === 'field' ? range.some(r => r.live) : pcs.some(pc => pc.alive && pc.site === 'bb');
+    if (!left) endStage('');
+    else if (timeLeft <= 0) endStage('Time up');
+    else if (shots === 0 && outT > 0.7) endStage('Out of shots');
   }
   else if (phase === 'result') { if (phaseT >= phaseDur) { hideMsg(); startTally(); } }
-  else if (phase === 'tally') { if (phaseT >= phaseDur) { hideMsg(); if (tallyPass) { round++; beginRound(); } else toTitle(); } }
+  else if (phase === 'tally') { if (phaseT >= phaseDur) { hideMsg(); if (tallyPass) swapTo(stage === 'field' ? 'office' : 'field'); else toTitle(); } }
+  else if (phase === 'swap') {
+    if (!swapped && phaseT >= 0.4) { swapped = true; if (swapNext === 'field') round++; setWorld(swapNext); fadeEl.style.opacity = '0'; }
+    if (phaseT >= 0.75) { if (swapNext === 'office') beginOffice(); else beginRound(); }
+  }
 }
 function updateTargets(dt) {
   for (const t of targets) {
@@ -897,7 +1046,7 @@ canvas.addEventListener('mousedown', e => {
 canvas.addEventListener('wheel', e => {
   if (state !== 'playing') return;
   e.preventDefault();
-  if (scopeT > 0.5) { scopeMag = clamp(scopeMag * Math.exp(-clamp(e.deltaY, -60, 60) * 0.004), 3, 12); rangeTick = 0; }
+  if (scopeT > 0.5) { scopeMag = clamp(scopeMag * Math.exp(-clamp(e.deltaY, -60, 60) * 0.004), 3, 16); rangeTick = 0; }
 }, { passive: false });
 addEventListener('mouseup', e => {
   if (e.button === 2 && scopeHeld) { scopeHeld = false; scopeToggle = performance.now() - scopeDownAt < 230 ? !scopeToggle : false; }
@@ -968,8 +1117,22 @@ function fire() {
   if (live) renderHud();
 }
 function onHit(h) {
-  const ud = h.object.userData, t = ud.target, rg = ud.range;
-  if (rg) {
+  const ud = h.object.userData, t = ud.target, rg = ud.range, pc = ud.pc;
+  if (pc) {
+    if (!pc.alive || phase !== 'active') return;
+    pc.alive = false; pc.g.visible = false; unhit(pc.g);
+    const p = pc.g.position, sc = pc.size, good = pc.site === 'bb';
+    const cols = [0xd8ccb0, 0xb0a488, 0x202428, good ? 0xf0641e : pc.site === 'sw' ? 0x1c4ca0 : pc.site === 'nemo' ? 0xd81c24 : 0x0c1c8c, 0xfcfcfc];
+    for (let i = 0; i < 14; i++) { // the whole machine goes to blocks
+      const m = new THREE.Mesh(BOX, mat(cols[i % cols.length])); m.scale.setScalar(rnd(0.25, 0.5) * sc);
+      m.position.set(p.x + rnd(-0.6, 0.6) * sc, p.y + rnd(0.2, 1.3) * sc, p.z + rnd(-0.5, 0.5) * sc);
+      addDebris(m, rnd(-4, 4) + dir.x * 3, rnd(2, 7), rnd(-3, 3) + dir.z * 3, rnd(1.6, 2.8));
+    }
+    v2.set(p.x, p.y + 0.8 * sc, p.z); sfx.wood();
+    if (good) { const pts = Math.round(1500 * tier() / 100) * 100, i = slots.indexOf(0); score += pts; if (i >= 0) slots[i] = 1; popup(v2, String(pts)); sfx.gotcha(); }
+    else { score = Math.max(0, score - 500); popup(v2, 'Wrong site -500'); sfx.wrong(); }
+    renderHud();
+  } else if (rg) {
     if (!rg.live || phase !== 'active') return;
     const lp = rg.board.worldToLocal(v2.copy(h.point)), bull = Math.max(Math.abs(lp.x), Math.abs(lp.y)) < 0.14;
     const pts = Math.round(rg.pts * tier() / 100) * 100 * (bull ? 2 : 1);
@@ -991,7 +1154,7 @@ function onHit(h) {
     renderHud();
   } else if (ud.dog && dog.mode === 'laugh' && dog.t < dog.dur - 0.25) {
     dog.dur = dog.t + 0.22; dog.mode = 'hold'; sfx.yelp(); popup(h.point, 'Yipe!');
-  } else if (!t && !ud.dog) puff(h.point, h.object === field ? [0xc88c3c, 0x80d010] : [0x48a808, 0x7c4410], 5, 1.6, 0.12);
+  } else if (!t && !ud.dog) puff(h.point, stage === 'office' ? [0xa8b0bc, 0x6c7684] : h.object === field ? [0xc88c3c, 0x80d010] : [0x48a808, 0x7c4410], 5, 1.6, 0.12);
 }
 
 // ---------- per-frame ----------
@@ -1013,8 +1176,10 @@ function updatePlayer(dt) {
   const k = 1 - Math.exp(-(P.onGround ? 12 : 2.5) * dt);
   P.vx += (tx - P.vx) * k; P.vz += (tz - P.vz) * k;
   P.pos.x += P.vx * dt; P.pos.z += P.vz * dt;
-  pushOut(P.pos, PR, colliders);
-  const r = Math.hypot(P.pos.x, P.pos.z); if (r > WORLD_R) { P.pos.x *= WORLD_R / r; P.pos.z *= WORLD_R / r; }
+  if (stage === 'field') {
+    pushOut(P.pos, PR, colliders);
+    const r = Math.hypot(P.pos.x, P.pos.z); if (r > WORLD_R) { P.pos.x *= WORLD_R / r; P.pos.z *= WORLD_R / r; }
+  } else { P.pos.x = clamp(P.pos.x, -13, 13); P.pos.z = clamp(P.pos.z, -9, 9); } // stay behind the yellow line
   P.vy -= GRAV * dt; P.pos.y += P.vy * dt;
   if (P.pos.y <= 0) { P.pos.y = 0; P.vy = 0; P.onGround = true; } else P.onGround = false;
   const spd = Math.hypot(P.vx, P.vz);
@@ -1098,7 +1263,7 @@ let last = performance.now(), T = 0;
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now;
-  if (state === 'playing') { updatePlayer(dt); updateWeapon(dt); updateGame(dt); updateTargets(dt); updateDog(dt); updateRange(dt); }
+  if (state === 'playing') { updatePlayer(dt); updateWeapon(dt); updateGame(dt); updateTargets(dt); updateDog(dt); if (stage === 'field') updateRange(dt); else updatePcs(dt); }
   else if (state === 'menu') { updateTargets(dt); updateRange(dt); }
   if (state !== 'paused') { T += dt; updateDebris(dt); updateTracers(dt); poseView(dt, T); }
   renderer.clear();

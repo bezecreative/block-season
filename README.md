@@ -1,14 +1,21 @@
 # Block Season
 
-A playable proposal for BoreBuddy: an 8-bit, first-person rifle range that runs in the browser.
+A playable proposal for BoreBuddy: an 8-bit, first-person shooting game that runs in the browser. Each round is a rifle range out in a field, then an office warehouse full of computers.
 
 **Play it:** https://bezecreative.github.io/block-season/
 
 ## How it plays
 
-- Five moving targets are set from 30 to 120 yards. The far ones are specks until you scope in.
-- Each round gives you eight shots and a clock. Hit at least three of the five to move on; targets speed up each round.
-- A dead-centre hit pays double. Ducks flush out of the grass for bonus points, and the dog fetches the ones you hit.
+**Stage one, the range.** Five moving targets are set from 30 to 120 yards. The far ones are specks until you scope in.
+You get eight shots and a clock, and need at least three of the five to move on. A dead-centre hit pays double.
+Ducks flush out of the grass for bonus points, and the dog fetches the ones you hit.
+
+**Stage two, the office.** The scene cuts to a warehouse office with ten computers: on desks, up on a mezzanine and
+riding a conveyor. Three screens show the BoreBuddy homepage, three show NEMO Arms, three show Smith & Wesson and one
+is dead. Scope in to read them and shoot only the three BoreBuddy screens. You get six shots; a wrong screen costs 500 points.
+
+Clear the office and the next round starts back at the range, faster.
+
 - The rifle is modelled on BoreBuddy's Complete AR22 Apogee Match upper in FDE.
 
 ## Controls
@@ -19,7 +26,7 @@ A playable proposal for BoreBuddy: an 8-bit, first-person rifle range that runs 
 | Mouse | Aim |
 | Space or click | Fire |
 | Right-click or Q | Scope |
-| Scroll | Scope zoom, 3x to 12x |
+| Scroll | Scope zoom, 3x to 16x |
 | Shift | Run |
 | J | Jump |
 | Esc | Pause |
@@ -40,4 +47,6 @@ In `index.html`, find `const PROPOSAL_URL = '';` and paste the link between the 
 ## Credits
 
 The BoreBuddy name and logo belong to BoreBuddy and appear here as part of a proposal prepared for them.
+NEMO Arms and Smith & Wesson are named on the office screens; those names belong to their owners. The screens are
+simplified drawings in each site's colours, not screenshots.
 The game's models and sounds are original; the look is a tribute to 8-bit light-gun games.
