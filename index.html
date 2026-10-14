@@ -530,21 +530,33 @@ for (const k in SCREENSHOTS) if (SCREENSHOTS[k]) {
   };
   im.src = SCREENSHOTS[k];
 }
-// six on desks, two up on the mezzanine, two riding the conveyor: [x, y, z, size, belt slot]
+// Fifteen machines. Eight sit still: six on desks, two up on the mezzanine. Seven move: three ride the
+// conveyor, two hang from trolleys on overhead beams, two ride scissor lifts.
+const BEAMS = [{ z: -27, y: 9.2 }, { z: -62.5, y: 9.2 }], LIFTS = [{ x: -21, z: -45 }, { x: 20, z: -30 }];
+for (const b of BEAMS) O(0x586070, 54, 0.4, 0.45, 0, b.y, b.z);
+const trolleys = BEAMS.map(b => ({ cart: O(0x2c3035, 0.9, 0.45, 0.9, 0, b.y - 0.4, b.z, false), cable: O(0x111315, 0.06, 1, 0.06, 0, b.y - 1, b.z, false) }));
+const lifts = LIFTS.map(l => {
+  O(0x3c4450, 2.8, 0.3, 2.8, l.x, 0.15, l.z);
+  return { top: O(0xf8b800, 2.6, 0.22, 2.6, l.x, 1, l.z), legs: [-0.7, 0.7].map(dx => O(0x2c3035, 0.25, 1, 0.25, l.x + dx, 0.5, l.z, false)) };
+});
 const pcs = [[-8, 1.06, -18, 1.25], [7, 1.06, -23, 1.25], [-17, 1.06, -31, 1.3], [24, 1.06, -50, 1.4], [-4, 1.06, -53, 1.45], [-18, 1.06, -60, 1.5],
-  [9, 5.86, -69, 1.7], [-11, 5.86, -69, 1.7], [0, 1.03, -38, 1.3, 0], [0, 1.03, -38, 1.3, 1]].map(sp => {
+  [9, 5.86, -69, 1.7], [-11, 5.86, -69, 1.7],
+  [0, 1.03, -38, 1.3, { belt: 0 }], [0, 1.03, -38, 1.3, { belt: 1 }], [0, 1.03, -38, 1.3, { belt: 2 }],
+  [0, 5.3, -27, 1.4, { trolley: 0 }], [0, 5.1, -62.5, 1.6, { trolley: 1 }],
+  [-21, 1.2, -45, 1.4, { lift: 0 }], [20, 1.2, -30, 1.3, { lift: 1 }]].map(sp => {
   const g = new THREE.Group(), beige = 0xd8ccb0, beigeD = 0xb0a488;
   B(g, beigeD, 0.7, 0.14, 0.7, 0, 0.07, 0); B(g, beige, 1.5, 1.2, 1.2, 0, 0.74, 0); B(g, beigeD, 1.3, 1.0, 0.3, 0, 0.74, -0.7);
   B(g, 0x202428, 1.26, 0.96, 0.02, 0, 0.78, 0.6); B(g, 0x80d010, 0.08, 0.05, 0.02, 0.6, 0.22, 0.605);
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.9), screens.off.mat); screen.position.set(0, 0.78, 0.615); g.add(screen);
-  const pc = { g, screen, site: 'off', alive: false, size: sp[3], belt: sp[4], t: 0 };
+  const pc = { g, screen, site: 'off', alive: false, size: sp[3], mv: sp[4], t: Math.random() * 10 };
   g.traverse(o => { if (o.isMesh) o.userData.pc = pc; });
   g.position.set(sp[0], sp[1], sp[2]); g.scale.setScalar(sp[3]); g.visible = false; officeWorld.add(g);
   return pc;
 });
 function setPcs(on) { for (const pc of pcs) { pc.alive = on; pc.g.visible = on; unhit(pc.g); } }
-function dealPcs() { // three of each site and one dead screen, shuffled onto the ten machines
-  const deck = ['bb', 'bb', 'bb', 'nemo', 'nemo', 'nemo', 'sw', 'sw', 'sw', 'off'];
+function dealPcs() { // three BoreBuddy screens hidden among twelve competitor screens, shuffled every visit
+  const deck = ['bb', 'bb', 'bb'];
+  for (let i = 0; i < 6; i++) deck.push('nemo', 'sw');
   for (let i = deck.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0, t = deck[i]; deck[i] = deck[j]; deck[j] = t; }
   pcs.forEach((pc, i) => { pc.site = deck[i]; pc.screen.material = screens[deck[i]].mat; });
   setPcs(true);
@@ -552,8 +564,18 @@ function dealPcs() { // three of each site and one dead screen, shuffled onto th
 function updatePcs(dt) {
   const k = 1 + (round - 1) * 0.12;
   for (const pc of pcs) {
-    const p = pc.g.position;
-    if (pc.belt !== undefined) { pc.t += dt * k; p.x = -15.5 + ((pc.t * 2.4 + pc.belt * 15.5) % 31); }
+    const p = pc.g.position, mv = pc.mv;
+    pc.t += dt * k;
+    if (mv && mv.belt !== undefined) p.x = -15.5 + ((pc.t * 2.4 + mv.belt * 31 / 3) % 31);
+    else if (mv && mv.trolley !== undefined) {
+      const b = BEAMS[mv.trolley], tr = trolleys[mv.trolley], top = p.y + 1.34 * pc.size, bottom = b.y - 0.62;
+      p.x = Math.sin(pc.t * 0.45) * 15;
+      tr.cart.position.x = p.x; tr.cable.position.set(p.x, (top + bottom) / 2, b.z); tr.cable.scale.y = Math.max(0.1, bottom - top);
+    } else if (mv && mv.lift !== undefined) {
+      const lf = lifts[mv.lift], h = 1 + (0.5 - 0.5 * Math.cos(pc.t * 0.7)) * 4;
+      lf.top.position.y = h; for (const leg of lf.legs) { leg.scale.y = h; leg.position.y = h / 2; }
+      p.y = h + 0.11;
+    }
     pc.g.rotation.y = Math.atan2(P.pos.x - p.x, P.pos.z - p.z);
   }
 }
@@ -736,7 +758,7 @@ let locked = false, everLocked = false, pendingLock = false, dragLook = false, l
 try { top = parseInt(localStorage.getItem('blockseason.top'), 10) || 0; } catch (e) { top = 0; }
 const pad6 = n => String(Math.max(0, Math.round(n))).padStart(6, '0');
 const tier = () => round <= 5 ? 1 : round <= 10 ? 1.6 : 2;
-const needFor = r => stage === 'office' ? Math.min(6, 4 + Math.floor((r - 1) / 2)) : Math.min(5, 3 + Math.floor((r - 1) / 3));
+const needFor = r => stage === 'office' ? Math.min(3, 2 + Math.floor((r - 1) / 2)) : Math.min(5, 3 + Math.floor((r - 1) / 3));
 const shotsFor = r => Math.max(5, 8 - Math.floor((r - 1) / 3));
 
 // ---------- HUD ----------
@@ -810,10 +832,10 @@ function beginRound() {
   showMsg('Round\n' + round); renderHud();
 }
 function beginOffice() {
-  slots = new Array(6).fill(0); maxShots = Math.max(7, 9 - Math.floor((round - 1) / 2)); shots = maxShots;
-  $('timer').hidden = true; phase = 'intro'; phaseT = 0; phaseDur = 3.4; sfx.next();
+  slots = new Array(3).fill(0); maxShots = Math.max(5, 7 - Math.floor((round - 1) / 2)); shots = maxShots;
+  $('timer').hidden = true; phase = 'intro'; phaseT = 0; phaseDur = 6; sfx.next();
   dealPcs();
-  showMsg('The office\nShoot the\ncompetitors\nNot BoreBuddy'); renderHud();
+  showMsg('Let\'s see how your\nwebsite stacks up against\nthe competition.\n\nShoot your website\nto score points.'); renderHud();
 }
 function openStage() {
   phase = 'active'; phaseT = 0; shots = maxShots; outT = 0; shownT = -1; $('timer').hidden = false;
@@ -824,8 +846,8 @@ function openStage() {
     duckAt = [rnd(2.5, timeLeft * 0.4)]; if (round >= 3) duckAt.push(rnd(timeLeft * 0.5, timeLeft * 0.8));
     sfx.rustle();
   } else {
-    timeLeft = Math.max(36, 64 - round * 4);
-    tip(touchMode ? 'Scope in. Shoot the competitors, never BoreBuddy' : 'Scope in to read the screens. Shoot NEMO and Smith & Wesson, never BoreBuddy', 9);
+    timeLeft = Math.max(36, 60 - round * 4);
+    tip(touchMode ? 'Scope in. Shoot the BoreBuddy screens, not the competition' : 'Scope in to read the screens. Shoot the BoreBuddy screens, not the competition', 9);
     for (const pc of pcs) hittables.push(pc.g);
     duckAt = [];
     sfx.thud();
@@ -921,7 +943,7 @@ function updateGame(dt) {
     const tl = Math.max(0, Math.ceil(timeLeft)); if (tl !== shownT) { shownT = tl; $('timer').textContent = 'T=' + tl; }
     if (duckAt.length && phaseT >= duckAt[0]) { duckAt.shift(); spawnDuck().life = 6.5; sfx.rustle(); sfx.quack(); }
     if (shots === 0) outT += dt;
-    const left = stage === 'field' ? range.some(r => r.live) : pcs.some(pc => pc.alive && (pc.site === 'nemo' || pc.site === 'sw'));
+    const left = stage === 'field' ? range.some(r => r.live) : pcs.some(pc => pc.alive && pc.site === 'bb');
     if (!left) endStage('');
     else if (timeLeft <= 0) endStage('Time up');
     else if (shots === 0 && outT > 0.7) endStage('Out of shots');
@@ -1160,7 +1182,7 @@ function onHit(h) {
   if (pc) {
     if (!pc.alive || phase !== 'active') return;
     pc.alive = false; pc.g.visible = false; unhit(pc.g);
-    const p = pc.g.position, sc = pc.size, rival = pc.site === 'nemo' || pc.site === 'sw';
+    const p = pc.g.position, sc = pc.size;
     const cols = [0xd8ccb0, 0xb0a488, 0x202428, pc.site === 'bb' ? 0xf0641e : pc.site === 'sw' ? 0x1c4ca0 : pc.site === 'nemo' ? 0xd81c24 : 0x0c1c8c, 0xfcfcfc];
     for (let i = 0; i < 14; i++) { // the whole machine goes to blocks
       const m = new THREE.Mesh(BOX, mat(cols[i % cols.length])); m.scale.setScalar(rnd(0.25, 0.5) * sc);
@@ -1168,9 +1190,8 @@ function onHit(h) {
       addDebris(m, rnd(-4, 4) + dir.x * 3, rnd(2, 7), rnd(-3, 3) + dir.z * 3, rnd(1.6, 2.8));
     }
     v2.set(p.x, p.y + 0.8 * sc, p.z); sfx.wood();
-    if (rival) { const pts = Math.round(1500 * tier() / 100) * 100, i = slots.indexOf(0); score += pts; if (i >= 0) slots[i] = 1; popup(v2, String(pts)); sfx.gotcha(); }
-    else if (pc.site === 'bb') { score = Math.max(0, score - 1000); popup(v2, 'Own site -1000'); sfx.wrong(); } // their own homepage costs them
-    else popup(v2, 'No signal');
+    if (pc.site === 'bb') { const pts = Math.round(1500 * tier() / 100) * 100, i = slots.indexOf(0); score += pts; if (i >= 0) slots[i] = 1; popup(v2, String(pts)); sfx.gotcha(); } // their own site scores
+    else { score = Math.max(0, score - 500); popup(v2, 'Wrong site -500'); sfx.wrong(); }
     renderHud();
   } else if (rg) {
     if (!rg.live || phase !== 'active') return;

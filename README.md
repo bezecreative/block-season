@@ -10,10 +10,10 @@ A playable proposal for BoreBuddy, by Mox: an 8-bit, first-person shooting game 
 You get eight shots and a clock. However it goes, the game moves on to the office. A dead-centre hit pays double.
 Ducks flush out of the grass for bonus points, and the dog fetches the ones you hit.
 
-**Stage two, the office.** The scene cuts to a warehouse office with ten computers: on desks, up on a mezzanine and
-riding a conveyor. Three screens show NEMO Arms, three show Smith & Wesson, three show BoreBuddy's own homepage and one
-is dead. Scope in to read them and shoot the six competitor screens. You get nine shots and need at least four.
-Hitting a BoreBuddy screen costs 1,000 points.
+**Stage two, the office.** The scene cuts to a warehouse office with fifteen computers. Eight sit still on desks and
+a mezzanine; seven move, riding a conveyor, hanging from overhead trolleys and rising on scissor lifts. Three screens
+show BoreBuddy's homepage and the other twelve show NEMO Arms and Smith & Wesson. The card reads "Let's see how your
+website stacks up against the competition. Shoot your website to score points." Hitting a competitor screen costs 500 points.
 
 **The pitch.** When the office ends, a card reads "Want to stand out? Go with Mox", with a link to the proposal and a
 button to keep playing. Carrying on starts the next round back at the range, faster.
