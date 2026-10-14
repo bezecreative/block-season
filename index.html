@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="A playable proposal for BoreBuddy: an 8-bit rifle range, then an office full of computers showing competitor sites to shoot.">
+<meta name="description" content="A playable proposal for BoreBuddy, by Mox: an 8-bit rifle range, then an office full of computers showing competitor sites to shoot.">
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16'/%3E%3Crect x='1' y='1' width='14' height='14' fill='%23fcfcfc'/%3E%3Crect x='2' y='2' width='12' height='12' fill='%23f83800'/%3E%3Crect x='4' y='4' width='8' height='8' fill='%23fcfcfc'/%3E%3Crect x='6' y='6' width='4' height='4' fill='%23f83800'/%3E%3C/svg%3E">
-<title>Block Season</title>
+<title>A Proposal for BoreBuddy</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
 <style>
 /* Layout: full-bleed 3D view drawn at low resolution and scaled up with hard pixels.
@@ -101,9 +101,12 @@ body.playing #view{cursor:crosshair}
 /* ---------- cards ---------- */
 .card{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);width:min(580px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto;background:var(--ink);border:4px solid var(--grass);border-radius:14px;padding:26px 22px 20px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
 .card h1{margin:0;width:100%;font-size:clamp(22px,6.4vw,40px);font-weight:400;line-height:1.25;color:var(--blue);text-shadow:3px 3px 0 #0c48b8;display:flex;flex-direction:column;align-items:center;gap:8px}
-.card h1 i{display:block;width:100%;height:6px;background:var(--orange)}
-.card .for{color:var(--grass)}
-.plate{background:var(--white);border-radius:8px;padding:10px 16px;width:min(300px,100%)}
+.card h1.byline{font-size:inherit;text-shadow:none;gap:10px}
+.card .for{color:var(--grass);font-size:clamp(8px,1.9vw,10px);line-height:1.4}
+.plate{display:block;background:var(--white);border-radius:8px;padding:10px 16px;width:min(300px,100%)}
+.mox{display:block;width:min(240px,70%);height:auto}
+.card a.seeprop{color:var(--white);font-size:clamp(8px,1.8vw,9px);line-height:1.4;text-decoration:none;border:2px solid var(--grass);border-radius:6px;padding:9px 12px 7px}
+.card a.seeprop:hover,.card a.seeprop:focus-visible{background:var(--grass);color:var(--ink);outline:none}
 .plate img{display:block;width:100%;height:auto}
 .card .pitch{font-size:clamp(9px,2.3vw,12px);line-height:2;max-width:38ch}
 .card a{color:var(--orange)}
@@ -165,13 +168,15 @@ a.mode{display:block;text-decoration:none}
   </div>
 
   <section class="card" id="menu" aria-labelledby="m-title">
-    <p class="for">A proposal for</p>
-    <div class="plate"><img src="borebuddy-logo.png" alt="BoreBuddy: Rimfire Perfected" width="1269" height="269"></div>
-    <h1 id="m-title"><span>Block</span><i></i><span>Season</span></h1>
-    <p class="pitch" id="pitch">Play your way through our proposal.</p>
+    <h1 id="m-title" class="byline">
+      <span class="for">A proposal for</span>
+      <span class="plate"><img src="borebuddy-logo.png" alt="BoreBuddy" width="1269" height="269"></span>
+      <span class="for">By</span>
+      <img class="mox" src="mox-logo.png" alt="Mox" width="900" height="254">
+    </h1>
+    <p class="pitch" id="pitch">Play your way through the proposal.</p>
     <div class="modes">
       <button class="mode" id="play" type="button">Play</button>
-      <a class="mode" id="viewbtn" href="#" target="_blank" rel="noopener" hidden>View the proposal</a>
     </div>
     <dl class="keys" id="keys-desk">
       <div><dt>WASD</dt><dd>Walk</dd></div>
@@ -179,8 +184,6 @@ a.mode{display:block;text-decoration:none}
       <div><dt>Space</dt><dd>Fire (or click)</dd></div>
       <div><dt>R-click</dt><dd>Scope (or Q)</dd></div>
       <div><dt>Scroll</dt><dd>Scope zoom</dd></div>
-      <div><dt>Shift</dt><dd>Run</dd></div>
-      <div><dt>J</dt><dd>Jump</dd></div>
       <div><dt>Esc</dt><dd>Pause</dd></div>
     </dl>
     <dl class="keys" id="keys-touch" hidden>
@@ -189,9 +192,9 @@ a.mode{display:block;text-decoration:none}
       <div><dt>Fire</dt><dd>Shoot</dd></div>
       <div><dt>Scope</dt><dd>Zoom in</dd></div>
     </dl>
-    <p>First the range: five moving targets from 30 to 120 yards. Then the office: ten computers. Scope in, shoot the six showing competitor sites, and leave the three showing BoreBuddy alone.</p>
     <p class="top">Top score = <span id="top">000000</span></p>
     <p id="last" hidden>Last game = <span id="lastv">000000</span></p>
+    <a class="seeprop" id="seeprop" href="#" target="_blank" rel="noopener" hidden>I just want to see your proposal</a>
     <p id="fatal" hidden></p>
   </section>
 
@@ -226,17 +229,10 @@ const TAU = Math.PI * 2, YD = 1.09361, EYE = 1.7, GRAV = 22, PR = 0.45, SHOT_GAP
 const WORLD_R = 16, GRASS_IN = 8, GRASS_OUT = 75, DOG_S = 1.5;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const canvas = $('view');
-// Paste the proposal link between the quotes. It switches on "view it here" on the title card and
-// "View proposal" on the card that follows the office.
+// Paste the proposal link between the quotes. It switches on "I just want to see your proposal" on the
+// title card and "View proposal" on the card that follows the office.
 const PROPOSAL_URL = '';
-if (PROPOSAL_URL) {
-  const pitch = $('pitch'), a = document.createElement('a');
-  a.href = PROPOSAL_URL; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'view it here';
-  pitch.textContent = 'Either play your way through our proposal, or simply ';
-  pitch.appendChild(a); pitch.appendChild(document.createTextNode('.'));
-  $('viewbtn').href = PROPOSAL_URL; $('viewbtn').hidden = false;
-  $('pc-view').href = PROPOSAL_URL; $('pc-view').hidden = false; // the card after the office gets its link too
-}
+if (PROPOSAL_URL) for (const id of ['seeprop', 'pc-view']) { $(id).href = PROPOSAL_URL; $(id).hidden = false; }
 const menuItems = [...document.querySelectorAll('#menu .mode')].filter(el => !el.hidden);
 
 function fatal(msg) { const f = $('fatal'); f.textContent = msg; f.hidden = false; $('play').disabled = true; }
@@ -643,22 +639,25 @@ const rifle = new THREE.Group(); gunScene.add(rifle);
 let gunRestX = 0.19;
 const flash = new THREE.Mesh(BOX, new THREE.MeshBasicMaterial({ color: 0xfcfcfc }));
 {
-  // AR22: flat dark earth upper with a full-length top rail and slim M-LOK handguard, on a black lower
-  const fde = 0xb89f78, fdeD = 0x9c855f, blk = 0x1b1d1f, slot = 0x0f1113, steel = 0x9a9da0, glass = 0x0d1216;
+  // BoreBuddy AR22 Heavy Precision upper: black receiver, long M-LOK free-float handguard and a stainless
+  // 18.5" Green Mountain heavy barrel standing out past the handguard. Black lower and scope.
+  const blk = 0x1b1d1f, ano = 0x22252a, hg = 0x1d2024, rail = 0x15171a, tooth = 0x2c3035, slot = 0x07080a, steel = 0x9a9da0, ss = 0xe0e3e6, glass = 0x0d1216;
   const cyl = (hex, r, len, x, y, z, seg) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, seg || 8), mat(hex)); m.rotation.x = Math.PI / 2; m.position.set(x, y, z); rifle.add(m); return m; };
-  B(rifle, fde, 0.05, 0.056, 0.2, 0, 0.034, 0);
-  B(rifle, fde, 0.044, 0.05, 0.4, 0, 0.036, -0.3);
-  B(rifle, fdeD, 0.02, 0.006, 0.61, 0, 0.064, -0.2);
-  for (let z = 0.095; z > -0.5; z -= 0.02) B(rifle, fde, 0.024, 0.007, 0.011, 0, 0.069, z);
+  B(rifle, ano, 0.05, 0.056, 0.2, 0, 0.034, 0);                    // upper receiver
+  B(rifle, hg, 0.044, 0.05, 0.52, 0, 0.036, -0.36);                // handguard, receiver to z -0.62
+  B(rifle, tooth, 0.047, 0.053, 0.006, 0, 0.035, -0.1);            // where the handguard meets the receiver
+  B(rifle, rail, 0.02, 0.006, 0.725, 0, 0.064, -0.2575);           // full-length top rail
+  for (let z = 0.095; z > -0.615; z -= 0.02) B(rifle, tooth, 0.024, 0.007, 0.011, 0, 0.069, z);
   for (const sd of [-1, 1]) {
     const x = sd * 0.0215;
-    for (let i = 0; i < 4; i++) { B(rifle, slot, 0.003, 0.011, 0.062, x, 0.036, -0.2 - i * 0.082); B(rifle, slot, 0.003, 0.005, 0.05, x, 0.019, -0.2 - i * 0.082); }
-    for (let i = 0; i < 5; i++) B(rifle, slot, 0.003, 0.012, 0.012, x, 0.051, -0.125 - i * 0.022).rotation.x = 0.6;
-    B(rifle, slot, 0.003, 0.012, 0.012, x, 0.036, -0.135); B(rifle, slot, 0.003, 0.012, 0.012, x, 0.036, -0.485);
+    for (let i = 0; i < 7; i++) { B(rifle, slot, 0.003, 0.011, 0.055, x, 0.038, -0.15 - i * 0.068); B(rifle, slot, 0.003, 0.006, 0.006, x, 0.02, -0.184 - i * 0.068); } // M-LOK slots, QD dots
+    B(rifle, slot, 0.003, 0.01, 0.01, x, 0.038, -0.115); B(rifle, slot, 0.003, 0.01, 0.01, x, 0.038, -0.603);
   }
-  B(rifle, steel, 0.003, 0.024, 0.07, 0.0255, 0.03, 0);
-  B(rifle, blk, 0.064, 0.012, 0.022, 0, 0.056, 0.108);
-  cyl(blk, 0.009, 0.07, 0, 0.036, -0.53); cyl(blk, 0.012, 0.026, 0, 0.036, -0.558);
+  B(rifle, steel, 0.003, 0.024, 0.07, 0.0255, 0.03, 0);             // dust cover
+  B(rifle, blk, 0.064, 0.012, 0.022, 0, 0.056, 0.108);              // charging handle
+  cyl(ss, 0.0135, 0.2, 0, 0.036, -0.72, 12);                       // stainless heavy barrel past the handguard
+  cyl(0x8a8e92, 0.014, 0.005, 0, 0.036, -0.795, 12);                // thread protector seam
+  cyl(0x2a2d30, 0.005, 0.003, 0, 0.036, -0.8205, 8);                // bore
   B(rifle, blk, 0.046, 0.04, 0.2, 0, -0.012, 0.005);
   B(rifle, blk, 0.044, 0.06, 0.07, 0, -0.04, -0.06);
   B(rifle, 0x25282b, 0.028, 0.15, 0.05, 0, -0.13, -0.066).rotation.x = 0.12;
@@ -672,7 +671,7 @@ const flash = new THREE.Mesh(BOX, new THREE.MeshBasicMaterial({ color: 0xfcfcfc 
   cyl(glass, 0.0225, 0.004, 0, 0.112, -0.206, 10); cyl(blk, 0.022, 0.06, 0, 0.112, 0.115, 10);
   B(rifle, blk, 0.022, 0.032, 0.022, 0, 0.088, 0.04); B(rifle, blk, 0.022, 0.032, 0.022, 0, 0.088, -0.09);
   B(rifle, blk, 0.02, 0.02, 0.024, 0, 0.136, -0.025); B(rifle, blk, 0.02, 0.02, 0.024, 0.024, 0.112, -0.025);
-  flash.scale.set(0.07, 0.07, 0.1); flash.position.set(0, 0.036, -0.63); flash.visible = false; rifle.add(flash);
+  flash.scale.set(0.07, 0.07, 0.1); flash.position.set(0, 0.036, -0.855); flash.visible = false; rifle.add(flash);
 }
 
 // ---------- sound: square waves and noise, nothing sampled ----------
@@ -1271,7 +1270,7 @@ function poseView(dt, t) {
   const bx = reduceMotion ? 0 : Math.sin(bobPhase) * 0.012 * mv, by = reduceMotion ? 0 : -Math.abs(Math.cos(bobPhase)) * 0.012 * mv;
   const hip = 1 - e; // sway, bob and cant settle out as the rifle comes up to the eye
   rifle.position.set(lerp(gunRestX, 0, e) + (sway.x + bx) * hip, lerp(-0.19, -0.112, e) + (sway.y + by) * hip, lerp(-0.54, -0.3, e) + gunKick * 0.03);
-  rifle.rotation.set(gunKick * 0.035 * hip, (0.04 + sway.x * 1.5) * hip, 0);
+  rifle.rotation.set(gunKick * 0.035 * hip, (0.11 + sway.x * 1.5) * hip, 0); // turned a little so the side and barrel show
   rifle.visible = scopeT < 0.72;
   const so = clamp((scopeT - 0.5) / 0.45, 0, 1);
   if (so <= 0) { if (!scopeEl.hidden) scopeEl.hidden = true; }

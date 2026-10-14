@@ -1,6 +1,6 @@
-# Block Season
+# A Proposal for BoreBuddy
 
-A playable proposal for BoreBuddy: an 8-bit, first-person shooting game that runs in the browser. Each round is a rifle range out in a field, then an office warehouse full of computers.
+A playable proposal for BoreBuddy, by Mox: an 8-bit, first-person shooting game that runs in the browser. Each round is a rifle range out in a field, then an office warehouse full of computers.
 
 **Play it:** https://bezecreative.github.io/block-season/
 
@@ -18,6 +18,8 @@ Hitting a BoreBuddy screen costs 1,000 points.
 **The pitch.** When the office ends, a card reads "Want to stand out? Go with Mox", with a link to the proposal and a
 button to keep playing. Carrying on starts the next round back at the range, faster.
 
+The rifle carries BoreBuddy's AR22 Heavy Precision upper with the 18.5-inch Green Mountain barrel.
+
 ## Controls
 
 | Key | Action |
@@ -27,8 +29,6 @@ button to keep playing. Carrying on starts the next round back at the range, fas
 | Space or click | Fire |
 | Right-click or Q | Scope |
 | Scroll | Scope zoom, 3x to 16x |
-| Shift | Run |
-| J | Jump |
 | Esc | Pause |
 | M | Sound on or off |
 
@@ -36,9 +36,8 @@ On a phone, the left thumb walks, the right thumb aims, and on-screen buttons fi
 
 ## Adding the proposal link
 
-In `index.html`, find `const PROPOSAL_URL = '';` and paste the link between the quotes. That switches on two things:
-the title card reads "Either play your way through our proposal, or simply view it here" with a "View the proposal"
-menu item, and the card after the office gains its "View proposal" link.
+In `index.html`, find `const PROPOSAL_URL = '';` and paste the link between the quotes. That switches on the
+"I just want to see your proposal" button on the title card and the "View proposal" link on the card after the office.
 
 ## The office screens
 
@@ -50,7 +49,7 @@ the logo in view. Only add screenshots you have the right to publish.
 ## Files
 
 - `index.html` is the whole game: markup, styles and script in one file. It loads three.js r128 from cdnjs and the Press Start 2P font from Google Fonts.
-- `borebuddy-logo.png` is BoreBuddy's logo, shown on the title card.
+- `borebuddy-logo.png` and `mox-logo.png` are the logos on the title card.
 - `screens/` holds the homepage screenshots shown on the office computers.
 
 ## Credits
