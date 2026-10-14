@@ -95,7 +95,18 @@ body.playing #view{cursor:crosshair}
 /* ---------- touch controls ---------- */
 #touch{position:absolute;inset:0;z-index:3;touch-action:none}
 .bar,#msg,#tip,#pops,.arr{z-index:2}
-#pausebtn,#mutebtn{z-index:4}
+#pausebtn{z-index:4}
+#msg.closable{padding:22px 34px 14px}
+#msg-hint{display:block;margin-top:12px;font-size:clamp(7px,1.4vw,9px);color:var(--grass)}
+#msg-x{position:absolute;top:4px;right:6px;pointer-events:auto;appearance:none;background:none;border:0;color:var(--white);font:inherit;font-size:16px;line-height:1;padding:6px 8px;cursor:pointer}
+#msg-x:hover,#msg-x:focus-visible{color:var(--orange);outline:none}
+.ctrls{position:absolute;left:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:2;margin:0;display:grid;gap:5px;background:rgba(0,0,0,.55);border-radius:6px;padding:9px 11px 7px;font-size:8px;line-height:1}
+.ctrls div{display:flex;gap:8px}
+.ctrls dt{color:var(--blue);min-width:6.2em}
+.ctrls dd{margin:0}
+body.touch .ctrls{display:none}
+@media (max-width:900px){.ctrls{display:none}}
+#mutebtn{z-index:5}
 #pops{position:absolute;inset:0}
 #stick{position:absolute;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;border:3px solid var(--white);background:rgba(0,0,0,.3);pointer-events:none}
 #stick b{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:var(--white)}
@@ -113,6 +124,11 @@ body.playing #view{cursor:crosshair}
 .mox{display:block;width:min(140px,40%);height:auto}
 .card a.seeprop{color:var(--white);font-size:clamp(8px,1.8vw,9px);line-height:1.4;text-decoration:none;border:2px solid var(--grass);border-radius:6px;padding:9px 12px 7px}
 .card a.seeprop:hover,.card a.seeprop:focus-visible{background:var(--grass);color:var(--ink);outline:none}
+.cta-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:stretch;gap:10px}
+.playbtn{appearance:none;font:inherit;font-size:clamp(11px,2.6vw,14px);line-height:1.2;text-transform:uppercase;color:var(--ink);background:var(--orange);border:2px solid var(--orange);border-radius:6px;padding:10px 26px 8px;cursor:pointer}
+.playbtn:hover,.playbtn:focus-visible{background:var(--white);border-color:var(--white);outline:none}
+.playbtn:disabled{opacity:.4;cursor:not-allowed}
+.cta-row .seeprop{display:flex;align-items:center}
 .plate img{display:block;width:100%;height:auto}
 .card .pitch{font-size:clamp(9px,2.3vw,12px);line-height:2;max-width:38ch}
 .card a{color:var(--orange)}
@@ -151,10 +167,16 @@ a.mode{display:block;text-decoration:none}
     <div class="arr" id="arrL" hidden></div>
     <div class="arr" id="arrR" hidden></div>
     <div class="cross" id="cross"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i></div>
-    <div id="msg" hidden aria-live="polite"></div>
+    <div id="msg" hidden aria-live="polite"><span id="msg-text"></span><span id="msg-hint" hidden></span><button id="msg-x" type="button" aria-label="Close" hidden>&times;</button></div>
     <div id="tip" hidden></div>
     <button id="pausebtn" type="button" hidden>Pause</button>
-    <button id="mutebtn" type="button" aria-label="Turn sound off" title="Sound on/off (M)"><svg viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><rect x="1" y="4" width="2" height="3"/><rect x="3" y="3" width="1" height="5"/><rect x="4" y="2" width="1" height="7"/><rect x="5" y="1" width="1" height="9"/><g class="w"><rect x="7" y="4" width="1" height="3"/><rect x="9" y="2" width="1" height="7"/></g><g class="x"><rect x="7" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="8" y="4" width="2" height="2"/><rect x="7" y="6" width="1" height="1"/><rect x="10" y="6" width="1" height="1"/></g></svg></button>
+    <dl class="ctrls" id="ctrls">
+      <div><dt>Mouse</dt><dd>Aim</dd></div>
+      <div><dt>Space</dt><dd>Fire</dd></div>
+      <div><dt>R-click</dt><dd>Scope</dd></div>
+      <div><dt>Esc</dt><dd>Pause</dd></div>
+      <div><dt>M</dt><dd>Sound</dd></div>
+    </dl>
     <div class="bar">
       <div class="shotwrap">
         <div class="roundrow"><div id="round">R=1</div><div id="timer" hidden>T=30</div></div>
@@ -165,6 +187,7 @@ a.mode{display:block;text-decoration:none}
     </div>
   </div>
 
+  <button id="mutebtn" type="button" aria-label="Turn sound off" title="Sound on/off (M)"><svg viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><rect x="1" y="4" width="2" height="3"/><rect x="3" y="3" width="1" height="5"/><rect x="4" y="2" width="1" height="7"/><rect x="5" y="1" width="1" height="9"/><g class="w"><rect x="7" y="4" width="1" height="3"/><rect x="9" y="2" width="1" height="7"/></g><g class="x"><rect x="7" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="8" y="4" width="2" height="2"/><rect x="7" y="6" width="1" height="1"/><rect x="10" y="6" width="1" height="1"/></g></svg></button>
   <div id="scope" hidden><i class="pl"></i><i class="pr"></i><i class="pb"></i><span id="range">-- yd</span></div>
   <div id="fade"></div>
 
@@ -182,10 +205,6 @@ a.mode{display:block;text-decoration:none}
       <img class="mox" src="mox-logo.png" alt="Mox" width="900" height="254">
     </h1>
     <p class="pitch" id="pitch">Play your way through the proposal.</p>
-    <div class="modes">
-      <button class="mode" id="play" type="button">Play</button>
-      <button class="mode" id="m-sound" type="button">Sound = On</button>
-    </div>
     <dl class="keys" id="keys-desk">
       <div><dt>Mouse</dt><dd>Aim</dd></div>
       <div><dt>Space</dt><dd>Fire (or click)</dd></div>
@@ -200,7 +219,10 @@ a.mode{display:block;text-decoration:none}
     </dl>
     <p class="top">Top score = <span id="top">000000</span></p>
     <p id="last" hidden>Last game = <span id="lastv">000000</span></p>
-    <a class="seeprop" id="seeprop" href="#" target="_blank" rel="noopener" hidden>I just want to see your proposal</a>
+    <div class="cta-row">
+      <button class="playbtn" id="play" type="button">Play</button>
+      <a class="seeprop" id="seeprop" href="#" target="_blank" rel="noopener" hidden>I just want to see your proposal</a>
+    </div>
     <p id="fatal" hidden></p>
   </section>
 
@@ -209,7 +231,6 @@ a.mode{display:block;text-decoration:none}
     <p id="p-msg" hidden></p>
     <div class="modes">
       <button class="mode" id="resume" type="button">Continue</button>
-      <button class="mode" id="p-sound" type="button">Sound = On</button>
       <button class="mode" id="quit" type="button">Quit to title</button>
     </div>
   </section>
@@ -240,7 +261,6 @@ const canvas = $('view');
 // title card and "View proposal" on the card that follows the office.
 const PROPOSAL_URL = 'proposal.html'; // next to this page, so the game and the proposal stay on the same host
 if (PROPOSAL_URL) for (const id of ['seeprop', 'pc-view']) { $(id).href = PROPOSAL_URL; $(id).hidden = false; }
-const menuItems = [...document.querySelectorAll('#menu .mode')].filter(el => !el.hidden);
 
 function fatal(msg) { const f = $('fatal'); f.textContent = msg; f.hidden = false; $('play').disabled = true; }
 if (!window.THREE) { fatal('The 3D engine did not load. Check your connection, then reload.'); return; }
@@ -466,6 +486,7 @@ function desk(x, y0, z) {
   O(0xa8b0bc, 3.4, 1.7, 0.12, x, y0 + 0.85, z - 1.0); // partition behind it
   O(0x3c50d8, 0.7, 0.12, 0.7, x + 0.2, y0 + 0.55, z + 1.4, false); O(0x3c50d8, 0.7, 0.8, 0.12, x + 0.2, y0 + 0.95, z + 1.75, false);
 }
+const cartons = []; // where the logo decals go, filled in once the logo loads
 {
   const wall = 0xa8b0bc, wallD = 0x6c7684, steel = 0x586070, tape = 0xf8b800, rackB = 0x2038a8, rackO = 0xfc9838, card = 0xc88c3c, cardD = 0xa86c20;
   const flat = m => { m.castShadow = false; return m; };
@@ -486,7 +507,7 @@ function desk(x, y0, z) {
     for (let z = -74; z <= -8; z += 6) { O(rackB, 0.25, 9, 0.25, x - 1.1, 4.5, z, false); O(rackB, 0.25, 9, 0.25, x + 1.1, 4.5, z, false); }
     for (const y of [0, 3, 6]) {
       if (y) O(rackO, 2.4, 0.2, 66, x, y, -41);
-      for (let z = -72; z < -10; z += srnd(3, 5)) { const h = srnd(1.0, 2.2); O(srand() < 0.5 ? card : cardD, srnd(1.3, 1.9), h, srnd(1.4, 2.2), x, y + 0.12 + h / 2, z); }
+      for (let z = -72; z < -10; z += srnd(3, 5)) { const h = srnd(1.0, 2.2), b = O(srand() < 0.5 ? card : cardD, srnd(1.3, 1.9), h, srnd(1.4, 2.2), x, y + 0.12 + h / 2, z); cartons.push(b); }
     }
   }
   O(0x30343c, 31, 0.25, 1.7, 0, 0.9, -38); // conveyor across the middle, with a hatch at each end
@@ -553,7 +574,37 @@ function drawScreens() {
   }
 }
 drawScreens();
-bbLogo.onload = drawScreens; bbLogo.src = 'borebuddy-logo.png';
+bbLogo.onload = () => { drawScreens(); brandWarehouse(); brandRifle(); }; bbLogo.src = 'borebuddy-logo.png';
+// The BoreBuddy logo around the warehouse: a big sign on the back wall, the round BB mark stamped on every third carton.
+function brandWarehouse() {
+  const wallTex = new THREE.Texture(bbLogo); wallTex.needsUpdate = true;
+  O(0xf4f2ee, 19, 4.7, 0.12, -4, 8.75, -79.72, false);
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(17.4, 17.4 * 269 / 1269), new THREE.MeshLambertMaterial({ map: wallTex, transparent: true }));
+  sign.position.set(-4, 8.75, -79.64); officeWorld.add(sign);
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  c.getContext('2d').drawImage(bbLogo, 0, 0, 272, 269, 0, 0, 128, 128);
+  const stamp = new THREE.MeshLambertMaterial({ map: new THREE.CanvasTexture(c), transparent: true, opacity: 0.85 });
+  cartons.forEach((b, i) => {
+    if (i % 3) return;
+    const side = b.position.x < 0 ? 1 : -1, size = Math.min(b.scale.y, b.scale.z) * 0.62; // the face toward the aisle
+    const d = new THREE.Mesh(new THREE.PlaneGeometry(size, size), stamp);
+    d.position.set(b.position.x + side * (b.scale.x / 2 + 0.01), b.position.y, b.position.z); d.rotation.y = side * Math.PI / 2;
+    officeWorld.add(d);
+  });
+}
+// The BoreBuddy logo in white on the left side of the upper receiver, the side you see while you shoot.
+function brandRifle() {
+  const c = document.createElement('canvas'); c.width = 1269; c.height = 269;
+  const x = c.getContext('2d'); x.drawImage(bbLogo, 0, 0);
+  try {
+    const px = x.getImageData(0, 0, c.width, c.height), d = px.data;
+    for (let i = 0; i < d.length; i += 4) if (d[i + 3] && Math.max(d[i], d[i + 1], d[i + 2]) < 140 && Math.max(d[i], d[i + 1], d[i + 2]) - Math.min(d[i], d[i + 1], d[i + 2]) < 40) d[i] = d[i + 1] = d[i + 2] = 245;
+    x.putImageData(px, 0, 0);
+  } catch (e) { return; } // a page that can't read its own image just skips the decal
+  const t = new THREE.CanvasTexture(c); t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const logo = new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.17 * 269 / 1269), new THREE.MeshBasicMaterial({ map: t, transparent: true }));
+  logo.position.set(-0.0253, 0.03, 0.0); logo.rotation.y = -Math.PI / 2; rifle.add(logo);
+}
 if (document.fonts && document.fonts.load) document.fonts.load('8px "Press Start 2P"').then(drawScreens, () => {});
 // Screenshot files replace the drawings. Add the image next to this page and put its path between the quotes,
 // for example bb: 'screens/borebuddy.jpg'. The top-left of each image is cropped to 4:3, which keeps the logo.
@@ -996,7 +1047,6 @@ function tone(f0, f1, dur, vol, delay, type) {
 function setMuted(m) {
   muted = m;
   if (master) master.gain.setValueAtTime(m ? 0 : 0.45, ac.currentTime); // cuts sounds already playing too
-  for (const id of ['m-sound', 'p-sound']) $(id).textContent = 'Sound = ' + (m ? 'Off' : 'On');
   $('mutebtn').classList.toggle('off', m); $('mutebtn').setAttribute('aria-label', m ? 'Turn sound on' : 'Turn sound off');
   try { localStorage.setItem('blockseason.muted', m ? '1' : '0'); } catch (e) {}
 }
@@ -1072,8 +1122,14 @@ function renderHud() {
   const hs = $('hits').children, nd = $('need').children, need = needFor(round);
   for (let i = 0; i < n; i++) { hs[i].className = slots[i] === 1 ? 'hit' : slots[i] === 2 ? 'miss' : ''; nd[i].classList.toggle('off', i >= need); }
 }
-function showMsg(s) { const m = $('msg'); m.textContent = s; m.hidden = false; }
-function hideMsg() { $('msg').hidden = true; }
+function showMsg(s, closable) {
+  const m = $('msg'); $('msg-text').textContent = s; m.hidden = false;
+  m.classList.toggle('closable', !!closable); $('msg-x').hidden = !closable; $('msg-hint').hidden = !closable;
+  if (closable) $('msg-hint').textContent = touchMode ? 'Tap X or Fire to start' : 'Click or press Space to start';
+}
+function hideMsg() { $('msg').hidden = true; $('msg-x').hidden = true; }
+const introOpen = () => phase === 'intro' && stage === 'office' && phaseDur === Infinity;
+function closeIntro() { if (introOpen()) phaseDur = phaseT; } // the next frame hides the card and starts the clock
 let tipTimer = 0;
 function tip(s, secs) { const el = $('tip'); el.textContent = s; el.hidden = false; clearTimeout(tipTimer); tipTimer = setTimeout(() => { el.hidden = true; }, (secs || 5) * 1000); }
 function popup(world, text) {
@@ -1090,6 +1146,7 @@ function setState(s) {
   $('hud').hidden = !(s === 'playing' || s === 'paused');
   $('touch').hidden = !(s === 'playing' && touchMode);
   $('pausebtn').hidden = !(touchMode || dragLook);
+  document.body.classList.toggle('touch', touchMode);
   document.body.classList.toggle('playing', s === 'playing');
   if (s !== 'playing') { for (const k in keys) keys[k] = false; scopeHeld = false; joy.x = joy.y = 0; $('stick').hidden = true; }
   if (s === 'menu' || s === 'pitch') { scopeToggle = false; scopeT = 0; scopeOn = false; $('scope').hidden = true; $('cross').hidden = false; $('top').textContent = pad6(top); }
@@ -1125,9 +1182,9 @@ function beginRound() {
 }
 function beginOffice() {
   slots = new Array(3).fill(0); maxShots = Math.max(5, 7 - Math.floor((round - 1) / 2)); shots = maxShots;
-  $('timer').hidden = true; phase = 'intro'; phaseT = 0; phaseDur = 6; sfx.next();
+  $('timer').hidden = true; phase = 'intro'; phaseT = 0; phaseDur = Infinity; sfx.next(); // the card stays up until it's closed
   dealPcs();
-  showMsg('Let\'s see how your\nwebsite stacks up against\nthe competition.\n\nShoot your website\nto score points.'); renderHud();
+  showMsg('Let\'s see how your\nwebsite stacks up against\nthe competition.\n\nShoot your website\nto score points.', true); renderHud();
 }
 function openStage() {
   phase = 'active'; phaseT = 0; shots = maxShots; outT = 0; shownT = -1; $('timer').hidden = false;
@@ -1380,7 +1437,8 @@ $('play').addEventListener('click', () => { initAudio(); startGame(); begin(); }
 $('resume').addEventListener('click', begin);
 $('quit').addEventListener('click', toTitle);
 $('pausebtn').addEventListener('click', () => { if (state === 'playing') setState('paused'); });
-for (const id of ['m-sound', 'p-sound', 'mutebtn']) $(id).addEventListener('click', () => {
+$('msg-x').addEventListener('click', () => { closeIntro(); if (state === 'playing') canvas.focus({ preventScroll: true }); });
+for (const id of ['mutebtn']) $(id).addEventListener('click', () => {
   setMuted(!muted);
   if (state === 'playing') canvas.focus({ preventScroll: true }); // keep the spacebar on the trigger
 });
@@ -1408,10 +1466,11 @@ addEventListener('keydown', e => {
     else if (e.code === 'KeyQ') scopeToggle = !scopeToggle;
     else if (e.code === 'KeyP' || e.code === 'Escape') { if (locked) document.exitPointerLock(); else setState('paused'); }
   } else if (state === 'paused' && e.code === 'KeyP' && !e.repeat) begin();
-  else if (state === 'menu' && (e.code === 'ArrowDown' || e.code === 'ArrowUp')) {
+  else if (state === 'menu' && /^Arrow(Down|Up|Left|Right)$/.test(e.code)) {
     e.preventDefault();
-    const i = menuItems.indexOf(document.activeElement), n = menuItems.length;
-    menuItems[i < 0 ? 0 : (i + (e.code === 'ArrowDown' ? 1 : n - 1)) % n].focus();
+    const items = [...document.querySelectorAll('#menu .playbtn, #menu .seeprop')].filter(el => !el.hidden), i = items.indexOf(document.activeElement), n = items.length;
+    const fwd = e.code === 'ArrowDown' || e.code === 'ArrowRight';
+    items[i < 0 ? 0 : (i + (fwd ? 1 : n - 1)) % n].focus();
   }
 });
 addEventListener('keyup', e => { keys[e.code] = false; });
@@ -1472,6 +1531,7 @@ press('tb-scope', () => { scopeToggle = !scopeToggle; $('tb-scope').classList.to
 const ray = new THREE.Raycaster(), dir = new THREE.Vector3(), origin = new THREE.Vector3(), endPt = new THREE.Vector3(), muzzle = new THREE.Vector3();
 function aimDir(yaw, pitch, out) { const cp = Math.cos(pitch); return out.set(-Math.sin(yaw) * cp, Math.sin(pitch), -Math.cos(yaw) * cp); }
 function fire() {
+  if (state === 'playing' && introOpen()) { closeIntro(); return; } // the first shot just closes the warehouse card
   if (state !== 'playing' || cooldown > 0) return;
   const live = phase === 'active';
   if (live && shots <= 0) { sfx.dry(); return; }
