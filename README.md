@@ -24,14 +24,13 @@ The rifle carries BoreBuddy's AR22 Heavy Precision upper with the 18.5-inch Gree
 
 | Key | Action |
 |---|---|
-| W A S D | Walk |
 | Mouse | Aim |
 | Space or click | Fire |
 | Right-click or Q | Scope |
 | Esc | Pause |
 | M | Sound on or off |
 
-On a phone, the left thumb walks, the right thumb aims, and on-screen buttons fire, scope and jump.
+On a phone, drag anywhere to aim; on-screen buttons fire and scope. Players stay in one spot and don't walk.
 
 ## Adding the proposal link
 

@@ -95,7 +95,6 @@ body.playing #view{cursor:crosshair}
 #touch button{position:absolute;border-radius:50%;border:3px solid var(--grass);background:var(--ink);color:var(--white);font:inherit;font-size:9px;text-transform:uppercase;touch-action:none}
 #touch button:active,#touch button.on{background:var(--white);color:var(--ink)}
 #tb-fire{right:18px;bottom:calc(96px + env(safe-area-inset-bottom,0px));width:88px;height:88px;background:var(--red)!important;color:var(--white)!important;font-size:12px!important}
-#tb-jump{right:118px;bottom:calc(90px + env(safe-area-inset-bottom,0px));width:62px;height:62px}
 #tb-scope{right:34px;bottom:calc(196px + env(safe-area-inset-bottom,0px));width:62px;height:62px}
 
 /* ---------- cards ---------- */
@@ -163,7 +162,6 @@ a.mode{display:block;text-decoration:none}
   <div id="touch" hidden>
     <div id="stick" hidden><b id="knob"></b></div>
     <button id="tb-scope" type="button">Scope</button>
-    <button id="tb-jump" type="button">Jump</button>
     <button id="tb-fire" type="button">Fire</button>
   </div>
 
@@ -179,15 +177,13 @@ a.mode{display:block;text-decoration:none}
       <button class="mode" id="play" type="button">Play</button>
     </div>
     <dl class="keys" id="keys-desk">
-      <div><dt>WASD</dt><dd>Walk</dd></div>
       <div><dt>Mouse</dt><dd>Aim</dd></div>
       <div><dt>Space</dt><dd>Fire (or click)</dd></div>
       <div><dt>R-click</dt><dd>Scope (or Q)</dd></div>
       <div><dt>Esc</dt><dd>Pause</dd></div>
     </dl>
     <dl class="keys" id="keys-touch" hidden>
-      <div><dt>Left</dt><dd>Thumb walks</dd></div>
-      <div><dt>Right</dt><dd>Thumb aims</dd></div>
+      <div><dt>Drag</dt><dd>Aim</dd></div>
       <div><dt>Fire</dt><dd>Shoot</dd></div>
       <div><dt>Scope</dt><dd>Zoom in</dd></div>
     </dl>
@@ -1080,7 +1076,6 @@ function look(dx, dy, s) {
   P.yaw -= dx * k; P.pitch = clamp(P.pitch - dy * k, -1.45, 1.45);
   lookDX += dx; lookDY += dy;
 }
-function jump() { if (state === 'playing' && P.onGround) { P.vy = 7; P.onGround = false; } }
 addEventListener('keydown', e => {
   if (e.code === 'KeyM' && !e.repeat) { muted = !muted; if (state === 'playing') tip(muted ? 'Sound off' : 'Sound on', 1.5); }
   if (state === 'playing') {
@@ -1089,7 +1084,6 @@ addEventListener('keydown', e => {
     keys[e.code] = true;
     if (e.code === 'Space' || e.code === 'KeyF') fire();
     else if (e.code === 'KeyQ') scopeToggle = !scopeToggle;
-    else if (e.code === 'KeyJ') jump();
     else if (e.code === 'KeyP' || e.code === 'Escape') { if (locked) document.exitPointerLock(); else setState('paused'); }
   } else if (state === 'paused' && e.code === 'KeyP' && !e.repeat) begin();
   else if (state === 'menu' && (e.code === 'ArrowDown' || e.code === 'ArrowUp')) {
@@ -1129,10 +1123,8 @@ touchEl.addEventListener('pointerdown', e => {
   if (e.target.closest('button')) return;
   e.preventDefault();
   try { touchEl.setPointerCapture(e.pointerId); } catch (err) {}
-  let kind = e.clientX < innerWidth * 0.45 ? 'move' : 'look';
-  if (kind === 'move') for (const t of touches.values()) if (t.kind === 'move') kind = 'look';
+  const kind = 'look'; // any drag aims
   touches.set(e.pointerId, { kind, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY });
-  if (kind === 'move') { const s = $('stick'); s.style.left = e.clientX + 'px'; s.style.top = e.clientY + 'px'; s.hidden = false; $('knob').style.transform = ''; }
 });
 touchEl.addEventListener('pointermove', e => {
   const t = touches.get(e.pointerId); if (!t) return;
@@ -1151,7 +1143,7 @@ const touchEnd = e => {
 };
 touchEl.addEventListener('pointerup', touchEnd); touchEl.addEventListener('pointercancel', touchEnd);
 const press = (id, fn) => $(id).addEventListener('pointerdown', e => { e.preventDefault(); fn(); });
-press('tb-fire', () => fire()); press('tb-jump', jump);
+press('tb-fire', () => fire());
 press('tb-scope', () => { scopeToggle = !scopeToggle; $('tb-scope').classList.toggle('on', scopeToggle); });
 
 // ---------- shooting ----------
@@ -1226,17 +1218,7 @@ function pushOut(p, r, list) {
   }
 }
 function updatePlayer(dt) {
-  let f = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) - joy.y;
-  let s = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0) + joy.x;
-  const len = Math.hypot(f, s); if (len > 1) { f /= len; s /= len; }
-  const scoped = scopeT > 0.5;
-  const run = !!(keys.ShiftLeft || keys.ShiftRight || Math.hypot(joy.x, joy.y) > 0.96) && f > 0.3 && !scoped;
-  const sp = scoped ? 2.4 : run ? 8.5 : 5.2;
-  const sy = Math.sin(P.yaw), cy = Math.cos(P.yaw);
-  const tx = (-sy * f + cy * s) * sp, tz = (-cy * f - sy * s) * sp;
-  const k = 1 - Math.exp(-(P.onGround ? 12 : 2.5) * dt);
-  P.vx += (tx - P.vx) * k; P.vz += (tz - P.vz) * k;
-  P.pos.x += P.vx * dt; P.pos.z += P.vz * dt;
+  P.vx = P.vz = 0; // a fixed firing position: players aim and shoot, they don't walk
   if (stage === 'field') {
     pushOut(P.pos, PR, colliders);
     const r = Math.hypot(P.pos.x, P.pos.z); if (r > WORLD_R) { P.pos.x *= WORLD_R / r; P.pos.z *= WORLD_R / r; }
