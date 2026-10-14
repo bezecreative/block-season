@@ -7,7 +7,7 @@
 <title>Website Proposal for BoreBuddy | Mox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   :root {
     --paper: #f3efe9;
@@ -1073,6 +1073,96 @@
     .roster-sec, .cases, .logos, .philosophy, .welove { padding-top: 90px; padding-bottom: 90px; }
     .stub, .closer { padding: 90px 0; }
   }
+
+  /* ---------- How it works + the investment (same format as Mox's other website proposals) ---------- */
+  .gp { --mono: 'JetBrains Mono', ui-monospace, monospace; --accent-2: #C8102E; --rule: var(--line); position: relative; padding: 130px 0; }
+  .gp-process { background: var(--paper); border-top: 1px solid var(--line); }
+  .gp-invest { background: var(--black); color: #fff; }
+  .gp .sec-lbl { font-family: var(--mono); font-size: .62rem; font-weight: 500; color: var(--amber); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 1.1rem; display: flex; align-items: center; gap: .6rem; }
+  .gp .sec-lbl::before { content: ""; width: 26px; height: 1px; background: var(--amber); display: inline-block; }
+  .gp .sec-title { font-weight: 900; font-size: clamp(2.2rem, 5vw, 4rem); color: var(--black); line-height: .94; letter-spacing: -.02em; text-transform: uppercase; margin-bottom: 1.4rem; }
+  .gp .lead { font-size: clamp(1rem, 1.4vw, 1.18rem); color: var(--ink-soft); font-weight: 300; line-height: 1.72; max-width: 64ch; }
+  .gp .lead + .lead { margin-top: 1.2rem; }
+  .gp-invest .sec-title { color: #fff; }
+  .gp-invest .lead { color: rgba(255,255,255,.72); }
+  .gp .steps { margin-top: 3rem; border-top: 1px solid var(--rule); }
+  .gp .step { display: grid; grid-template-columns: 64px 200px 1fr; gap: 1.5rem; align-items: baseline; padding: 1.5rem 0; border-bottom: 1px solid var(--rule); }
+  .gp .step-num { font-weight: 800; font-size: 1.5rem; color: var(--amber); line-height: 1; }
+  .gp .step-name { font-weight: 700; font-size: 1.05rem; text-transform: uppercase; letter-spacing: -.01em; color: var(--black); }
+  .gp .step-desc { font-size: .92rem; color: var(--ink-soft); font-weight: 300; line-height: 1.65; }
+  .gp .gantt-wrap { margin-top: 3.5rem; }
+  .gp .gantt { background: #fff; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06); }
+  .gp .gantt-scale { display: grid; grid-template-columns: 180px 1fr; border-bottom: 1px solid var(--rule); background: var(--paper-2); }
+  .gp .gantt-scale-lbl { padding: .85rem 1.25rem; font-family: var(--mono); font-size: .56rem; color: #999; letter-spacing: .06em; text-transform: uppercase; border-right: 1px solid var(--rule); display: flex; align-items: center; }
+  .gp .gantt-months { display: grid; grid-template-columns: repeat(5, 1fr); }
+  .gp .gantt-month { padding: .85rem .1rem; text-align: center; font-family: var(--mono); font-size: .56rem; color: #666; border-right: 1px solid var(--rule); font-weight: 500; }
+  .gp .gantt-month:last-child { border-right: none; }
+  .gp .gantt-month span { display: block; font-size: .46rem; opacity: .6; color: #999; }
+  .gp .gantt-row { display: grid; grid-template-columns: 180px 1fr; border-bottom: 1px solid var(--rule); align-items: center; }
+  .gp .gantt-row:last-child { border-bottom: none; }
+  .gp .gantt-row-lbl { padding: 1rem 1.25rem; border-right: 1px solid var(--rule); height: 100%; display: flex; flex-direction: column; justify-content: center; }
+  .gp .gantt-row-name { font-weight: 700; font-size: .98rem; text-transform: uppercase; letter-spacing: -.01em; color: var(--black); line-height: 1; }
+  .gp .gantt-track { position: relative; height: 56px; }
+  .gp .gantt-grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(5, 1fr); }
+  .gp .gantt-grid span { border-right: 1px solid var(--rule); }
+  .gp .gantt-grid span:last-child { border-right: none; }
+  .gp .gantt-bar { position: absolute; top: 50%; transform: translateY(-50%); height: 26px; border-radius: 3px; display: flex; align-items: center; padding: 0 .7rem; font-family: var(--mono); font-size: .56rem; color: #fff; letter-spacing: .02em; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,.14); width: 0; overflow: hidden; transition: width 1s var(--ease); }
+  .gp .gantt.in .gantt-bar { width: var(--w); }
+  .gp .gantt-legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.5rem; padding: 0 .25rem; }
+  .gp .gantt-legend-item { display: flex; align-items: center; gap: .5rem; font-family: var(--mono); font-size: .62rem; color: #666; letter-spacing: .03em; text-transform: uppercase; }
+  .gp .gantt-legend-sw { width: 13px; height: 13px; border-radius: 3px; }
+  .gp .milestones { display: flex; gap: 3rem; flex-wrap: wrap; margin-top: 2.5rem; }
+  .gp .ms { display: flex; flex-direction: column; gap: .3rem; }
+  .gp .ms-lbl { font-family: var(--mono); font-size: .6rem; color: var(--amber); letter-spacing: .1em; text-transform: uppercase; }
+  .gp .ms-val { font-weight: 800; font-size: 1.5rem; text-transform: uppercase; letter-spacing: -.01em; color: var(--black); }
+  .gp .yourpart { margin-top: 3rem; background: var(--paper-2); border-radius: 8px; border-left: 3px solid var(--amber); padding: 1.75rem 2rem; }
+  .gp .yourpart h4 { font-weight: 800; font-size: 1.15rem; text-transform: uppercase; color: var(--amber); margin: 0 0 .6rem; }
+  .gp .yourpart p { font-size: .9rem; color: var(--ink-soft); font-weight: 300; line-height: 1.7; max-width: 70ch; }
+  .gp .fee-cards { margin-top: 3.5rem; display: flex; flex-direction: column; gap: 1rem; }
+  .gp .fee-card { border: 1px solid rgba(255,255,255,.14); border-radius: 8px; overflow: hidden; background: rgba(255,255,255,.03); }
+  .gp .fee-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.5rem 1.75rem; cursor: pointer; user-select: none; transition: background .2s; }
+  .gp .fee-head:hover { background: rgba(255,255,255,.05); }
+  .gp .fee-head-l { display: flex; align-items: baseline; gap: 1rem; }
+  .gp .fee-phase { font-family: var(--mono); font-size: .6rem; color: var(--accent-2); letter-spacing: .1em; text-transform: uppercase; }
+  .gp .fee-title { font-weight: 800; font-size: 1.3rem; text-transform: uppercase; letter-spacing: -.01em; color: #fff; }
+  .gp .fee-head-r { display: flex; align-items: center; gap: 1.25rem; }
+  .gp .fee-sum { font-weight: 800; font-size: 1.3rem; color: #fff; }
+  .gp .fee-chev { width: 11px; height: 11px; border-right: 2px solid var(--accent-2); border-bottom: 2px solid var(--accent-2); transform: rotate(45deg); transition: transform .3s var(--ease); flex-shrink: 0; }
+  .gp .fee-card.open .fee-chev { transform: rotate(-135deg); }
+  .gp .fee-body { max-height: 0; overflow: hidden; transition: max-height .4s var(--ease); }
+  .gp .fee-lines { padding: 0 1.75rem 1.5rem; }
+  .gp .fee-line { display: grid; grid-template-columns: 1fr auto auto auto; gap: 1rem; align-items: center; padding: .7rem 0; border-top: 1px solid rgba(255,255,255,.09); font-size: .82rem; }
+  .gp .fee-line:first-child { border-top: none; }
+  .gp .fee-item { color: rgba(255,255,255,.9); font-weight: 400; }
+  .gp .fee-who { font-family: var(--mono); font-size: .62rem; color: rgba(255,255,255,.45); text-align: right; min-width: 14ch; }
+  .gp .fee-units { font-family: var(--mono); font-size: .68rem; color: rgba(255,255,255,.5); text-align: right; min-width: 8ch; }
+  .gp .fee-cost { font-family: var(--mono); font-size: .72rem; color: #fff; text-align: right; min-width: 9ch; font-weight: 500; }
+  .gp .fee-total { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.75rem; padding: 1.75rem; background: var(--amber); border-radius: 8px; }
+  .gp .fee-total .t-lbl { font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: .02em; color: #fff; }
+  .gp .fee-total .t-sub { font-family: var(--mono); font-size: .62rem; color: rgba(255,255,255,.75); letter-spacing: .05em; text-transform: uppercase; margin-top: .25rem; }
+  .gp .fee-total .t-val { font-weight: 900; font-size: 2.4rem; color: #fff; line-height: 1; }
+  @media (max-width: 900px) {
+    .gp .step { grid-template-columns: 48px 1fr; gap: .75rem 1rem; }
+    .gp .step-desc { grid-column: 2; }
+  }
+  @media (max-width: 720px) {
+    .gp { padding: 90px 0; }
+    .gp .gantt-scale, .gp .gantt-row { grid-template-columns: 96px 1fr; }
+    .gp .gantt-scale-lbl, .gp .gantt-row-lbl { padding-left: .7rem; padding-right: .55rem; }
+    .gp .gantt-row-name { font-size: .8rem; }
+    .gp .gantt-bar { font-size: 0; padding: 0; }
+    .gp .fee-head { padding: 1.15rem 1.25rem; gap: .75rem; }
+    .gp .fee-head-l { flex-direction: column; align-items: flex-start; gap: .4rem; }
+    .gp .fee-title, .gp .fee-sum { font-size: 1.08rem; }
+    .gp .fee-lines { padding: 0 1.25rem 1.25rem; }
+    .gp .fee-line { grid-template-columns: 1fr auto auto; gap: .5rem .75rem; }
+    .gp .fee-who { display: none; }
+    .gp .fee-units { min-width: 0; }
+    .gp .fee-total { flex-direction: column; align-items: flex-start; gap: .85rem; padding: 1.4rem 1.5rem; }
+    .gp .fee-total .t-val { font-size: 2rem; }
+    .gp .milestones { gap: 2rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .gp .gantt-bar { transition: none; } }
 </style>
 <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
@@ -1476,157 +1566,105 @@ With 10 years of experience, and counting, I have had great mentors, and amazing
   </div>
 </section>
 
-<!-- Bid (placeholder) -->
-<section class="stub alt" id="bid">
+<!-- How it works -->
+<section class="gp gp-process" id="bid">
   <div class="wrap">
-    <h2 class="reveal d1">Our Proposal</h2>
-    <div class="bid-acc reveal d1">
-      <div class="acc-item">
-        <button class="acc-head" aria-expanded="false">
-          <span class="acc-title">Website Scope</span>
-          <span class="acc-icon" aria-hidden="true"></span>
-        </button>
-        <div class="acc-body"><div class="acc-body-inner"><div class="prop">
-        <p class="lead">Here is how we would rebuild borebuddy.com, start to finish. Every phase can flex once we understand your priorities.</p>
-        <ul class="prop-list">
-        <li><b>Discovery and Planning.</b> We start with your data, not our taste. We audit your analytics, search rankings and checkout, talk with your team about what sells and what stalls, and study the competition. You approve a sitemap and design direction before we build anything.</li>
-        <li><b>Store Structure.</b> Your catalog spans the AR22, the 10/22 and 9mm, from complete uppers to bolts, barrels and trigger parts. We organize it around how your buyers actually search, and we test the navigation before we commit to it.</li>
-        <li><b>Product Pages and Build Configurator.</b> Your uppers come with real choices: barrel length, bolt group, FRT or full-auto readiness, bolt weights, buffer systems and the VIP accurizing package. We turn that stack of options into a guided build that shows price and compatibility as the buyer goes.</li>
-        <li><b>Design.</b> Figma wireframes first, then high-fidelity mockups for desktop, tablet and mobile. We build on the identity you already have, the stencil wordmark and the Rimfire Perfected orange.</li>
-        <li><b>Development.</b> Your store runs on WordPress today. We build on that foundation with Elementor Pro and custom code, so your team keeps control of products, prices and content without calling a developer.</li>
-        <li><b>Migration and Redirects.</b> Products, options and customer accounts come across cleanly. Every old URL gets a permanent redirect, so your search rankings and the links in forum threads and video descriptions keep working.</li>
-        <li><b>Age Check and Checkout.</b> Today a first-time visitor meets an age check and an SMS signup in the same pop-up. We keep every check your business needs, including shipping restrictions and payment rules, and make the first impression about your parts.</li>
-        <li><b>Video and Photography.</b> Your technical videos live on Rumble. We bring them onto the product pages where buyers decide, and we direct new product photography where the catalog needs it.</li>
-        <li><b>Analytics, SEO and Heatmaps.</b> We set up Google Analytics 4 with tracking on the moments that matter: configurator steps, add to cart and checkout. Technical SEO is built in, and Microsoft Clarity heatmaps show us how shooters really use the site.</li>
-        <li><b>Testing, Launch and Training.</b> We test every page on desktop, tablet and mobile, launch in a low-traffic window, and record training sessions so your team can run the store on its own.</li>
-        </ul>
-        <p><b>How we'll work with you.</b> We keep in touch by email, phone, Slack and video calls. A shared project tracker shows what is in progress at any time. You see the work at every milestone, and we flag timing, scope or budget concerns before they become problems.</p>
-        <p><b>Team and subcontractors.</b> Our core team is led in-house out of our Boise office and managed end to end by Mox — you'll always have a single point of contact and one team accountable for the work. We operate on a talent-agency model, which means we bring in vetted contract specialists from our national roster (senior designers, motion artists, photographers, video producers) as a project calls for them. Any specialist we bring in works under Mox's direction and standards, so you get the right expertise for each job without ever managing a patchwork of vendors. If a project ever calls for an outside production house or specialized partner, we'll identify them to you transparently before we engage them.</p>
-      </div></div></div>
+    <div class="sec-lbl reveal">How It Works</div>
+    <h2 class="sec-title reveal">Six steps.<br>12&ndash;15 weeks.</h2>
+    <div class="steps">
+      <div class="step reveal"><div class="step-num">01</div><div class="step-name">Research</div><div class="step-desc">We start by looking at your current site data and talking to your stakeholders to see what's working and what isn't.</div></div>
+      <div class="step reveal"><div class="step-num">02</div><div class="step-name">UX Design</div><div class="step-desc">We build the site structure so every page and navigation path directly supports your business goals and KPIs.</div></div>
+      <div class="step reveal"><div class="step-num">03</div><div class="step-name">UI Design</div><div class="step-desc">We look at what your customers are actually saying about you, then make sure the new site design reflects that same reputation and quality.</div></div>
+      <div class="step reveal"><div class="step-num">04</div><div class="step-name">Copywriting</div><div class="step-desc">We help you review your messaging across all channels to ensure you're telling a clear, consistent story.</div></div>
+      <div class="step reveal"><div class="step-num">05</div><div class="step-name">Development</div><div class="step-desc">We build a fast, secure, modern site specifically engineered for your team to easily update on their own.</div></div>
+      <div class="step reveal"><div class="step-num">06</div><div class="step-name">Launch</div><div class="step-desc">We connect the domain and push live, record live training sessions, and add heatmap tracking. Then we celebrate with Friday margaritas.</div></div>
+    </div>
+
+    <div class="gantt-wrap reveal">
+      <div class="gantt" id="gantt">
+        <div class="gantt-scale">
+          <div class="gantt-scale-lbl">Phase &middot; Weeks 1 &rarr; 15</div>
+          <div class="gantt-months">
+            <div class="gantt-month">WK 1&ndash;3<span>Kickoff</span></div>
+            <div class="gantt-month">WK 4&ndash;6</div>
+            <div class="gantt-month">WK 7&ndash;9</div>
+            <div class="gantt-month">WK 10&ndash;12</div>
+            <div class="gantt-month">WK 13&ndash;15<span>Launch</span></div>
+          </div>
+        </div>
+        <!-- bars: left/width in % of the 15-week track -->
+        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">Research</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:2%;--w:18%;background:#7a0f00">Research</div></div></div>
+        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">UX Design</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:14%;--w:24%;background:#9a1400">UX Design</div></div></div>
+        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">UI Design</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:34%;--w:24%;background:var(--amber)">UI Design</div></div></div>
+        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">Copywriting</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:48%;--w:18%;background:#d13010">Copywriting</div></div></div>
+        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">Development</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:58%;--w:30%;background:var(--accent-2)">Development</div></div></div>
+        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">Launch</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:84%;--w:14%;background:#e8720e">Launch</div></div></div>
       </div>
-      <div class="acc-item">
-        <button class="acc-head" aria-expanded="false">
-          <span class="acc-title">Cost Information</span>
-          <span class="acc-icon" aria-hidden="true"></span>
-        </button>
-        <div class="acc-body"><div class="acc-body-inner"><div class="prop">
-        <p>Our financial approach is rooted in transparency and flexibility. A website rebuild is a defined project, so once discovery confirms the scope we will quote the build as a fixed project fee. No surprises, and no paying for hours you don't use.</p>
-        <p>We will be upfront: without the full scope defined yet, we can't hand you a single clean number today. We would rather scope it honestly with you than guess high or low.</p>
-        <p>After launch, many clients keep us on for ongoing design, development and marketing support. Our retainers typically run anywhere from $3,500 a month to $20,000 a month, depending on scope and complexity.</p>
-        <p>We typically work one of two ways, and we're glad to do either (or a mix of both):</p>
-        <p><b>Active Project Retainer.</b> For a single flat monthly fee, your team gets a set number of active projects running at any given time. As one wraps, the next moves into an open slot — so you have a predictable monthly cost and a steady creative pipeline without renegotiating every piece of work. It's the simplest way to keep a consistent flow of creative moving, and we'll size the number of concurrent projects to match your needs.</p>
-        <p><b>Hourly.</b> For ongoing, as-needed creative and quick-turn work, we bill by the hour at the rates below:</p>
-        <table class="rate-table">
-          <thead><tr><th>Role</th><th>Hourly Rate</th></tr></thead>
-          <tbody>
-            <tr><td>Creative Director</td><td>$200 / hour</td></tr>
-            <tr><td>Senior Designer</td><td>$125 / hour</td></tr>
-            <tr><td>Production Designer</td><td>$75 / hour</td></tr>
-            <tr><td>Other Staff</td><td>$125 / hour</td></tr>
-          </tbody>
-        </table>
-        <p>We assign the right level of talent to each task, so you're never paying Creative Director rates for production work that a Production Designer should handle. That keeps your spend efficient and honest.</p>
-        <p><b>We flex with your launches.</b> A new batch or product drop runs hotter than a normal month. When you need more of us, we are there. When things quiet down, you are not carrying overhead you don't need.</p>
-        <p>There are no ancillary fees, tariffs, or hidden costs in the rates above. If a project ever requires a specialized third-party tool, license, or outside production cost, we'll present it to you transparently up front and pass it through at cost with zero markup. We don't anticipate any supply-chain disruptions affecting our ability to deliver.</p>
-      </div></div></div>
+      <div class="gantt-legend">
+        <div class="gantt-legend-item"><span class="gantt-legend-sw" style="background:#7a0f00"></span>Discovery</div>
+        <div class="gantt-legend-item"><span class="gantt-legend-sw" style="background:var(--amber)"></span>Design</div>
+        <div class="gantt-legend-item"><span class="gantt-legend-sw" style="background:var(--accent-2)"></span>Build</div>
+        <div class="gantt-legend-item"><span class="gantt-legend-sw" style="background:#e8720e"></span>Launch</div>
       </div>
-      <div class="acc-item">
-        <button class="acc-head" aria-expanded="false">
-          <span class="acc-title">Enhancements/Miscellaneous Information</span>
-          <span class="acc-icon" aria-hidden="true"></span>
-        </button>
-        <div class="acc-body"><div class="acc-body-inner"><div class="prop">
-        <p class="lead">Here's what we think sets us apart, beyond the services listed in the scope.</p>
-        <ul class="prop-list">
-        <li><b>We're built for quick-turn creative.</b> A product drop doesn't wait. Our project manager keeps everything organized and on schedule, so when you need a banner, a landing page or a launch email turned around fast, we are ready.</li>
-        <li><b>A talent-agency model, not a fixed roster.</b> Our in-house team is intentionally lean, but we represent a deep bench of top creatives across the country — designers, copywriters, motion artists, photographers, and video producers. That means we staff each project with the right people for the job, not just whoever happens to be free. You get big-agency range with boutique-agency attention.</li>
-        <li><b>We play well with others.</b> If you already work with developers, photographers or marketing partners, we are used to being one piece of a larger team. We keep the work aligned so everything feels like one BoreBuddy brand, not a patchwork of vendors.</li>
-        <li><b>Evidence over guesswork.</b> A lot of creative shops design on instinct. We do too, but we back it up. We've run real behavioral research — including webcam eye-tracking studies — to figure out exactly what people actually see, read, and act on. When the stakes are high (a product page, a configurator, a checkout), we can bring that rigor to make sure the work performs, not just looks good.</li>
-        <li><b>We use AI differently.</b> We don't use it to cut corners or replace the human element. We use it to handle the heavy lifting — data, organization, first-pass options — which buys us more time to think, refine, and do the thoughtful work that actually matters. For us, it's a tool to make better work, not cheaper work.</li>
-        <li><b>Organized files, always.</b> Every concept, draft, revision, and final asset lives in one shared, agreed-upon platform. We deliver final files in the right formats for print, digital, social, presentation, signage, or production use — and you'll never have to dig through email threads to find the latest version.</li>
-        <li><b>Bigger than the bottom line.</b> This is the principle we built Mox on. We care about what our clients care about. For BoreBuddy, that is the shooter at the bench who wants a part that runs right the first time. We show up with the discipline of athletes, the rigor of engineers and the heart of creatives.</li>
-        </ul>
-      </div></div></div>
+    </div>
+
+    <div class="milestones reveal">
+      <div class="ms"><span class="ms-lbl">Kickoff</span><span class="ms-val">Week 1</span></div>
+      <div class="ms"><span class="ms-lbl">Launch</span><span class="ms-val">Weeks 12&ndash;15</span></div>
+    </div>
+
+    <div class="yourpart reveal">
+      <h4>Your part</h4>
+      <p>This is a collaborative project, and we'll stay on schedule if we have the content &mdash; copy, product photos, and product details &mdash; ready early. Having that material up front makes the review process much faster and keeps both teams in sync as we move forward.</p>
+    </div>
+  </div>
+</section>
+
+<!-- The investment -->
+<section class="gp gp-invest" id="invest">
+  <div class="wrap">
+    <div class="sec-lbl reveal">The Investment</div>
+    <h2 class="sec-title reveal">Transparent,<br>all-inclusive</h2>
+    <p class="lead reveal">We're excited to partner with you on this website refresh &mdash; a transparent, all-inclusive investment that covers every stage of the project. By prioritizing a data-driven strategy and a premium, user-focused aesthetic, we ensure your new site elevates your brand's legacy while delivering a seamless, high-performing experience for your customers and partners.</p>
+    <p class="lead reveal">We've structured this investment for complete peace of mind &mdash; a powerful digital foundation that's secure, fast, and ready to drive results from day one.</p>
+
+    <div class="fee-cards">
+      <div class="fee-card reveal">
+        <div class="fee-head"><div class="fee-head-l"><span class="fee-phase">Phase 01</span><span class="fee-title">Pre-Production &middot; R&amp;D</span></div><div class="fee-head-r"><span class="fee-sum">$11,700</span><span class="fee-chev"></span></div></div>
+        <div class="fee-body"><div class="fee-lines">
+          <div class="fee-line"><span class="fee-item">Market + User Research</span><span class="fee-who">Zanders + Ramirez</span><span class="fee-units">8 hrs</span><span class="fee-cost">$1,600</span></div>
+          <div class="fee-line"><span class="fee-item">UX / Wireframe</span><span class="fee-who">Nathan Zanders</span><span class="fee-units">10 hrs</span><span class="fee-cost">$2,000</span></div>
+          <div class="fee-line"><span class="fee-item">Style Test</span><span class="fee-who">Zanders + Ramirez</span><span class="fee-units">6 hrs</span><span class="fee-cost">$1,200</span></div>
+          <div class="fee-line"><span class="fee-item">Site Map</span><span class="fee-who">Nathan Zanders</span><span class="fee-units">2 hrs</span><span class="fee-cost">$400</span></div>
+          <div class="fee-line"><span class="fee-item">Project Management</span><span class="fee-who">Matt McMorrow</span><span class="fee-units">35 hrs</span><span class="fee-cost">$5,250</span></div>
+          <div class="fee-line"><span class="fee-item">Meetings</span><span class="fee-who">All</span><span class="fee-units">10 hrs</span><span class="fee-cost">$1,250</span></div>
+        </div></div>
       </div>
-      <div class="acc-item">
-        <button class="acc-head" aria-expanded="false">
-          <span class="acc-title">Contact Information</span>
-          <span class="acc-icon" aria-hidden="true"></span>
-        </button>
-        <div class="acc-body"><div class="acc-body-inner"><div class="prop">
-        <p class="prop-contact"><span class="n">Jeff Barker</span><br>Co-Owner &amp; Chief Operating Officer, Mox Collective<br>Managing this proposal on behalf of Mox</p>
-        <p class="prop-contact">Address: 1020 S. Main St. #310, Boise, ID 83702<br>Phone: <a href="tel:2082407013">208-240-7013</a><br>Email: <a href="mailto:jeff@wearemox.com">jeff@wearemox.com</a><br>Website: <a href="https://wearemox.com" target="_blank" rel="noopener">wearemox.com</a><br>Portfolio: <a href="https://wearemox.com/portfolio" target="_blank" rel="noopener">wearemox.com/portfolio</a></p>
-      </div></div></div>
+      <div class="fee-card reveal">
+        <div class="fee-head"><div class="fee-head-l"><span class="fee-phase">Phase 02</span><span class="fee-title">Production &middot; Design</span></div><div class="fee-head-r"><span class="fee-sum">$11,200</span><span class="fee-chev"></span></div></div>
+        <div class="fee-body"><div class="fee-lines">
+          <div class="fee-line"><span class="fee-item">Homepage Design</span><span class="fee-who">Peter Dong</span><span class="fee-units">25 hrs</span><span class="fee-cost">$5,000</span></div>
+          <div class="fee-line"><span class="fee-item">Internal Page Design</span><span class="fee-who">Aliya Reames</span><span class="fee-units">8 hrs</span><span class="fee-cost">$1,200</span></div>
+          <div class="fee-line"><span class="fee-item">Copywriting Support</span><span class="fee-who">Einar Schelin</span><span class="fee-units">10 hrs</span><span class="fee-cost">$2,000</span></div>
+          <div class="fee-line"><span class="fee-item">Creative Direction</span><span class="fee-who">DJ Ramirez</span><span class="fee-units">15 hrs</span><span class="fee-cost">$3,000</span></div>
+        </div></div>
       </div>
-      <div class="acc-item">
-        <button class="acc-head" aria-expanded="false">
-          <span class="acc-title">References</span>
-          <span class="acc-icon" aria-hidden="true"></span>
-        </button>
-        <div class="acc-body"><div class="acc-body-inner"><div class="ref-grid">
-        <div class="ref">
-          <span class="ref-name">Drew Roberts</span>
-          <span class="ref-line">Marketing Director</span>
-          <span class="ref-line">Unie.com</span>
-          <span class="ref-line">Phoenix, AZ</span>
-          <a class="ref-contact" href="mailto:drew@unie.com">drew@unie.com</a>
-        </div>
-        <div class="ref">
-          <span class="ref-name">Sydney Quintana</span>
-          <span class="ref-line">Director, Regional Marketing</span>
-          <span class="ref-line">National Carwash Solutions</span>
-          <span class="ref-line">Grimes, IA</span>
-          <a class="ref-contact" href="mailto:squintana@ncswash.com">squintana@ncswash.com</a>
-        </div>
-        <div class="ref">
-          <span class="ref-name">Claire Davis</span>
-          <span class="ref-line">Director of Digital</span>
-          <span class="ref-line">Oregon Tilth</span>
-          <a class="ref-contact" href="tel:3146260682">(314) 626-0682</a>
-        </div>
-        <div class="ref">
-          <span class="ref-name">Ben Tester</span>
-          <span class="ref-line">Founder</span>
-          <span class="ref-line">RivTek</span>
-          <a class="ref-contact" href="mailto:ben@rivtek.com">ben@rivtek.com</a>
-        </div>
-        <div class="ref">
-          <span class="ref-name">Blake Brunk</span>
-          <span class="ref-line">Owner</span>
-          <span class="ref-line">Briva Pools and Spa</span>
-          <span class="ref-line">Boise, ID</span>
-          <a class="ref-contact" href="mailto:blake@brivapools.com">blake@brivapools.com</a>
-          <a class="ref-contact" href="tel:7193311659">719-331-1659</a>
-        </div>
-        <div class="ref">
-          <span class="ref-name">Tom Lillicrap</span>
-          <span class="ref-line">TMN Events</span>
-          <span class="ref-line">Boise, ID</span>
-          <a class="ref-contact" href="mailto:tlillicrap@tmnevents.com">tlillicrap@tmnevents.com</a>
-          <a class="ref-contact" href="tel:2083859510">208-385-9510</a>
-        </div>
-        </div>
-        <div class="prop" style="padding-bottom:0; margin-top:26px;">
-        <p><b>What we're watching for.</b> The risk in a store rebuild isn't the design. It's continuity. Products, options, customer accounts and search rankings all have to survive the move, so we plan the migration and redirect map first and test checkout end to end before launch.</p>
-        <p><b>Licenses, certifications &amp; awards.</b> Mox Collective is a registered LLC in good standing in the State of Idaho. We carry comprehensive business liability and professional services insurance and can provide certificates meeting your requirements upon award. Our roster includes an award-winning film crew. If there's a specific certification or credential you would like to see documented, we're glad to provide it.</p>
-        </div></div></div>
+      <div class="fee-card reveal">
+        <div class="fee-head"><div class="fee-head-l"><span class="fee-phase">Phase 03</span><span class="fee-title">Development &middot; Deployment</span></div><div class="fee-head-r"><span class="fee-sum">$7,600</span><span class="fee-chev"></span></div></div>
+        <div class="fee-body"><div class="fee-lines">
+          <div class="fee-line"><span class="fee-item">Server Install + Development</span><span class="fee-who">Jeff Barker</span><span class="fee-units">2 hrs</span><span class="fee-cost">$400</span></div>
+          <div class="fee-line"><span class="fee-item">Homepage Development</span><span class="fee-who">Jeff Barker</span><span class="fee-units">12 hrs</span><span class="fee-cost">$2,400</span></div>
+          <div class="fee-line"><span class="fee-item">Additional Page Development</span><span class="fee-who">Jeff Barker</span><span class="fee-units">16 hrs</span><span class="fee-cost">$3,200</span></div>
+          <div class="fee-line"><span class="fee-item">SEO Kickstart</span><span class="fee-who">Jeff Barker</span><span class="fee-units">2 hrs</span><span class="fee-cost">$400</span></div>
+          <div class="fee-line"><span class="fee-item">Testing</span><span class="fee-who">Jeff Barker</span><span class="fee-units">4 hrs</span><span class="fee-cost">$800</span></div>
+          <div class="fee-line"><span class="fee-item">Launching Website</span><span class="fee-who">Jeff Barker</span><span class="fee-units">2 hrs</span><span class="fee-cost">$400</span></div>
+        </div></div>
       </div>
-      <div class="acc-item">
-        <button class="acc-head" aria-expanded="false">
-          <span class="acc-title">Next Steps</span>
-          <span class="acc-icon" aria-hidden="true"></span>
-        </button>
-        <div class="acc-body"><div class="acc-body-inner"><div class="prop">
-        <ul class="prop-list">
-        <li><b>A first call.</b> We walk through this proposal and hear what matters most to you.</li>
-        <li><b>Discovery.</b> We audit the current store and agree on goals, sitemap and design direction.</li>
-        <li><b>A fixed quote.</b> With the scope confirmed, you get one clear number and a timeline.</li>
-        <li><b>Design, build and launch.</b> Mockups, development, migration, testing and training, with your sign-off at every milestone.</li>
-        </ul>
-        <p>We'd love to build this with you.</p>
-        <p class="prop-sign">Sincerely,<br><b>Jeff Barker</b><br>Co-Owner &amp; Chief Operating Officer, Mox</p>
-      </div></div></div>
-      </div>
+    </div>
+
+    <div class="fee-total reveal">
+      <div><div class="t-lbl">Total Investment</div><div class="t-sub">Website subtotal $30,500 &middot; Agency fee 15% $4,575</div></div>
+      <div class="t-val">$35,075</div>
     </div>
   </div>
 </section>
@@ -1951,6 +1989,27 @@ With 10 years of experience, and counting, I have had great mentors, and amazing
   })();
 
 
+</script>
+<script>
+  // How it works: timeline bars grow in when the chart scrolls into view
+  (function () {
+    const gantt = document.getElementById('gantt');
+    if (!gantt) return;
+    if (!('IntersectionObserver' in window)) { gantt.classList.add('in'); return; }
+    const obs = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } }), { threshold: 0.3 });
+    obs.observe(gantt);
+  })();
+  // The investment: each phase card opens to show its line items
+  (function () {
+    document.querySelectorAll('.fee-card').forEach(card => {
+      const head = card.querySelector('.fee-head'), body = card.querySelector('.fee-body');
+      head.setAttribute('role', 'button'); head.setAttribute('tabindex', '0'); head.setAttribute('aria-expanded', 'false');
+      const toggle = () => { const open = card.classList.toggle('open'); body.style.maxHeight = open ? body.scrollHeight + 'px' : '0px'; head.setAttribute('aria-expanded', String(open)); };
+      head.addEventListener('click', toggle);
+      head.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    });
+    window.addEventListener('resize', () => document.querySelectorAll('.fee-card.open .fee-body').forEach(b => { b.style.maxHeight = b.scrollHeight + 'px'; }));
+  })();
 </script>
 </body>
 </html>
