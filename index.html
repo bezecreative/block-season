@@ -262,7 +262,7 @@ renderer.setClearColor(0x5cb8ff);
 const scene = new THREE.Scene();
 const fieldWorld = new THREE.Group(), officeWorld = new THREE.Group(); // the range outdoors, then the office
 officeWorld.visible = false; scene.add(fieldWorld, officeWorld);
-const camera = new THREE.PerspectiveCamera(72, 1, 0.1, 500);
+const camera = new THREE.PerspectiveCamera(72, 1, 0.1, 2500);
 camera.rotation.order = 'YXZ';
 let baseFov = 72, scopeMag = 7; // fixed scope power: right-click brings it up, nothing to adjust
 const scopeFov = () => 2 * Math.atan(Math.tan(baseFov * Math.PI / 360) / scopeMag) * 180 / Math.PI;
@@ -322,6 +322,7 @@ function makeTree(x, z, s, yaw) {
   blob(g, -2.7, 5.7, 0, 1, leaf, under); blob(g, 2.5, 6.9, 0.3, 0.9, leaf, under); blob(g, 0, 8.6, -0.2, 1.1, leaf, under);
   fieldWorld.add(g); g.traverse(o => { if (o.isMesh) { o.receiveShadow = true; solids.push(o); } });
   if (Math.hypot(x, z) < WORLD_R + 2) colliders.push({ x, z, r: 0.62 * s });
+  return g;
 }
 function makeBush(x, z, s, yaw) { // returns the bush
   const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = yaw; g.scale.setScalar(s);
@@ -333,9 +334,11 @@ function makeBush(x, z, s, yaw) { // returns the bush
 }
 const farFrom = (x, z, list, min) => { for (const p of list) { const dx = p.x - x, dz = p.z - z; if (dx * dx + dz * dz < min * min) return false; } return true; };
 makeTree(-11, -19, 1.3, 0); const startBush = makeBush(13, -17, 1.25, 0); // the pair you see from the start (the bush makes way for the road)
-const startBushParts = new Set(); startBush.traverse(o => { if (o.isMesh) startBushParts.add(o); });
 makeTree(-16, -44, 1.3, 0); // the swinging target hangs from this one
-makeTree(-34, -138, 1.7, 0.4); makeTree(6, -150, 1.8, 2.1); makeTree(38, -132, 1.6, 4); // backdrop behind the far rail
+makeTree(-34, -138, 1.7, 0.4); const farTree = makeTree(6, -150, 1.8, 2.1); makeTree(38, -132, 1.6, 4); // backdrop behind the far rail
+// at the billboard the bush would sit on the road and the far tree would hide the target, so both stand down there
+const offAtBillboard = [startBush, farTree], startBushParts = new Set();
+for (const g of offAtBillboard) g.traverse(o => { if (o.isMesh) startBushParts.add(o); });
 {
   const spots = [{ x: -11, z: -19 }, { x: 13, z: -17 }, { x: -34, z: -138 }, { x: 38, z: -132 }];
   for (let n = 0, tries = 0; n < 26 && tries < 3000; tries++) {
@@ -498,7 +501,7 @@ function desk(x, y0, z) {
 // What is on each screen: a screenshot file where one is listed in SCREENSHOTS below, otherwise a simplified
 // drawing in that site's colours, labelled by name.
 const screens = {};
-for (const k of ['bb', 'nemo', 'sw', 'off']) {
+for (const k of ['bb', 'nemo', 'sw', 'ammo', 'pws', 'allterra', 'off']) {
   const c = document.createElement('canvas'); c.width = 96; c.height = 72;
   const t = new THREE.CanvasTexture(c); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
   screens[k] = { c, t, mat: new THREE.MeshBasicMaterial({ map: t }) };
@@ -527,6 +530,21 @@ function drawScreens() {
       say(x, '#fcfcfc', 'SMITH &', 4, 8); say(x, '#fcfcfc', 'WESSON', 4, 18);
       box(x, '#fcfcfc', 4, 34, 36, 4); box(x, '#fcfcfc', 4, 41, 28, 4); box(x, '#1c4ca0', 4, 50, 28, 9);
     },
+    ammo(x) { // charcoal header, olive ammo can, yellow button
+      box(x, '#2a2a28', 0, 0, 96, 72); box(x, '#4c5a34', 46, 26, 46, 38); box(x, '#1c1c1c', 0, 0, 96, 20);
+      say(x, '#fcfcfc', 'AMMO2', 30, 6);
+      box(x, '#fcfcfc', 4, 30, 38, 5); box(x, '#fcfcfc', 4, 38, 30, 4); box(x, '#f0b800', 4, 50, 30, 9);
+    },
+    pws(x) { // black header, red hero, a rifle across it
+      box(x, '#c0182c', 0, 0, 96, 72); box(x, '#9c9ca4', 52, 22, 44, 50); box(x, '#000000', 0, 0, 96, 18);
+      say(x, '#fcfcfc', 'PWS', 6, 5); box(x, '#2c3020', 34, 40, 58, 6); box(x, '#4c5a34', 60, 38, 26, 4);
+      box(x, '#fcfcfc', 4, 50, 40, 6); box(x, '#a01020', 4, 60, 22, 7);
+    },
+    allterra(x) { // brown header, mountains, red button
+      box(x, '#5c6c84', 0, 0, 96, 72); box(x, '#7c6a52', 0, 44, 96, 28); box(x, '#4c4434', 10, 34, 30, 14); box(x, '#4c4434', 50, 30, 40, 18);
+      box(x, '#5c5034', 0, 0, 96, 18); say(x, '#e8301c', 'ALLTERRA', 4, 5);
+      box(x, '#fcfcfc', 18, 22, 60, 16); box(x, '#5c6c84', 20, 24, 56, 12); box(x, '#e8301c', 30, 62, 36, 8);
+    },
     off(x) { box(x, '#0c1c8c', 0, 0, 96, 72); say(x, '#fcfcfc', 'NO SIGNAL', 12, 32); } // the tenth machine has nothing on it
   };
   for (const k in screens) if (!screens[k].shot) {
@@ -539,7 +557,10 @@ bbLogo.onload = drawScreens; bbLogo.src = 'borebuddy-logo.png';
 if (document.fonts && document.fonts.load) document.fonts.load('8px "Press Start 2P"').then(drawScreens, () => {});
 // Screenshot files replace the drawings. Add the image next to this page and put its path between the quotes,
 // for example bb: 'screens/borebuddy.jpg'. The top-left of each image is cropped to 4:3, which keeps the logo.
-const SCREENSHOTS = { bb: 'screens/borebuddy.jpg', nemo: 'screens/nemo-arms.jpg', sw: 'screens/smith-wesson.jpg' };
+const SCREENSHOTS = {
+  bb: 'screens/borebuddy.jpg', nemo: 'screens/nemo-arms.jpg', sw: 'screens/smith-wesson.jpg',
+  ammo: 'screens/ammo-squared.jpg', pws: 'screens/pws.jpg', allterra: 'screens/allterra-arms.jpg'
+};
 for (const k in SCREENSHOTS) if (SCREENSHOTS[k]) {
   const im = new Image();
   im.onload = () => {
@@ -575,11 +596,11 @@ const pcs = [[-8, 1.06, -18, 1.25], [7, 1.06, -23, 1.25], [-17, 1.06, -31, 1.3],
 });
 function setPcs(on) { for (const pc of pcs) { pc.alive = on; pc.g.visible = on; unhit(pc.g); } }
 const FRONT_Z = -35; // the front row: every machine nearer than the conveyor
+const SITE_COL = { bb: 0xf0641e, nemo: 0xd81c24, sw: 0x1c4ca0, ammo: 0xf0b800, pws: 0xc0182c, allterra: 0x6c5c3c }; // debris colours
+const RIVALS = ['nemo', 'nemo', 'nemo', 'sw', 'sw', 'sw', 'ammo', 'ammo', 'pws', 'pws', 'allterra', 'allterra']; // twelve competitor screens
 function dealPcs() { // three BoreBuddy screens hidden among twelve competitor screens, shuffled every visit, never in the front row
   const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0, t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
-  const ours = shuffle(pcs.filter(pc => pc.g.position.z < FRONT_Z)).slice(0, 3), rivals = [];
-  for (let i = 0; i < 6; i++) rivals.push('nemo', 'sw');
-  shuffle(rivals);
+  const ours = shuffle(pcs.filter(pc => pc.g.position.z < FRONT_Z)).slice(0, 3), rivals = shuffle(RIVALS.slice());
   for (const pc of pcs) { pc.site = ours.includes(pc) ? 'bb' : rivals.pop(); pc.screen.material = screens[pc.site].mat; }
   setPcs(true);
 }
@@ -603,7 +624,7 @@ function updatePcs(dt) {
 }
 
 // ---------- the billboard: the last stop. "Ready to stand out? Go with Mox", and a target that opens the proposal ----------
-const billboard = new THREE.Group(); billboard.position.set(-4, 0, -120); billboard.scale.setScalar(1.3); billboard.visible = false; scene.add(billboard); // far out past the field: a scope shot
+const billboard = new THREE.Group(); billboard.position.set(-4, 0, -360); billboard.scale.setScalar(1.3); billboard.visible = false; scene.add(billboard); // far down the valley: a scope shot
 const bbCanvas = document.createElement('canvas'); bbCanvas.width = 2048; bbCanvas.height = 1024;
 const bbTex = new THREE.CanvasTexture(bbCanvas), moxImg = new Image();
 bbTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -649,6 +670,53 @@ bbTarget.position.set((760 / 1024 - 0.5) * BB_W, BB_Y + BB_H * (1 - 270 / 512), 
 bbTarget.userData.billboardTarget = true; billboard.add(bbTarget);
 const bbSolids = []; billboard.traverse(o => { if (o.isMesh && o !== bbTarget) bbSolids.push(o); });
 
+// ---------- the backdrop at the billboard: rolling high-desert hills closing in a valley, a deep blue sky, clouds ----------
+const backdrop = new THREE.Group(); backdrop.visible = false; scene.add(backdrop);
+{
+  const CZ = -200, g = new THREE.PlaneGeometry(1700, 1800, 170, 180).rotateX(-Math.PI / 2);
+  const pos = g.attributes.position, col = new Float32Array(pos.count * 3), c = new THREE.Color();
+  const GOLD = new THREE.Color(0xa8823e), TAN = new THREE.Color(0xc8a464), SAGE = new THREE.Color(0x7c8a50), RUST = new THREE.Color(0x9a5638), FLOOR = new THREE.Color(0x80d010), HAZE = new THREE.Color(0xb4cce0);
+  const halfW = z => z > -150 ? 185 : 185 - Math.min(1, (-150 - z) / 400) * 80; // the valley narrows toward the far end
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), z = pos.getZ(i) + CZ;
+    const out = Math.max(Math.abs(x) - halfW(z), -560 - z, z - 380); // metres outside the valley floor
+    const t = Math.min(1, Math.max(0, out / 240)), ease = t * t * (3 - 2 * t);
+    const roll = 0.62 + 0.24 * Math.sin(x * 0.011 + 1.7) + 0.18 * Math.sin(z * 0.009 + x * 0.004) + 0.1 * Math.sin((x - z) * 0.023);
+    const h = out <= 0 ? -0.6 : ease * 150 * roll + ease * 12 * Math.sin(x * 0.047) * Math.sin(z * 0.041);
+    pos.setY(i, h);
+    if (out <= 0) c.copy(FLOOR);
+    else {
+      c.copy(GOLD).lerp(TAN, 0.5 + 0.5 * Math.sin(x * 0.019 + z * 0.013));
+      if (Math.sin(x * 0.031 - z * 0.027) + Math.sin(z * 0.05) * 0.5 > 0.9) c.lerp(SAGE, 0.55);            // sagebrush
+      if (t > 0.35 && Math.sin(x * 0.009 + 2.1) + Math.sin(z * 0.012 - 0.6) > 1.25) c.lerp(RUST, 0.6); // red rock slopes
+      c.lerp(HAZE, Math.min(0.3, Math.max(0, (Math.hypot(x, z) - 420) / 1400)));
+    }
+    col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+  }
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3)); g.computeVertexNormals();
+  const land = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true }));
+  land.position.z = CZ; backdrop.add(land);
+  // sky: deep blue overhead, paler at the horizon
+  const sg = new THREE.SphereGeometry(1900, 32, 16), sp = sg.attributes.position, sc = new Float32Array(sp.count * 3);
+  const TOP = new THREE.Color(0x2c6cd0), LOW = new THREE.Color(0xb8d6f2);
+  for (let i = 0; i < sp.count; i++) { c.copy(LOW).lerp(TOP, Math.pow(Math.max(0, sp.getY(i) / 1900), 0.6)); sc[i * 3] = c.r; sc[i * 3 + 1] = c.g; sc[i * 3 + 2] = c.b; }
+  sg.setAttribute('color', new THREE.BufferAttribute(sc, 3));
+  const sky = new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, depthWrite: false }));
+  sky.renderOrder = -1; backdrop.add(sky);
+  // big white clouds
+  const puff = new THREE.SphereGeometry(1, 14, 10), white = new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0x8c96a4 });
+  for (let i = 0; i < 16; i++) {
+    const a = i < 11 ? srnd(-1.3, 1.3) : srnd(1.6, 4.7), r = srnd(650, 1300), cl = new THREE.Group();
+    cl.position.set(Math.sin(a) * r, srnd(170, 330), -Math.cos(a) * r); cl.rotation.y = -a;
+    const n = 4 + ((srand() * 4) | 0);
+    for (let k = 0; k < n; k++) {
+      const m = new THREE.Mesh(puff, white), w = srnd(26, 52);
+      m.scale.set(w, srnd(12, 22), srnd(18, 30)); m.position.set((k - n / 2) * srnd(26, 38), srnd(-4, 10), srnd(-14, 14)); cl.add(m);
+    }
+    backdrop.add(cl);
+  }
+}
+
 // ---------- the highway past the billboard: two lanes, gravel shoulders, reflector posts, a deer crossing sign ----------
 const roadside = new THREE.Group(); roadside.visible = false; scene.add(roadside);
 {
@@ -659,7 +727,7 @@ const roadside = new THREE.Group(); roadside.visible = false; scene.add(roadside
   x.fillStyle = '#ecece4'; x.fillRect(2, 0, 1, 128); x.fillRect(61, 0, 1, 128); // edge lines
   x.fillStyle = '#f8c800'; x.fillRect(31, 0, 2, 32); // centre dashes: 3 m on, 9 m off
   const t = new THREE.CanvasTexture(c); t.wrapT = THREE.RepeatWrapping; t.repeat.set(1, 900 / 12); t.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const road = new THREE.Mesh(new THREE.PlaneGeometry(ROAD_W, 900).rotateX(-Math.PI / 2), new THREE.MeshLambertMaterial({ map: t }));
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(ROAD_W, 900).rotateX(-Math.PI / 2), new THREE.MeshLambertMaterial({ map: t, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
   road.position.set(ROAD_X, 0.06, -100); roadside.add(road);
   for (const s of [-1, 1]) { const sh = B(roadside, 0xa89878, 1.6, 0.04, 900, ROAD_X + s * (ROAD_W / 2 + 0.8), 0.04, -100); sh.castShadow = false; }
   for (let pz = 150; pz >= -330; pz -= 30) for (const s of [-1, 1]) { // reflector posts
@@ -1034,7 +1102,7 @@ function hideDog() { dog.mode = 'hidden'; dogUp.visible = dogWalk.visible = fals
 function setWorld(w) {
   stage = w;
   const outdoors = w !== 'office';
-  fieldWorld.visible = outdoors; officeWorld.visible = !outdoors; billboard.visible = roadside.visible = w === 'billboard'; rangeProps.visible = w === 'field'; startBush.visible = w !== 'billboard';
+  fieldWorld.visible = outdoors; officeWorld.visible = !outdoors; billboard.visible = roadside.visible = backdrop.visible = w === 'billboard'; rangeProps.visible = w === 'field'; for (const g of offAtBillboard) g.visible = w !== 'billboard';
   renderer.setClearColor(outdoors ? 0x5cb8ff : 0x20242c);
   hemi.groundColor.setHex(outdoors ? 0x9cc060 : 0x8c8c94);
   clearTargets(); hideDog(); setRange(false); setPcs(false); clearDeer(); clearCars(); roadsideGrass(w === 'billboard'); $('hud').classList.remove('free');
@@ -1108,7 +1176,7 @@ let nextDuck = 0;
 function beginBillboard() {
   phase = 'free'; phaseT = 0; nextDuck = 4; $('timer').hidden = true; $('hud').classList.add('free');
   for (let i = 0; i < 6; i++) spawnDeer();
-  showMsg('Hunt for bonus points.\nThen scope in and hit\nthe target on the billboard.'); sfx.next(); renderHud();
+  showMsg('Scope in and hit\nthe target on the billboard.'); sfx.next(); renderHud();
 }
 function hitBillboard() {
   if (phase !== 'free') return;
@@ -1192,7 +1260,7 @@ function updateGame(dt) {
     else if (shots === 0 && outT > 0.7) endStage('Out of shots');
   }
   else if (phase === 'free') {
-    if (phaseT >= 5 && phaseT - dt < 5) { hideMsg(); tip(touchMode ? 'Scope in and hit the billboard target to see the proposal' : 'Deer and ducks are bonus points. Scope in and hit the billboard target to see the proposal', 9); }
+    if (phaseT >= 5 && phaseT - dt < 5) { hideMsg(); tip('Scope in and hit the billboard target to see the proposal', 9); }
     if (phaseT >= nextDuck) { nextDuck = phaseT + rnd(6, 10); spawnDuck().life = 8; sfx.rustle(); sfx.quack(); }
   }
   else if (phase === 'result') { if (phaseT >= phaseDur) { hideMsg(); startTally(); } }
@@ -1413,7 +1481,7 @@ function fire() {
   const spread = scoped ? 0 : 0.009 + Math.min(0.015, Math.hypot(P.vx, P.vz) * 0.0018) + (P.onGround ? 0 : 0.015);
   aimDir(aimYaw + rnd(-spread, spread), aimPitch + rnd(-spread, spread), dir);
   origin.copy(camera.position);
-  ray.set(origin, dir); ray.far = 300;
+  ray.set(origin, dir); ray.far = 900;
   const hit = ray.intersectObjects(hittables, true)[0];
   if (hit) { endPt.copy(hit.point); onHit(hit); } else endPt.copy(origin).addScaledVector(dir, 200);
   const sy = Math.sin(aimYaw), cy = Math.cos(aimYaw), side = scoped ? 0 : 0.2;
@@ -1446,7 +1514,7 @@ function onHit(h) {
     if (!pc.alive || phase !== 'active') return;
     pc.alive = false; pc.g.visible = false; unhit(pc.g);
     const p = pc.g.position, sc = pc.size;
-    const cols = [0xd8ccb0, 0xb0a488, 0x202428, pc.site === 'bb' ? 0xf0641e : pc.site === 'sw' ? 0x1c4ca0 : pc.site === 'nemo' ? 0xd81c24 : 0x0c1c8c, 0xfcfcfc];
+    const cols = [0xd8ccb0, 0xb0a488, 0x202428, SITE_COL[pc.site] || 0x0c1c8c, 0xfcfcfc];
     for (let i = 0; i < 14; i++) { // the whole machine goes to blocks
       const m = new THREE.Mesh(BOX, mat(cols[i % cols.length])); m.scale.setScalar(rnd(0.25, 0.5) * sc);
       m.position.set(p.x + rnd(-0.6, 0.6) * sc, p.y + rnd(0.2, 1.3) * sc, p.z + rnd(-0.5, 0.5) * sc);
@@ -1514,7 +1582,7 @@ function updateWeapon(dt) {
     rangeTick -= dt;
     if (rangeTick <= 0) {
       rangeTick = 0.12;
-      ray.set(camera.position, aimDir(aimYaw, aimPitch, v1)); ray.far = 300;
+      ray.set(camera.position, aimDir(aimYaw, aimPitch, v1)); ray.far = 900;
       const h = ray.intersectObjects(hittables, true)[0];
       $('range').textContent = (h ? Math.round(h.distance * YD) : '--') + ' yd';
     }

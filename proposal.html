@@ -1078,6 +1078,7 @@
   .gp { --mono: 'JetBrains Mono', ui-monospace, monospace; --accent-2: #C8102E; --rule: var(--line); position: relative; padding: 130px 0; }
   .gp-process { background: var(--paper); border-top: 1px solid var(--line); }
   .gp-invest { background: var(--black); color: #fff; }
+  .gp-invest + .roster-sec { border-top: 1px solid rgba(243,239,233,.1); }
   .gp .sec-lbl { font-family: var(--mono); font-size: .62rem; font-weight: 500; color: var(--amber); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 1.1rem; display: flex; align-items: center; gap: .6rem; }
   .gp .sec-lbl::before { content: ""; width: 26px; height: 1px; background: var(--amber); display: inline-block; }
   .gp .sec-title { font-weight: 900; font-size: clamp(2.2rem, 5vw, 4rem); color: var(--black); line-height: .94; letter-spacing: -.02em; text-transform: uppercase; margin-bottom: 1.4rem; }
@@ -1200,10 +1201,10 @@
     <nav class="nav-links" aria-label="Main">
       <a href="#who">Who We Are</a>
       <a href="#portfolio">Portfolio</a>
+      <a href="#bid">Proposal</a>
       <a href="#roster">Roster</a>
       <a href="#cases">Case Studies</a>
       <a href="#philosophy">Creative Philosophy</a>
-      <a href="#bid">Proposal</a>
       <a href="./">Back to the Game</a>
     </nav>
     <button class="menu-btn" id="menuOpen" aria-label="Open menu" aria-expanded="false"><span class="burger" aria-hidden="true"></span></button>
@@ -1224,6 +1225,9 @@
       <div class="menu-nav-row"><a href="#portfolio">Portfolio</a></div>
     </div>
     <div class="menu-nav-item">
+      <div class="menu-nav-row"><a href="#bid">Proposal</a></div>
+    </div>
+    <div class="menu-nav-item">
       <div class="menu-nav-row"><a href="#roster">Roster</a></div>
     </div>
     <div class="menu-nav-item">
@@ -1231,9 +1235,6 @@
     </div>
     <div class="menu-nav-item">
       <div class="menu-nav-row"><a href="#philosophy">Creative Philosophy</a></div>
-    </div>
-    <div class="menu-nav-item">
-      <div class="menu-nav-row"><a href="#bid">Proposal</a></div>
     </div>
     <div class="menu-nav-item">
       <div class="menu-nav-row"><a href="./">Back to the Game</a></div>
@@ -1315,6 +1316,109 @@
       <div class="logo-tile" data-name="711"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784146663/711.png" alt="711" loading="lazy"></div>
     </div>
 
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="gp gp-process" id="bid">
+  <div class="wrap">
+    <div class="sec-lbl reveal">How It Works</div>
+    <h2 class="sec-title reveal">Six steps.<br>12&ndash;15 weeks.</h2>
+    <div class="steps">
+      <div class="step reveal"><div class="step-num">01</div><div class="step-name">Research</div><div class="step-desc">We start by looking at your current site data and talking to your stakeholders to see what's working and what isn't.</div></div>
+      <div class="step reveal"><div class="step-num">02</div><div class="step-name">UX Design</div><div class="step-desc">We build the site structure so every page and navigation path directly supports your business goals and KPIs.</div></div>
+      <div class="step reveal"><div class="step-num">03</div><div class="step-name">UI Design</div><div class="step-desc">We look at what your customers are actually saying about you, then make sure the new site design reflects that same reputation and quality.</div></div>
+      <div class="step reveal"><div class="step-num">04</div><div class="step-name">Copywriting</div><div class="step-desc">We help you review your messaging across all channels to ensure you're telling a clear, consistent story.</div></div>
+      <div class="step reveal"><div class="step-num">05</div><div class="step-name">Development</div><div class="step-desc">We build a fast, secure, modern site specifically engineered for your team to easily update on their own.</div></div>
+      <div class="step reveal"><div class="step-num">06</div><div class="step-name">Launch</div><div class="step-desc">We connect the domain and push live, record live training sessions, and add heatmap tracking. Then we celebrate with Friday margaritas.</div></div>
+    </div>
+
+    <div class="gantt-wrap reveal">
+      <div class="gantt" id="gantt">
+        <div class="gantt-scale">
+          <div class="gantt-scale-lbl">Phase &middot; Weeks 1 &rarr; 15</div>
+          <div class="gantt-months">
+            <div class="gantt-month">WK 1&ndash;3<span>Kickoff</span></div>
+            <div class="gantt-month">WK 4&ndash;6</div>
+            <div class="gantt-month">WK 7&ndash;9</div>
+            <div class="gantt-month">WK 10&ndash;12</div>
+            <div class="gantt-month">WK 13&ndash;15<span>Launch</span></div>
+          </div>
+        </div>
+        <!-- bars: left/width in % of the 15-week track -->
+        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">Research</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:2%;--w:18%;background:#7a0f00">Research</div></div></div>
+        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">UX Design</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:14%;--w:24%;background:#9a1400">UX Design</div></div></div>
+        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">UI Design</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:34%;--w:24%;background:var(--amber)">UI Design</div></div></div>
+        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">Copywriting</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:48%;--w:18%;background:#d13010">Copywriting</div></div></div>
+        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">Development</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:58%;--w:30%;background:var(--accent-2)">Development</div></div></div>
+        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">Launch</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:84%;--w:14%;background:#e8720e">Launch</div></div></div>
+      </div>
+      <div class="gantt-legend">
+        <div class="gantt-legend-item"><span class="gantt-legend-sw" style="background:#7a0f00"></span>Discovery</div>
+        <div class="gantt-legend-item"><span class="gantt-legend-sw" style="background:var(--amber)"></span>Design</div>
+        <div class="gantt-legend-item"><span class="gantt-legend-sw" style="background:var(--accent-2)"></span>Build</div>
+        <div class="gantt-legend-item"><span class="gantt-legend-sw" style="background:#e8720e"></span>Launch</div>
+      </div>
+    </div>
+
+    <div class="milestones reveal">
+      <div class="ms"><span class="ms-lbl">Kickoff</span><span class="ms-val">Week 1</span></div>
+      <div class="ms"><span class="ms-lbl">Launch</span><span class="ms-val">Weeks 12&ndash;15</span></div>
+    </div>
+
+    <div class="yourpart reveal">
+      <h4>Your part</h4>
+      <p>This is a collaborative project, and we'll stay on schedule if we have the content &mdash; copy, product photos, and product details &mdash; ready early. Having that material up front makes the review process much faster and keeps both teams in sync as we move forward.</p>
+    </div>
+  </div>
+</section>
+
+<!-- The investment -->
+<section class="gp gp-invest" id="invest">
+  <div class="wrap">
+    <div class="sec-lbl reveal">The Investment</div>
+    <h2 class="sec-title reveal">Transparent,<br>all-inclusive</h2>
+    <p class="lead reveal">We're excited to partner with you on this website refresh &mdash; a transparent, all-inclusive investment that covers every stage of the project. By prioritizing a data-driven strategy and a premium, user-focused aesthetic, we ensure your new site elevates your brand's legacy while delivering a seamless, high-performing experience for your customers and partners.</p>
+    <p class="lead reveal">We've structured this investment for complete peace of mind &mdash; a powerful digital foundation that's secure, fast, and ready to drive results from day one.</p>
+
+    <div class="fee-cards">
+      <div class="fee-card reveal">
+        <div class="fee-head"><div class="fee-head-l"><span class="fee-phase">Phase 01</span><span class="fee-title">Pre-Production &middot; R&amp;D</span></div><div class="fee-head-r"><span class="fee-sum">$11,700</span><span class="fee-chev"></span></div></div>
+        <div class="fee-body"><div class="fee-lines">
+          <div class="fee-line"><span class="fee-item">Market + User Research</span><span class="fee-who">Zanders + Ramirez</span><span class="fee-units">8 hrs</span><span class="fee-cost">$1,600</span></div>
+          <div class="fee-line"><span class="fee-item">UX / Wireframe</span><span class="fee-who">Nathan Zanders</span><span class="fee-units">10 hrs</span><span class="fee-cost">$2,000</span></div>
+          <div class="fee-line"><span class="fee-item">Style Test</span><span class="fee-who">Zanders + Ramirez</span><span class="fee-units">6 hrs</span><span class="fee-cost">$1,200</span></div>
+          <div class="fee-line"><span class="fee-item">Site Map</span><span class="fee-who">Nathan Zanders</span><span class="fee-units">2 hrs</span><span class="fee-cost">$400</span></div>
+          <div class="fee-line"><span class="fee-item">Project Management</span><span class="fee-who">Matt McMorrow</span><span class="fee-units">35 hrs</span><span class="fee-cost">$5,250</span></div>
+          <div class="fee-line"><span class="fee-item">Meetings</span><span class="fee-who">All</span><span class="fee-units">10 hrs</span><span class="fee-cost">$1,250</span></div>
+        </div></div>
+      </div>
+      <div class="fee-card reveal">
+        <div class="fee-head"><div class="fee-head-l"><span class="fee-phase">Phase 02</span><span class="fee-title">Production &middot; Design</span></div><div class="fee-head-r"><span class="fee-sum">$11,200</span><span class="fee-chev"></span></div></div>
+        <div class="fee-body"><div class="fee-lines">
+          <div class="fee-line"><span class="fee-item">Homepage Design</span><span class="fee-who">Peter Dong</span><span class="fee-units">25 hrs</span><span class="fee-cost">$5,000</span></div>
+          <div class="fee-line"><span class="fee-item">Internal Page Design</span><span class="fee-who">Aliya Reames</span><span class="fee-units">8 hrs</span><span class="fee-cost">$1,200</span></div>
+          <div class="fee-line"><span class="fee-item">Copywriting Support</span><span class="fee-who">Einar Schelin</span><span class="fee-units">10 hrs</span><span class="fee-cost">$2,000</span></div>
+          <div class="fee-line"><span class="fee-item">Creative Direction</span><span class="fee-who">DJ Ramirez</span><span class="fee-units">15 hrs</span><span class="fee-cost">$3,000</span></div>
+        </div></div>
+      </div>
+      <div class="fee-card reveal">
+        <div class="fee-head"><div class="fee-head-l"><span class="fee-phase">Phase 03</span><span class="fee-title">Development &middot; Deployment</span></div><div class="fee-head-r"><span class="fee-sum">$7,600</span><span class="fee-chev"></span></div></div>
+        <div class="fee-body"><div class="fee-lines">
+          <div class="fee-line"><span class="fee-item">Server Install + Development</span><span class="fee-who">Jeff Barker</span><span class="fee-units">2 hrs</span><span class="fee-cost">$400</span></div>
+          <div class="fee-line"><span class="fee-item">Homepage Development</span><span class="fee-who">Jeff Barker</span><span class="fee-units">12 hrs</span><span class="fee-cost">$2,400</span></div>
+          <div class="fee-line"><span class="fee-item">Additional Page Development</span><span class="fee-who">Jeff Barker</span><span class="fee-units">16 hrs</span><span class="fee-cost">$3,200</span></div>
+          <div class="fee-line"><span class="fee-item">SEO Kickstart</span><span class="fee-who">Jeff Barker</span><span class="fee-units">2 hrs</span><span class="fee-cost">$400</span></div>
+          <div class="fee-line"><span class="fee-item">Testing</span><span class="fee-who">Jeff Barker</span><span class="fee-units">4 hrs</span><span class="fee-cost">$800</span></div>
+          <div class="fee-line"><span class="fee-item">Launching Website</span><span class="fee-who">Jeff Barker</span><span class="fee-units">2 hrs</span><span class="fee-cost">$400</span></div>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="fee-total reveal">
+      <div><div class="t-lbl">Total Investment</div><div class="t-sub">Website subtotal $30,500 &middot; Agency fee 15% $4,575</div></div>
+      <div class="t-val">$35,075</div>
+    </div>
   </div>
 </section>
 
@@ -1562,109 +1666,6 @@ With 10 years of experience, and counting, I have had great mentors, and amazing
           <p class="tenex-text" id="tenexText">Being intellectual is not enough in a creative setting. Knowledge is being right, but wisdom is being right at the right time, in the right way, about the right thing.</p>
         </div>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- How it works -->
-<section class="gp gp-process" id="bid">
-  <div class="wrap">
-    <div class="sec-lbl reveal">How It Works</div>
-    <h2 class="sec-title reveal">Six steps.<br>12&ndash;15 weeks.</h2>
-    <div class="steps">
-      <div class="step reveal"><div class="step-num">01</div><div class="step-name">Research</div><div class="step-desc">We start by looking at your current site data and talking to your stakeholders to see what's working and what isn't.</div></div>
-      <div class="step reveal"><div class="step-num">02</div><div class="step-name">UX Design</div><div class="step-desc">We build the site structure so every page and navigation path directly supports your business goals and KPIs.</div></div>
-      <div class="step reveal"><div class="step-num">03</div><div class="step-name">UI Design</div><div class="step-desc">We look at what your customers are actually saying about you, then make sure the new site design reflects that same reputation and quality.</div></div>
-      <div class="step reveal"><div class="step-num">04</div><div class="step-name">Copywriting</div><div class="step-desc">We help you review your messaging across all channels to ensure you're telling a clear, consistent story.</div></div>
-      <div class="step reveal"><div class="step-num">05</div><div class="step-name">Development</div><div class="step-desc">We build a fast, secure, modern site specifically engineered for your team to easily update on their own.</div></div>
-      <div class="step reveal"><div class="step-num">06</div><div class="step-name">Launch</div><div class="step-desc">We connect the domain and push live, record live training sessions, and add heatmap tracking. Then we celebrate with Friday margaritas.</div></div>
-    </div>
-
-    <div class="gantt-wrap reveal">
-      <div class="gantt" id="gantt">
-        <div class="gantt-scale">
-          <div class="gantt-scale-lbl">Phase &middot; Weeks 1 &rarr; 15</div>
-          <div class="gantt-months">
-            <div class="gantt-month">WK 1&ndash;3<span>Kickoff</span></div>
-            <div class="gantt-month">WK 4&ndash;6</div>
-            <div class="gantt-month">WK 7&ndash;9</div>
-            <div class="gantt-month">WK 10&ndash;12</div>
-            <div class="gantt-month">WK 13&ndash;15<span>Launch</span></div>
-          </div>
-        </div>
-        <!-- bars: left/width in % of the 15-week track -->
-        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">Research</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:2%;--w:18%;background:#7a0f00">Research</div></div></div>
-        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">UX Design</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:14%;--w:24%;background:#9a1400">UX Design</div></div></div>
-        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">UI Design</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:34%;--w:24%;background:var(--amber)">UI Design</div></div></div>
-        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">Copywriting</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:48%;--w:18%;background:#d13010">Copywriting</div></div></div>
-        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">Development</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:58%;--w:30%;background:var(--accent-2)">Development</div></div></div>
-        <div class="gantt-row"><div class="gantt-row-lbl"><span class="gantt-row-name">Launch</span></div><div class="gantt-track"><div class="gantt-grid"><span></span><span></span><span></span><span></span><span></span></div><div class="gantt-bar" style="left:84%;--w:14%;background:#e8720e">Launch</div></div></div>
-      </div>
-      <div class="gantt-legend">
-        <div class="gantt-legend-item"><span class="gantt-legend-sw" style="background:#7a0f00"></span>Discovery</div>
-        <div class="gantt-legend-item"><span class="gantt-legend-sw" style="background:var(--amber)"></span>Design</div>
-        <div class="gantt-legend-item"><span class="gantt-legend-sw" style="background:var(--accent-2)"></span>Build</div>
-        <div class="gantt-legend-item"><span class="gantt-legend-sw" style="background:#e8720e"></span>Launch</div>
-      </div>
-    </div>
-
-    <div class="milestones reveal">
-      <div class="ms"><span class="ms-lbl">Kickoff</span><span class="ms-val">Week 1</span></div>
-      <div class="ms"><span class="ms-lbl">Launch</span><span class="ms-val">Weeks 12&ndash;15</span></div>
-    </div>
-
-    <div class="yourpart reveal">
-      <h4>Your part</h4>
-      <p>This is a collaborative project, and we'll stay on schedule if we have the content &mdash; copy, product photos, and product details &mdash; ready early. Having that material up front makes the review process much faster and keeps both teams in sync as we move forward.</p>
-    </div>
-  </div>
-</section>
-
-<!-- The investment -->
-<section class="gp gp-invest" id="invest">
-  <div class="wrap">
-    <div class="sec-lbl reveal">The Investment</div>
-    <h2 class="sec-title reveal">Transparent,<br>all-inclusive</h2>
-    <p class="lead reveal">We're excited to partner with you on this website refresh &mdash; a transparent, all-inclusive investment that covers every stage of the project. By prioritizing a data-driven strategy and a premium, user-focused aesthetic, we ensure your new site elevates your brand's legacy while delivering a seamless, high-performing experience for your customers and partners.</p>
-    <p class="lead reveal">We've structured this investment for complete peace of mind &mdash; a powerful digital foundation that's secure, fast, and ready to drive results from day one.</p>
-
-    <div class="fee-cards">
-      <div class="fee-card reveal">
-        <div class="fee-head"><div class="fee-head-l"><span class="fee-phase">Phase 01</span><span class="fee-title">Pre-Production &middot; R&amp;D</span></div><div class="fee-head-r"><span class="fee-sum">$11,700</span><span class="fee-chev"></span></div></div>
-        <div class="fee-body"><div class="fee-lines">
-          <div class="fee-line"><span class="fee-item">Market + User Research</span><span class="fee-who">Zanders + Ramirez</span><span class="fee-units">8 hrs</span><span class="fee-cost">$1,600</span></div>
-          <div class="fee-line"><span class="fee-item">UX / Wireframe</span><span class="fee-who">Nathan Zanders</span><span class="fee-units">10 hrs</span><span class="fee-cost">$2,000</span></div>
-          <div class="fee-line"><span class="fee-item">Style Test</span><span class="fee-who">Zanders + Ramirez</span><span class="fee-units">6 hrs</span><span class="fee-cost">$1,200</span></div>
-          <div class="fee-line"><span class="fee-item">Site Map</span><span class="fee-who">Nathan Zanders</span><span class="fee-units">2 hrs</span><span class="fee-cost">$400</span></div>
-          <div class="fee-line"><span class="fee-item">Project Management</span><span class="fee-who">Matt McMorrow</span><span class="fee-units">35 hrs</span><span class="fee-cost">$5,250</span></div>
-          <div class="fee-line"><span class="fee-item">Meetings</span><span class="fee-who">All</span><span class="fee-units">10 hrs</span><span class="fee-cost">$1,250</span></div>
-        </div></div>
-      </div>
-      <div class="fee-card reveal">
-        <div class="fee-head"><div class="fee-head-l"><span class="fee-phase">Phase 02</span><span class="fee-title">Production &middot; Design</span></div><div class="fee-head-r"><span class="fee-sum">$11,200</span><span class="fee-chev"></span></div></div>
-        <div class="fee-body"><div class="fee-lines">
-          <div class="fee-line"><span class="fee-item">Homepage Design</span><span class="fee-who">Peter Dong</span><span class="fee-units">25 hrs</span><span class="fee-cost">$5,000</span></div>
-          <div class="fee-line"><span class="fee-item">Internal Page Design</span><span class="fee-who">Aliya Reames</span><span class="fee-units">8 hrs</span><span class="fee-cost">$1,200</span></div>
-          <div class="fee-line"><span class="fee-item">Copywriting Support</span><span class="fee-who">Einar Schelin</span><span class="fee-units">10 hrs</span><span class="fee-cost">$2,000</span></div>
-          <div class="fee-line"><span class="fee-item">Creative Direction</span><span class="fee-who">DJ Ramirez</span><span class="fee-units">15 hrs</span><span class="fee-cost">$3,000</span></div>
-        </div></div>
-      </div>
-      <div class="fee-card reveal">
-        <div class="fee-head"><div class="fee-head-l"><span class="fee-phase">Phase 03</span><span class="fee-title">Development &middot; Deployment</span></div><div class="fee-head-r"><span class="fee-sum">$7,600</span><span class="fee-chev"></span></div></div>
-        <div class="fee-body"><div class="fee-lines">
-          <div class="fee-line"><span class="fee-item">Server Install + Development</span><span class="fee-who">Jeff Barker</span><span class="fee-units">2 hrs</span><span class="fee-cost">$400</span></div>
-          <div class="fee-line"><span class="fee-item">Homepage Development</span><span class="fee-who">Jeff Barker</span><span class="fee-units">12 hrs</span><span class="fee-cost">$2,400</span></div>
-          <div class="fee-line"><span class="fee-item">Additional Page Development</span><span class="fee-who">Jeff Barker</span><span class="fee-units">16 hrs</span><span class="fee-cost">$3,200</span></div>
-          <div class="fee-line"><span class="fee-item">SEO Kickstart</span><span class="fee-who">Jeff Barker</span><span class="fee-units">2 hrs</span><span class="fee-cost">$400</span></div>
-          <div class="fee-line"><span class="fee-item">Testing</span><span class="fee-who">Jeff Barker</span><span class="fee-units">4 hrs</span><span class="fee-cost">$800</span></div>
-          <div class="fee-line"><span class="fee-item">Launching Website</span><span class="fee-who">Jeff Barker</span><span class="fee-units">2 hrs</span><span class="fee-cost">$400</span></div>
-        </div></div>
-      </div>
-    </div>
-
-    <div class="fee-total reveal">
-      <div><div class="t-lbl">Total Investment</div><div class="t-sub">Website subtotal $30,500 &middot; Agency fee 15% $4,575</div></div>
-      <div class="t-val">$35,075</div>
     </div>
   </div>
 </section>
