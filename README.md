@@ -28,7 +28,6 @@ The rifle carries BoreBuddy's AR22 Heavy Precision upper with the 18.5-inch Gree
 | Mouse | Aim |
 | Space or click | Fire |
 | Right-click or Q | Scope |
-| Scroll | Scope zoom, 3x to 16x |
 | Esc | Pause |
 | M | Sound on or off |
 

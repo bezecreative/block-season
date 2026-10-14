@@ -183,7 +183,6 @@ a.mode{display:block;text-decoration:none}
       <div><dt>Mouse</dt><dd>Aim</dd></div>
       <div><dt>Space</dt><dd>Fire (or click)</dd></div>
       <div><dt>R-click</dt><dd>Scope (or Q)</dd></div>
-      <div><dt>Scroll</dt><dd>Scope zoom</dd></div>
       <div><dt>Esc</dt><dd>Pause</dd></div>
     </dl>
     <dl class="keys" id="keys-touch" hidden>
@@ -200,7 +199,7 @@ a.mode{display:block;text-decoration:none}
 
   <section class="card" id="pause" hidden aria-labelledby="p-title">
     <h2 id="p-title">Pause</h2>
-    <p id="p-msg">The ducks will wait.</p>
+    <p id="p-msg" hidden></p>
     <div class="modes">
       <button class="mode" id="resume" type="button">Continue</button>
       <button class="mode" id="quit" type="button">Quit to title</button>
@@ -257,7 +256,7 @@ const fieldWorld = new THREE.Group(), officeWorld = new THREE.Group(); // the ra
 officeWorld.visible = false; scene.add(fieldWorld, officeWorld);
 const camera = new THREE.PerspectiveCamera(72, 1, 0.1, 500);
 camera.rotation.order = 'YXZ';
-let baseFov = 72, scopeMag = 4;
+let baseFov = 72, scopeMag = 7; // fixed scope power: right-click brings it up, nothing to adjust
 const scopeFov = () => 2 * Math.atan(Math.tan(baseFov * Math.PI / 360) / scopeMag) * 180 / Math.PI;
 
 const hemi = new THREE.HemisphereLight(0xffffff, 0x9cc060, 0.86); scene.add(hemi);
@@ -800,7 +799,7 @@ function setWorld(w) {
   P.pos.set(0, 0, 0); P.vx = P.vz = P.vy = 0; P.yaw = 0; P.pitch = 0.04; scopeToggle = false; $('tb-scope').classList.remove('on');
 }
 function startGame() {
-  round = 1; score = 0; $('pops').textContent = ''; scopeMag = 4; scopeT = 0;
+  round = 1; score = 0; $('pops').textContent = ''; scopeT = 0;
   setWorld('field'); beginRound();
 }
 function beginRound() {
@@ -820,13 +819,13 @@ function openStage() {
   phase = 'active'; phaseT = 0; shots = maxShots; outT = 0; shownT = -1; $('timer').hidden = false;
   if (stage === 'field') {
     timeLeft = Math.max(24, 48 - round * 3);
-    if (round === 1) tip(touchMode ? 'Far targets: tap scope to zoom in' : 'Far targets: hold right-click to scope, scroll to zoom in closer', 8);
+    if (round === 1) tip(touchMode ? 'Far targets: tap scope to zoom in' : 'Far targets: hold right-click to scope in', 8);
     setRange(true, true);
     duckAt = [rnd(2.5, timeLeft * 0.4)]; if (round >= 3) duckAt.push(rnd(timeLeft * 0.5, timeLeft * 0.8));
     sfx.rustle();
   } else {
     timeLeft = Math.max(36, 64 - round * 4);
-    tip(touchMode ? 'Scope in. Shoot the competitors, never BoreBuddy' : 'Scope in and zoom to read the screens. Shoot NEMO and Smith & Wesson, never BoreBuddy', 9);
+    tip(touchMode ? 'Scope in. Shoot the competitors, never BoreBuddy' : 'Scope in to read the screens. Shoot NEMO and Smith & Wesson, never BoreBuddy', 9);
     for (const pc of pcs) hittables.push(pc.g);
     duckAt = [];
     sfx.thud();
@@ -1019,13 +1018,13 @@ function updateDog(dt) {
 function lockFailed() {
   if (!pendingLock) return;
   pendingLock = false; clearTimeout(lockTimer);
-  if (everLocked) { if (state !== 'paused') setState('paused'); $('p-msg').textContent = 'The browser needs a moment before it will capture the mouse again. Press continue once more.'; return; }
+  if (everLocked) { if (state !== 'paused') setState('paused'); $('p-msg').hidden = false; $('p-msg').textContent = 'The browser needs a moment before it will capture the mouse again. Press continue once more.'; return; }
   dragLook = true; setState('playing');
   tip('Mouse capture is not available here. Drag to look, space to fire, Q to scope, P to pause.', 9);
 }
 function begin() {
   initAudio();
-  $('p-msg').textContent = 'The ducks will wait.';
+  $('p-msg').hidden = true;
   if (touchMode || dragLook || !canvas.requestPointerLock) { if (!touchMode) dragLook = true; setState('playing'); canvas.focus(); return; }
   canvas.focus({ preventScroll: true }); // so the spacebar goes to the game, not a menu button
   pendingLock = true;
@@ -1088,11 +1087,6 @@ canvas.addEventListener('mousedown', e => {
   if (locked) { if (e.button === 0) fire(); }
   else if (dragLook) { dragBtn = e.button; dragDist = 0; }
 });
-canvas.addEventListener('wheel', e => {
-  if (state !== 'playing') return;
-  e.preventDefault();
-  if (scopeT > 0.5) { scopeMag = clamp(scopeMag * Math.exp(-clamp(e.deltaY, -60, 60) * 0.004), 3, 16); rangeTick = 0; }
-}, { passive: false });
 addEventListener('mouseup', e => {
   if (e.button === 2 && scopeHeld) { scopeHeld = false; scopeToggle = performance.now() - scopeDownAt < 230 ? !scopeToggle : false; }
   if (dragLook && dragBtn === 0 && e.button === 0 && dragDist < 6 && state === 'playing') fire();
@@ -1247,7 +1241,7 @@ function updateWeapon(dt) {
       rangeTick = 0.12;
       ray.set(camera.position, aimDir(aimYaw, aimPitch, v1)); ray.far = 300;
       const h = ray.intersectObjects(hittables, true)[0];
-      $('range').textContent = (h ? Math.round(h.distance * YD) : '--') + ' yd  ' + scopeMag.toFixed(1) + 'x';
+      $('range').textContent = (h ? Math.round(h.distance * YD) : '--') + ' yd';
     }
   }
 }
