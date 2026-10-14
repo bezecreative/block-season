@@ -55,7 +55,8 @@ the logo in view. Only add screenshots you have the right to publish.
 - `borebuddy-logo.png` and `mox-logo.png` are the logos on the title card.
 - `screens/` holds the homepage screenshots shown on the office computers.
 - `proposal.html` is the proposal page the game links to.
-- `team/` and `logos/` hold images the proposal serves itself (a roster photo, the Micron logo).
+- `team/`, `logos/` and `work/` hold images the proposal serves itself: a roster photo, client logos and screenshots of
+  websites Mox has built.
 - `vercel.json` and `.vercelignore` set up the Vercel copy.
 
 ## Credits

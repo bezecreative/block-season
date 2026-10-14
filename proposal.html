@@ -1154,6 +1154,20 @@
     .gp .milestones { gap: 2rem; }
   }
   @media (prefers-reduced-motion: reduce) { .gp .gantt-bar { transition: none; } }
+  /* case studies as a grid of websites we've built */
+  .cases .project-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 56px; }
+  .cases .project { position: relative; display: block; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06); transition: transform .3s var(--ease), box-shadow .3s var(--ease); }
+  .cases .project img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; transition: transform .5s var(--ease); }
+  .cases .project-veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.62) 100%); transition: background .3s; }
+  .cases .project-name { position: absolute; left: 1.25rem; right: 1.25rem; bottom: 1.1rem; font-weight: 800; font-size: clamp(1.05rem, 1.8vw, 1.45rem); text-transform: uppercase; letter-spacing: -.01em; color: #fff; line-height: 1.05; text-shadow: 0 1px 12px rgba(0,0,0,.5); }
+  .cases .project-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) translateY(8px); background: var(--amber); color: #fff; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: .8rem 1.4rem; border-radius: 2px; opacity: 0; transition: opacity .25s var(--ease), transform .25s var(--ease); white-space: nowrap; box-shadow: 0 6px 20px rgba(0,0,0,.3); }
+  .cases .project:hover, .cases .project:focus-visible { transform: translateY(-6px); box-shadow: 0 2px 8px rgba(0,0,0,.08), 0 12px 40px rgba(0,0,0,.1); outline: none; }
+  .cases .project:hover img, .cases .project:focus-visible img { transform: scale(1.04); }
+  .cases .project:hover .project-veil, .cases .project:focus-visible .project-veil { background: linear-gradient(180deg, rgba(0,0,0,.28) 0%, rgba(0,0,0,.68) 100%); }
+  .cases .project:hover .project-btn, .cases .project:focus-visible .project-btn { opacity: 1; transform: translate(-50%, -50%); }
+  @media (hover: none) { .cases .project-btn { opacity: 1; transform: translate(-50%, -50%); } }
+  @media (prefers-reduced-motion: reduce) { .cases .project, .cases .project img, .cases .project-btn { transition: none; } }
+  @media (max-width: 720px) { .cases .project-grid { grid-template-columns: 1fr; gap: 1.25rem; } }
 </style>
 <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
@@ -1303,6 +1317,8 @@
       <div class="logo-tile" data-name="Johnson &amp; Johnson"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145146/Logo-Johnson-Johnson_1.png" alt="Johnson &amp; Johnson" loading="lazy"></div>
       <div class="logo-tile" data-name="Treefort"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145148/Treefort_1.png" alt="Treefort" loading="lazy"></div>
       <div class="logo-tile" data-name="711"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784146663/711.png" alt="711" loading="lazy"></div>
+      <div class="logo-tile" data-name="REI"><img src="logos/rei.png" alt="REI" loading="lazy"></div>
+      <div class="logo-tile" data-name="Microsoft"><img src="logos/microsoft.png" alt="Microsoft" loading="lazy"></div>
     </div>
 
   </div>
@@ -1495,104 +1511,39 @@ With 10 years of experience, and counting, I have had great mentors, and amazing
   </div>
 </section>
 
-<!-- Case Studies -->
+<!-- Case Studies: websites we've built -->
 <section class="cases" id="cases">
   <div class="wrap">
     <span class="eyebrow reveal">The Proof</span>
     <h2 class="reveal d1">Case Studies</h2>
-    <div class="case-layout reveal d1">
-      <div class="case-rail" role="tablist" aria-label="Case studies">
-        <button class="case-tab active" role="tab" aria-selected="true" style="background-image:url('https://sockeyebrew.com/wp-content/uploads/2026/05/Can-on-Post-1.jpg')">
-          <span class="ct-name">Sockeye</span>
-        </button>
-        <button class="case-tab" role="tab" aria-selected="false" style="background-image:url('https://framerusercontent.com/images/mwERdMMwZZxkw86JFuaaOFCCo.webp?scale-down-to=2048')">
-          <span class="ct-name">AC Boise</span>
-        </button>
-        <button class="case-tab" role="tab" aria-selected="false" style="background-image:url('https://res.cloudinary.com/dbwtszgtb/image/upload/v1784294796/Screenshot_2026-07-17_at_7.26.29_AM.png')">
-          <span class="ct-name">NCS</span>
-        </button>
-        <button class="case-tab" role="tab" aria-selected="false" style="background-image:url('https://framerusercontent.com/images/1M2vZd0VEP6cdi7IneyrBnhuFo.jpg?scale-down-to=2048')">
-          <span class="ct-name">RivTek</span>
-        </button>
-      </div>
-      <div class="case-content">
-
-<article class="case-reader active">
-      <div class="cr-head">
-        <h3 class="cr-title">Sockeye Brewing</h3>
-        <div class="cr-meta">
-          <div><span class="cr-k">Project Scope</span><span class="cr-v">Website</span></div>
-          <div><span class="cr-k">Launched</span><span class="cr-v">August 2026</span></div>
-        </div>
-      </div>
-      <div class="cr-body">
-        <p><strong>Description:</strong> We built the new sockeyebrew.com for Sockeye Brewing, a Boise brewery. It went live on August 18, 2026.</p>
-        <figure class="cr-photo"><img src="https://sockeyebrew.com/wp-content/uploads/2026/05/Can-on-Post-1.jpg" alt="A can of Sockeye Dagger Falls IPA on a fence post in the sagebrush" loading="lazy"></figure>
-        <p><strong>After Launch:</strong> A launch is a starting line, not a finish line. We built Sockeye a before-and-after report from Google Analytics 4, Microsoft Clarity and Google Search Console, and we read it the way a coach reads game film. Against the old site, rage clicks (the rapid repeat clicks of a frustrated visitor) fell 81% and dead clicks fell 32%. Visitors spent 21% more time engaged per visit than in the old site&rsquo;s final weeks.</p>
-        <p>That is the loop we would run for BoreBuddy: launch, measure, then fix what the numbers show.</p>
-        <p class="cr-ref">See it live: <a href="https://sockeyebrew.com/" target="_blank" rel="noopener">sockeyebrew.com</a></p>
-      </div>
-    </article>
-<article class="case-reader">
-      <div class="cr-head">
-        <h3 class="cr-title">AC Boise</h3>
-        <div class="cr-meta">
-          <div><span class="cr-k">Project Scope</span><span class="cr-v">Kit Launch Campaign</span></div>
-        </div>
-      </div>
-      <div class="cr-body">
-        <p><strong>Description &mdash;</strong> You do not launch a local club's kit in a blank studio. You take it outside. To reveal the new AC Boise gear, we teamed up with Against, director DJ Ramirez, and DP Nathan Zanders to put the city on screen. We framed Boise as a living character, filming real people wearing the kit in the places they do life. Built for both the live launch event and social channels, the film skips the standard sports hype. It gives a clear, honest look at a city standing behind its team.</p>
-        <div class="cr-video"><iframe src="https://www.youtube.com/embed/dTzb_Ck8vJ4" title="AC Boise — Kit Launch" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
-        <figure class="cr-photo"><img src="https://framerusercontent.com/images/mwERdMMwZZxkw86JFuaaOFCCo.webp?scale-down-to=2048" alt="AC Boise kit launch film still" loading="lazy"></figure>
-        <div class="cr-photo-pair">
-          <figure class="cr-photo"><img src="https://framerusercontent.com/images/NsMJRFw2y8iEh5HSUOQBYBdElU.webp?scale-down-to=2048" alt="" loading="lazy"></figure>
-          <figure class="cr-photo"><img src="https://framerusercontent.com/images/0tbvSRYuvB2fidAe9oUEZUrjdg.jpg?scale-down-to=2048" alt="" loading="lazy"></figure>
-        </div>
-      </div>
-    </article>
-<article class="case-reader">
-      <div class="cr-head">
-        <h3 class="cr-title">NCS</h3>
-        <div class="cr-meta">
-          <div><span class="cr-k">Length of Retainer</span><span class="cr-v">5+</span></div>
-          <div><span class="cr-k">Project Scope</span><span class="cr-v">Design Retainer</span></div>
-          <div><span class="cr-k">Assets Created</span><span class="cr-v">2000+</span></div>
-        </div>
-      </div>
-      <div class="cr-body">
-        <p>We've partnered with National Carwash Solutions (NCS) for five years running, and we're still going. Over that time we've worked with them in just about every way a creative partner can — but if you boil it down, we've been their strongest problem solvers.</p>
-        <p>When NCS had a problem, they came to us. How do we launch a new product? How do we get people to actually stop by our booth instead of walking past it? How do we become completely unmissable at a show? Those are the kinds of questions we've answered for them, again and again — and the answers showed up as real, produced creative.</p>
-        <div class="cr-tour"><iframe id="tour-embeded" name="NCS Booth Tour" src="https://tour.panoee.net/iframe/680fb252ad5d3dd2fafe3171" frameborder="0" width="100%" height="400px" scrolling="no" allowvr="yes" allow="vr; xr; accelerometer; gyroscope; autoplay;" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" loading="lazy" title="NCS Booth Tour, 360 virtual tour"></iframe></div>
-        <p>The range speaks for itself. Social media graphics, websites, landing pages, videos, event and booth materials, decks and presentations — honestly, just about anything a marketing team could dream up, we've built for NCS. Whatever the channel or the deadline, we've been the team they trust to figure it out and deliver.</p>
-        <div class="cr-photo-pair sq">
-          <figure class="cr-photo"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784294362/IBA_1080x1080_Option2.png" alt="" loading="lazy"></figure>
-          <figure class="cr-photo"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784294361/GoogleAds_1200x1200_DesignA.png" alt="" loading="lazy"></figure>
-        </div>
-        <p>What makes this relevant to BoreBuddy is how we work. NCS has its own internal marketing team and in-house designers, and we don't step on them — we work right alongside them. We regularly share larger projects, dividing the work in whatever way serves the goal. We can lead as creative director and set the vision, or roll up our sleeves as the production design team executing the details — often both on the same project. If people on your team already run the store, the photos or the social posts, we work with them, not around them.</p>
-        <p>The through-line across five years is simple: NCS keeps coming back because we solve their problems, integrate with their team, and make them unmissable. That's the same partner we'd be for you.</p>
-        <p class="cr-ref">Reference contact: Sydney Quintana, Director of Regional Marketing, National Carwash Solutions — <a href="mailto:squintana@ncswash.com">squintana@ncswash.com</a></p>
-      </div>
-    </article>
-<article class="case-reader">
-      <div class="cr-head">
-        <h3 class="cr-title">RivTek</h3>
-        <div class="cr-meta">
-          <div><span class="cr-k">Project Scope</span><span class="cr-v">Go To Market Campaign</span></div>
-        </div>
-      </div>
-      <div class="cr-body">
-        <p><strong>Description &mdash;</strong> We shot RIVTEK&rsquo;s &ldquo;More White Water&rdquo; campaign to show what the boat can actually do. Using fast drones and low-angle cameras, we tracked the raft through extreme drops. No camera tricks. Just a clear, fast-paced look at a heavy-duty raft doing exactly what it was built to do.</p>
-        <div class="cr-video"><iframe src="https://www.youtube.com/embed/u7PyW3uGzFA" title="RIVTEK — More White Water" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
-        <div class="cr-photo-trio">
-          <figure class="cr-photo"><img src="https://framerusercontent.com/images/BrdrPckQ6zrz32WkE2GU17nV98I.png?scale-down-to=2048" alt="" loading="lazy"></figure>
-          <figure class="cr-photo"><img src="https://framerusercontent.com/images/7m2faWE1m7r9QfQ1eeeaPjcrvk.jpg?scale-down-to=2048" alt="" loading="lazy"></figure>
-          <figure class="cr-photo"><img src="https://framerusercontent.com/images/4YJ0WpMiGhYCMsJgeCoSBilnJbA.jpg?scale-down-to=2048" alt="" loading="lazy"></figure>
-        </div>
-      </div>
-    </article>
-      </div>
+    <div class="project-grid">
+      <a class="project reveal" href="https://sockeyebrew.com/" target="_blank" rel="noopener">
+        <img src="work/sockeye-brewing.jpg" alt="Sockeye Brewing website" width="1000" height="1000" loading="lazy">
+        <span class="project-veil"></span>
+        <span class="project-name">Sockeye Brewing</span>
+        <span class="project-btn">View Website</span>
+      </a>
+      <a class="project reveal" href="https://www.tmnevents.com/" target="_blank" rel="noopener">
+        <img src="work/tmn-events.jpg" alt="TMN Events website" width="1000" height="1000" loading="lazy">
+        <span class="project-veil"></span>
+        <span class="project-name">TMN Events</span>
+        <span class="project-btn">View Website</span>
+      </a>
+      <a class="project reveal" href="https://ncswash.com/" target="_blank" rel="noopener">
+        <img src="work/ncs.jpg" alt="NCS website" width="1000" height="1000" loading="lazy">
+        <span class="project-veil"></span>
+        <span class="project-name">NCS</span>
+        <span class="project-btn">View Website</span>
+      </a>
+      <a class="project reveal" href="https://shadowequipment.com/" target="_blank" rel="noopener">
+        <img src="work/shadow-equipment.jpg" alt="Shadow Equipment website" width="1000" height="1000" loading="lazy">
+        <span class="project-veil"></span>
+        <span class="project-name">Shadow Equipment</span>
+        <span class="project-btn">View Website</span>
+      </a>
     </div>
-    </div></section>
+  </div>
+</section>
 
 <!-- Creative Philosophy -->
 <section class="philosophy" id="philosophy">
