@@ -850,7 +850,7 @@ function startTally() {
   if (tallyPass && hits === n) { const bonus = n * 1000 * tier(); score += bonus; showMsg('Perfect!!\n' + bonus); sfx.perfect(); phaseDur = 2.8; }
   else if (tallyPass) { showMsg('Good!!\n' + hits + ' of ' + n); sfx.clear(); phaseDur = 2.4; }
   else {
-    showMsg('Game over\n' + hits + ' of ' + n); sfx.over(); phaseDur = 3.6;
+    showMsg(stage === 'field' ? hits + ' of ' + n + '\nOn to the office' : 'Game over\n' + hits + ' of ' + n); sfx.over(); phaseDur = 3.6; // the range never ends the game
     if (stage === 'field') { dogPop('laugh', { x: P.pos.x - Math.sin(P.yaw) * 10, z: P.pos.z - Math.cos(P.yaw) * 10 }, null, 3.2); sfx.laugh(); }
   }
   renderHud();
@@ -927,7 +927,7 @@ function updateGame(dt) {
     else if (shots === 0 && outT > 0.7) endStage('Out of shots');
   }
   else if (phase === 'result') { if (phaseT >= phaseDur) { hideMsg(); startTally(); } }
-  else if (phase === 'tally') { if (phaseT >= phaseDur) { hideMsg(); if (stage === 'office') showPitch(tallyPass); else if (tallyPass) swapTo('office'); else toTitle(); } }
+  else if (phase === 'tally') { if (phaseT >= phaseDur) { hideMsg(); if (stage === 'office') showPitch(tallyPass); else swapTo('office'); } }
   else if (phase === 'swap') {
     if (!swapped && phaseT >= 0.4) { swapped = true; if (swapNext === 'field') round++; setWorld(swapNext); fadeEl.style.opacity = '0'; }
     if (phaseT >= 0.75) { if (swapNext === 'office') beginOffice(); else beginRound(); }

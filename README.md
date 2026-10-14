@@ -7,7 +7,7 @@ A playable proposal for BoreBuddy, by Mox: an 8-bit, first-person shooting game 
 ## How it plays
 
 **Stage one, the range.** Five moving targets are set from 30 to 120 yards. The far ones are specks until you scope in.
-You get eight shots and a clock, and need at least three of the five to move on. A dead-centre hit pays double.
+You get eight shots and a clock. However it goes, the game moves on to the office. A dead-centre hit pays double.
 Ducks flush out of the grass for bonus points, and the dog fetches the ones you hit.
 
 **Stage two, the office.** The scene cuts to a warehouse office with ten computers: on desks, up on a mezzanine and
