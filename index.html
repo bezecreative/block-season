@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16'/%3E%3Crect x='1' y='1' width='14' height='14' fill='%23fcfcfc'/%3E%3Crect x='2' y='2' width='12' height='12' fill='%23f83800'/%3E%3Crect x='4' y='4' width='8' height='8' fill='%23fcfcfc'/%3E%3Crect x='6' y='6' width='4' height='4' fill='%23f83800'/%3E%3C/svg%3E">
 <title>A Proposal for BoreBuddy</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=Press+Start+2P&display=swap">
 <style>
 /* Layout: full-bleed 3D view drawn at low resolution and scaled up with hard pixels.
    An 8-bit status bar is pinned to the bottom (SHOT / HIT / SCORE boxes); title, pause and
@@ -31,6 +31,7 @@ body{margin:0;background:var(--sky);color:var(--white);font-family:var(--px);fon
 #game{position:relative;width:100%;height:100%;overflow:hidden;background:var(--sky)}
 #view{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none;image-rendering:crisp-edges;image-rendering:pixelated}
 body.playing #view{cursor:crosshair}
+#view.sharp{image-rendering:auto}
 
 /* ---------- status bar ---------- */
 #hud{position:absolute;inset:0;pointer-events:none}
@@ -214,7 +215,7 @@ a.mode{display:block;text-decoration:none}
   </section>
 
   <section class="card" id="pitchcard" hidden tabindex="-1" aria-labelledby="pc-title">
-    <h2 id="pc-title">Want to stand out?</h2>
+    <h2 id="pc-title">Ready to stand out?</h2>
     <p class="big">Go with Mox</p>
     <div class="modes">
       <a class="mode cta" id="pc-view" href="#" target="_blank" rel="noopener" hidden>View proposal</a>
@@ -232,11 +233,12 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const rnd = (a, b) => a + Math.random() * (b - a);
 const TAU = Math.PI * 2, YD = 1.09361, EYE = 1.7, GRAV = 22, PR = 0.45, SHOT_GAP = 0.14;
 const WORLD_R = 16, GRASS_IN = 8, GRASS_OUT = 75, DOG_S = 1.5;
+const ROAD_X = 18.5, ROAD_W = 9; // the highway at the billboard: off to your right, running straight out to the horizon
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const canvas = $('view');
 // Paste the proposal link between the quotes. It switches on "I just want to see your proposal" on the
 // title card and "View proposal" on the card that follows the office.
-const PROPOSAL_URL = 'https://bezecreative.github.io/block-season/proposal.html';
+const PROPOSAL_URL = 'proposal.html'; // next to this page, so the game and the proposal stay on the same host
 if (PROPOSAL_URL) for (const id of ['seeprop', 'pc-view']) { $(id).href = PROPOSAL_URL; $(id).hidden = false; }
 const menuItems = [...document.querySelectorAll('#menu .mode')].filter(el => !el.hidden);
 
@@ -321,34 +323,46 @@ function makeTree(x, z, s, yaw) {
   fieldWorld.add(g); g.traverse(o => { if (o.isMesh) { o.receiveShadow = true; solids.push(o); } });
   if (Math.hypot(x, z) < WORLD_R + 2) colliders.push({ x, z, r: 0.62 * s });
 }
-function makeBush(x, z, s, yaw) {
+function makeBush(x, z, s, yaw) { // returns the bush
   const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = yaw; g.scale.setScalar(s);
   const leaf = 0x48a808, under = 0x2c7c04;
   B(g, under, 2.9, 0.5, 2.3, 0, 0.25, 0); B(g, leaf, 2.7, 1.3, 2.1, 0, 0.95, 0); B(g, leaf, 1.7, 0.8, 1.6, -0.2, 1.9, 0); B(g, leaf, 1.3, 0.9, 1.5, 1.5, 0.75, 0.1);
   fieldWorld.add(g); g.traverse(o => { if (o.isMesh) { o.receiveShadow = true; solids.push(o); } });
   if (Math.hypot(x, z) < WORLD_R + 2) colliders.push({ x, z, r: 1.35 * s });
+  return g;
 }
 const farFrom = (x, z, list, min) => { for (const p of list) { const dx = p.x - x, dz = p.z - z; if (dx * dx + dz * dz < min * min) return false; } return true; };
-makeTree(-11, -19, 1.3, 0); makeBush(13, -17, 1.25, 0); // the pair you see from the start
+makeTree(-11, -19, 1.3, 0); const startBush = makeBush(13, -17, 1.25, 0); // the pair you see from the start (the bush makes way for the road)
+const startBushParts = new Set(); startBush.traverse(o => { if (o.isMesh) startBushParts.add(o); });
 makeTree(-16, -44, 1.3, 0); // the swinging target hangs from this one
 makeTree(-34, -138, 1.7, 0.4); makeTree(6, -150, 1.8, 2.1); makeTree(38, -132, 1.6, 4); // backdrop behind the far rail
 {
   const spots = [{ x: -11, z: -19 }, { x: 13, z: -17 }, { x: -34, z: -138 }, { x: 38, z: -132 }];
   for (let n = 0, tries = 0; n < 26 && tries < 3000; tries++) {
     const a = srnd(0, TAU), r = srnd(18, 110), x = Math.cos(a) * r, z = Math.sin(a) * r;
-    if (!farFrom(x, z, spots, 13) || (z < -9 && Math.abs(x) < 28)) continue; // keep the range clear
+    if (!farFrom(x, z, spots, 13) || (z < -9 && Math.abs(x) < 28) || Math.abs(x - ROAD_X) < 9) continue; // keep the range and the road clear
     spots.push({ x, z }); if (srand() < 0.55) makeTree(x, z, srnd(0.7, 1.2), srnd(0, TAU)); else makeBush(x, z, srnd(0.8, 1.4), srnd(0, TAU)); n++;
   }
 }
 
-// tall grass: a wide ring around the clearing; ducks come up out of it and the dog hides in it
+// tall grass: a wide ring around the clearing; ducks come up out of it and the dog hides in it.
+// At the billboard the road cuts through it, and the verge on your side of the road is mown so you can see the road.
+const verge = [], ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
+let grassMesh = null;
+function roadsideGrass(on) {
+  for (const v of verge) grassMesh.setMatrixAt(v.i, on ? v.off : v.on);
+  grassMesh.instanceMatrix.needsUpdate = true;
+}
 {
-  const N = 13000, grass = new THREE.InstancedMesh(BOX, new THREE.MeshLambertMaterial({ color: 0xffffff }), N);
+  const N = 13000, grass = grassMesh = new THREE.InstancedMesh(BOX, new THREE.MeshLambertMaterial({ color: 0xffffff }), N);
   const dummy = new THREE.Object3D(), c = new THREE.Color(), COLS = [0x58a800, 0x4c9c00, 0x80d010, 0x68bc08];
   for (let i = 0; i < N; i++) {
     const a = srnd(0, TAU), r = srnd(GRASS_IN, GRASS_OUT), h = srnd(0.8, 1.5) * (r < GRASS_IN + 2 ? 0.7 : 1);
     dummy.position.set(Math.cos(a) * r, h / 2, Math.sin(a) * r); dummy.rotation.set(0, srnd(0, TAU), 0); dummy.scale.set(srnd(0.3, 0.6), h, srnd(0.3, 0.6)); dummy.updateMatrix();
     grass.setMatrixAt(i, dummy.matrix); c.setHex(COLS[(srand() * COLS.length) | 0]); grass.setColorAt(i, c);
+    const gx = dummy.position.x, edge = ROAD_X - ROAD_W / 2 - 1.8;
+    if (Math.abs(gx - ROAD_X) < ROAD_W / 2 + 1.8) verge.push({ i, on: dummy.matrix.clone(), off: ZERO });
+    else if (gx < edge && gx > edge - 10) { const on = dummy.matrix.clone(); dummy.scale.y *= 0.3; dummy.position.y *= 0.3; dummy.updateMatrix(); verge.push({ i, on, off: dummy.matrix.clone() }); }
   }
   grass.receiveShadow = true; grass.frustumCulled = false; fieldWorld.add(grass);
 }
@@ -586,26 +600,30 @@ function updatePcs(dt) {
   }
 }
 
-// ---------- the billboard: the last stop. "Want to stand out? Go with Mox", and a target that opens the proposal ----------
-const billboard = new THREE.Group(); billboard.position.set(0, 0, -36); billboard.visible = false; scene.add(billboard);
-const bbCanvas = document.createElement('canvas'); bbCanvas.width = 1024; bbCanvas.height = 512;
+// ---------- the billboard: the last stop. "Ready to stand out? Go with Mox", and a target that opens the proposal ----------
+const billboard = new THREE.Group(); billboard.position.set(0, 0, -44); billboard.visible = false; scene.add(billboard);
+const bbCanvas = document.createElement('canvas'); bbCanvas.width = 2048; bbCanvas.height = 1024;
 const bbTex = new THREE.CanvasTexture(bbCanvas), moxImg = new Image();
-function drawBillboard() {
+bbTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+const SANS = 'Archivo, "Arial Black", Arial, sans-serif';
+function fitFont(x, text, maxW, size, weight) { do { x.font = weight + ' ' + size + 'px ' + SANS; } while (x.measureText(text).width > maxW && --size > 10); }
+function drawBillboard() { // laid out on a 1024 x 512 grid, drawn at double that
   const x = bbCanvas.getContext('2d');
+  x.setTransform(2, 0, 0, 2, 0, 0);
   x.fillStyle = '#000'; x.fillRect(0, 0, 1024, 512);
   x.strokeStyle = '#80d010'; x.lineWidth = 14; x.strokeRect(7, 7, 1010, 498);
   x.textBaseline = 'top'; x.textAlign = 'center';
-  x.font = '48px "Press Start 2P", monospace'; x.fillStyle = '#3cbcfc'; x.fillText('WANT TO STAND OUT?', 512, 48);
-  x.fillStyle = '#fc9838'; x.fillRect(48, 122, 928, 8);
-  x.textAlign = 'left'; x.fillStyle = '#fcfcfc'; x.font = '36px "Press Start 2P", monospace'; x.fillText('GO WITH', 60, 196);
-  if (moxImg.complete && moxImg.naturalWidth) x.drawImage(moxImg, 60, 270, 400, 113);
-  else { x.font = '72px "Press Start 2P", monospace'; x.fillText('MOX', 60, 280); }
-  x.textAlign = 'center'; x.fillStyle = '#fc9838'; x.font = '20px "Press Start 2P", monospace';
-  x.fillText('SHOOT THE TARGET', 760, 420); x.fillText('TO SEE THE PROPOSAL', 760, 452);
+  fitFont(x, 'Ready to stand out?', 900, 92, 900); x.fillStyle = '#3cbcfc'; x.fillText('Ready to stand out?', 512, 36);
+  x.fillStyle = '#fc9838'; x.fillRect(48, 150, 928, 8);
+  x.textAlign = 'left'; x.fillStyle = '#fcfcfc'; x.font = '800 54px ' + SANS; x.fillText('Go with', 60, 196);
+  if (moxImg.complete && moxImg.naturalWidth) x.drawImage(moxImg, 60, 276, 400, 113);
+  else { x.font = '900 110px ' + SANS; x.fillText('MOX', 60, 270); }
+  x.textAlign = 'center'; x.fillStyle = '#fc9838'; x.font = '800 26px ' + SANS;
+  x.fillText('SHOOT THE TARGET', 760, 414); x.fillText('TO SEE THE PROPOSAL', 760, 446);
   bbTex.needsUpdate = true;
 }
 drawBillboard(); moxImg.onload = drawBillboard; moxImg.src = 'mox-logo.png';
-if (document.fonts && document.fonts.load) document.fonts.load('20px "Press Start 2P"').then(drawBillboard, () => {});
+if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('900 48px Archivo'), document.fonts.load('800 48px Archivo')]).then(drawBillboard, () => {});
 const BB_W = 24, BB_H = 12, BB_Y = 3.5;
 {
   const face = new THREE.Mesh(new THREE.PlaneGeometry(BB_W, BB_H), new THREE.MeshBasicMaterial({ map: bbTex }));
@@ -616,10 +634,94 @@ const BB_W = 24, BB_H = 12, BB_Y = 3.5;
   for (const lx of [-8, 0, 8]) { B(billboard, 0x2c3035, 0.12, 0.12, 1.4, lx, BB_Y - 0.05, 1.6); B(billboard, 0xfcfcd8, 0.7, 0.25, 0.4, lx, BB_Y + 0.05, 2.3); }
 }
 // the target sits over the right side of the art, centred on canvas point (760, 270)
-const bbTarget = new THREE.Mesh(BOX, boardMats); bbTarget.scale.set(4.4, 4.4, 0.35);
+const bbTarget = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const x = c.getContext('2d');
+  [['#111', 127], ['#f83800', 121], ['#fcfcfc', 96], ['#f83800', 71], ['#fcfcfc', 46], ['#f83800', 21]].forEach(r => { x.fillStyle = r[0]; x.beginPath(); x.arc(128, 128, r[1], 0, TAU); x.fill(); });
+  const t = new THREE.CanvasTexture(c); t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const face = new THREE.MeshLambertMaterial({ map: t }), rim = mat(0xd8d8d8);
+  return new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 1, 48).rotateX(Math.PI / 2), [rim, face, rim]);
+})();
+bbTarget.scale.set(4.4, 4.4, 0.35);
 bbTarget.position.set((760 / 1024 - 0.5) * BB_W, BB_Y + BB_H * (1 - 270 / 512), 0.45); bbTarget.castShadow = true;
 bbTarget.userData.billboardTarget = true; billboard.add(bbTarget);
 const bbSolids = []; billboard.traverse(o => { if (o.isMesh && o !== bbTarget) bbSolids.push(o); });
+
+// ---------- the highway past the billboard: two lanes, gravel shoulders, reflector posts, a deer crossing sign ----------
+const roadside = new THREE.Group(); roadside.visible = false; scene.add(roadside);
+{
+  const c = document.createElement('canvas'); c.width = 64; c.height = 128; // 9 m across, one 12 m stretch along
+  const x = c.getContext('2d');
+  x.fillStyle = '#4c5056'; x.fillRect(0, 0, 64, 128);
+  for (let i = 0; i < 700; i++) { x.fillStyle = srand() < 0.5 ? '#44484e' : '#555a60'; x.fillRect((srand() * 64) | 0, (srand() * 128) | 0, 1, 1); }
+  x.fillStyle = '#ecece4'; x.fillRect(2, 0, 1, 128); x.fillRect(61, 0, 1, 128); // edge lines
+  x.fillStyle = '#f8c800'; x.fillRect(31, 0, 2, 32); // centre dashes: 3 m on, 9 m off
+  const t = new THREE.CanvasTexture(c); t.wrapT = THREE.RepeatWrapping; t.repeat.set(1, 900 / 12); t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(ROAD_W, 900).rotateX(-Math.PI / 2), new THREE.MeshLambertMaterial({ map: t }));
+  road.position.set(ROAD_X, 0.06, -100); roadside.add(road);
+  for (const s of [-1, 1]) { const sh = B(roadside, 0xa89878, 1.6, 0.04, 900, ROAD_X + s * (ROAD_W / 2 + 0.8), 0.04, -100); sh.castShadow = false; }
+  for (let pz = 150; pz >= -330; pz -= 30) for (const s of [-1, 1]) { // reflector posts
+    const xx = ROAD_X + s * (ROAD_W / 2 + 1.9), zz = pz + s * 7;
+    B(roadside, 0xecece4, 0.12, 1.1, 0.12, xx, 0.55, zz); B(roadside, s > 0 ? 0xf83800 : 0xf8c800, 0.13, 0.18, 0.13, xx, 0.9, zz);
+  }
+  // deer crossing sign on the near shoulder
+  const sc = document.createElement('canvas'); sc.width = sc.height = 256;
+  const y = sc.getContext('2d'), TAU2 = Math.PI * 2;
+  y.scale(2, 2);
+  y.fillStyle = '#111'; y.beginPath(); y.moveTo(64, 1); y.lineTo(127, 64); y.lineTo(64, 127); y.lineTo(1, 64); y.closePath(); y.fill();
+  y.fillStyle = '#f8c800'; y.beginPath(); y.moveTo(64, 7); y.lineTo(121, 64); y.lineTo(64, 121); y.lineTo(7, 64); y.closePath(); y.fill();
+  y.fillStyle = y.strokeStyle = '#111'; y.lineCap = 'round'; y.lineJoin = 'round';
+  y.beginPath(); y.ellipse(60, 68, 23, 10, -0.3, 0, TAU2); y.fill();
+  y.lineWidth = 8; y.beginPath(); y.moveTo(76, 60); y.lineTo(86, 45); y.stroke();
+  y.beginPath(); y.ellipse(90, 42, 8, 5, -0.5, 0, TAU2); y.fill();
+  y.lineWidth = 3; y.beginPath(); y.moveTo(86, 38); y.lineTo(82, 26); y.moveTo(84, 32); y.lineTo(77, 29); y.moveTo(89, 37); y.lineTo(92, 25); y.moveTo(91, 31); y.lineTo(97, 27); y.stroke();
+  y.lineWidth = 5; y.beginPath(); y.moveTo(74, 66); y.lineTo(88, 76); y.lineTo(96, 72); y.moveTo(70, 70); y.lineTo(82, 84); y.moveTo(44, 74); y.lineTo(31, 84); y.lineTo(25, 92); y.moveTo(42, 70); y.lineTo(27, 74); y.stroke();
+  y.lineWidth = 4; y.beginPath(); y.moveTo(39, 69); y.lineTo(33, 61); y.stroke();
+  const st = new THREE.CanvasTexture(sc); st.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const sign = new THREE.Group(); sign.position.set(ROAD_X - ROAD_W / 2 - 2.4, 0, -15); sign.rotation.y = -0.35; roadside.add(sign);
+  B(sign, 0x9098a0, 0.1, 2.9, 0.1, 0, 1.45, -0.06);
+  B(sign, 0x9098a0, 1.3, 1.3, 0.04, 0, 2.6, -0.01).rotation.z = Math.PI / 4;
+  const art = new THREE.Mesh(new THREE.PlaneGeometry(1.86, 1.86), new THREE.MeshLambertMaterial({ map: st, alphaTest: 0.5 }));
+  art.position.set(0, 2.6, 0.015); sign.add(art);
+  roadside.traverse(o => { if (o.isMesh) { o.receiveShadow = true; o.userData.road = true; } });
+}
+const roadSolids = []; roadside.traverse(o => { if (o.isMesh) roadSolids.push(o); });
+
+// traffic: a pickup now and then, either way down the road. It stops bullets and moves deer off the road.
+const TRUCK_COLS = [0xc82c20, 0xecece4, 0x2c5cb8, 0x2c3035, 0x5c6c3c];
+function buildTruck(col) { // nose toward +x
+  const g = new THREE.Group(), glass = 0x22303c, tire = 0x1c1c1c, chrome = 0xc8ccd0;
+  B(g, col, 5.4, 0.75, 2.0, 0, 0.85, 0);
+  B(g, col, 2.1, 0.85, 1.9, 0.35, 1.65, 0);
+  B(g, glass, 0.08, 0.6, 1.7, 1.42, 1.66, 0); B(g, glass, 1.7, 0.5, 1.92, 0.3, 1.72, 0); B(g, glass, 0.06, 0.45, 1.6, -0.72, 1.72, 0);
+  B(g, col, 2.4, 0.5, 0.12, -1.5, 1.45, 0.94); B(g, col, 2.4, 0.5, 0.12, -1.5, 1.45, -0.94); B(g, col, 0.12, 0.5, 2.0, -2.66, 1.45, 0);
+  B(g, chrome, 0.15, 0.35, 2.06, 2.72, 0.7, 0); B(g, chrome, 0.15, 0.25, 2.06, -2.72, 0.62, 0);
+  for (const s of [-1, 1]) { B(g, 0xfcfcd8, 0.06, 0.18, 0.36, 2.72, 1.0, s * 0.72); B(g, 0xd81c24, 0.06, 0.3, 0.2, -2.72, 1.1, s * 0.86); }
+  for (const wx of [1.75, -1.75]) for (const s of [-1, 1]) { B(g, tire, 0.85, 0.85, 0.36, wx, 0.43, s * 0.92); B(g, chrome, 0.38, 0.38, 0.38, wx, 0.43, s * 0.93); }
+  g.traverse(o => { if (o.isMesh) o.userData.car = true; });
+  return g;
+}
+const cars = []; let nextCar = 0;
+function spawnCar() { // dir 1 comes at you from the horizon, dir -1 comes up from behind and drives away
+  const dir = Math.random() < 0.5 ? 1 : -1, g = buildTruck(TRUCK_COLS[(Math.random() * TRUCK_COLS.length) | 0]);
+  const c = { g, dir, z: dir > 0 ? -280 : 160, speed: rnd(19, 27), heard: false };
+  g.position.set(ROAD_X - dir * ROAD_W / 4, 0, c.z); g.rotation.y = -dir * Math.PI / 2; // keep right
+  scene.add(g); hittables.push(g); cars.push(c);
+}
+function clearCars() { for (const c of cars) { scene.remove(c.g); unhit(c.g); } cars.length = 0; }
+function updateCars(dt) {
+  nextCar -= dt; if (nextCar <= 0) { nextCar = rnd(7, 15); spawnCar(); }
+  for (let i = cars.length - 1; i >= 0; i--) {
+    const c = cars[i]; c.z += c.dir * c.speed * dt; c.g.position.z = c.z;
+    const ahead = (P.pos.z - c.z) * c.dir; // metres before it draws level with you
+    if (!c.heard && ahead < c.speed * 0.9) { c.heard = true; sfx.car(); }
+    for (const d of deer) {
+      const along = (d.g.position.z - c.z) * c.dir, side = d.g.position.x - ROAD_X;
+      if (along > -3 && along < 45 && Math.abs(side) < ROAD_W / 2 + 2 && d.state !== 'flee') { d.state = 'flee'; d.timer = rnd(1.5, 2.5); d.want = side > 0 ? Math.PI / 2 : -Math.PI / 2; }
+    }
+    if (c.z > 170 || c.z < -300) { scene.remove(c.g); unhit(c.g); cars.splice(i, 1); }
+  }
+}
 
 // ---------- deer around the billboard, for bonus points ----------
 function buildDeer(buck) {
@@ -640,10 +742,11 @@ function buildDeer(buck) {
   return { g, legs, head };
 }
 const deer = [], deerWait = [];
+const offRoad = x => Math.abs(x - ROAD_X) > ROAD_W / 2 + 2 ? x : ROAD_X + (x > ROAD_X ? 1 : -1) * (ROAD_W / 2 + rnd(2.5, 5));
 function spawnDeer() {
   const buck = Math.random() < 0.45, b = buildDeer(buck), a = rnd(-1.1, 1.1), r = rnd(18, 42);
   const d = { buck, g: b.g, legs: b.legs, head: b.head, heading: rnd(0, TAU), want: 0, speed: 0, state: 'graze', timer: rnd(1, 4), tx: 0, tz: 0, phase: rnd(0, 6), alive: true, pts: buck ? 1000 : 600 };
-  d.want = d.heading; b.g.position.set(Math.sin(a) * r, 0, -Math.cos(a) * r); b.g.rotation.y = d.heading;
+  d.want = d.heading; b.g.position.set(offRoad(Math.sin(a) * r), 0, -Math.cos(a) * r); b.g.rotation.y = d.heading;
   b.g.traverse(o => { if (o.isMesh) o.userData.deer = d; });
   scene.add(b.g); hittables.push(b.g); deer.push(d);
 }
@@ -665,7 +768,7 @@ function updateDeer(dt) {
     else if (d.state === 'walk') {
       const tx = d.tx - p.x, tz = d.tz - p.z;
       if (Math.hypot(tx, tz) < 0.8 || d.timer <= 0) { d.state = 'graze'; d.timer = rnd(2.5, 6); } else { d.want = Math.atan2(tx, tz); speed = 1.6; }
-    } else if (d.timer <= 0) { const a = rnd(-1.15, 1.15), rr = rnd(16, 42); d.tx = Math.sin(a) * rr; d.tz = -Math.cos(a) * rr; d.state = 'walk'; d.timer = 16; }
+    } else if (d.timer <= 0) { const a = rnd(-1.15, 1.15), rr = rnd(16, 42); d.tx = offRoad(Math.sin(a) * rr); d.tz = -Math.cos(a) * rr; d.state = 'walk'; d.timer = 16; }
     let da = d.want - d.heading; da = Math.atan2(Math.sin(da), Math.cos(da));
     d.heading += da * Math.min(1, dt * (d.state === 'flee' ? 6 : 3));
     d.speed += (speed - d.speed) * Math.min(1, dt * 4);
@@ -848,7 +951,16 @@ const sfx = {
   perfect() { tune([523, 659, 784, 1047, 784, 1047, 1319, 1568], 0.09, 0.11); },
   over() { tune([392, 370, 349, 330, 0, 262], 0.22, 0.11); },
   wood() { noise(0.16, 'bandpass', 1500, 500, 0.6); tone(220, 90, 0.1, 0.2, 0, 'triangle'); },
-  step() { noise(0.06, 'lowpass', 420, 160, 0.07); }
+  step() { noise(0.06, 'lowpass', 420, 160, 0.07); },
+  tink() { tone(1900, 1300, 0.05, 0.08); tone(2600, 2100, 0.04, 0.05, 0.03); },
+  car() { // a truck going by: swells, then fades
+    if (!ac || muted) return;
+    const t = ac.currentTime, src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+    src.buffer = noiseBuf; src.loop = true; f.type = 'lowpass'; f.Q.value = 1.4;
+    f.frequency.setValueAtTime(300, t); f.frequency.linearRampToValueAtTime(900, t + 0.8); f.frequency.linearRampToValueAtTime(240, t + 1.9);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.3, t + 0.8); g.gain.linearRampToValueAtTime(0.0001, t + 1.9);
+    src.connect(f); f.connect(g); g.connect(master); src.start(t, Math.random() * 0.5); src.stop(t + 1.95);
+  }
 };
 
 // ---------- state ----------
@@ -920,14 +1032,15 @@ function hideDog() { dog.mode = 'hidden'; dogUp.visible = dogWalk.visible = fals
 function setWorld(w) {
   stage = w;
   const outdoors = w !== 'office';
-  fieldWorld.visible = outdoors; officeWorld.visible = !outdoors; billboard.visible = w === 'billboard'; rangeProps.visible = w === 'field';
+  fieldWorld.visible = outdoors; officeWorld.visible = !outdoors; billboard.visible = roadside.visible = w === 'billboard'; rangeProps.visible = w === 'field'; startBush.visible = w !== 'billboard';
   renderer.setClearColor(outdoors ? 0x5cb8ff : 0x20242c);
   hemi.groundColor.setHex(outdoors ? 0x9cc060 : 0x8c8c94);
-  clearTargets(); hideDog(); setRange(false); setPcs(false); clearDeer(); $('hud').classList.remove('free');
+  clearTargets(); hideDog(); setRange(false); setPcs(false); clearDeer(); clearCars(); roadsideGrass(w === 'billboard'); $('hud').classList.remove('free');
   clearTimeout(tipTimer); $('tip').hidden = true;
   hittables = outdoors ? solids.concat([dogUp]) : officeSolids.slice();
-  if (w === 'billboard') { bbTarget.visible = true; hittables.push(...bbSolids, bbTarget); }
-  P.pos.set(0, 0, 0); P.vx = P.vz = P.vy = 0; P.yaw = 0; P.pitch = 0.04; scopeToggle = false; $('tb-scope').classList.remove('on');
+  if (w === 'billboard') { hittables = hittables.filter(o => !startBushParts.has(o)); bbTarget.visible = true; hittables.push(...bbSolids, ...roadSolids, bbTarget); nextCar = rnd(2, 4); }
+  canvas.classList.toggle('sharp', w === 'billboard'); resize();
+  P.pos.set(0, 0, 0); P.vx = P.vz = P.vy = 0; P.yaw = w === 'billboard' ? -0.17 : 0; P.pitch = 0.04; // at the billboard, face a touch right: board and road both in view scopeToggle = false; $('tb-scope').classList.remove('on');
 }
 function startGame() {
   round = 1; score = 0; $('pops').textContent = ''; scopeT = 0;
@@ -1363,7 +1476,8 @@ function onHit(h) {
     renderHud();
   } else if (ud.dog && dog.mode === 'laugh' && dog.t < dog.dur - 0.25) {
     dog.dur = dog.t + 0.22; dog.mode = 'hold'; sfx.yelp(); popup(h.point, 'Yipe!');
-  } else if (!t && !ud.dog) puff(h.point, stage === 'office' ? [0xa8b0bc, 0x6c7684] : h.object === field ? [0xc88c3c, 0x80d010] : [0x48a808, 0x7c4410], 5, 1.6, 0.12);
+  } else if (ud.car) { puff(h.point, [0xfcfcd8, 0x9098a0], 5, 2, 0.1); sfx.tink(); }
+  else if (!t && !ud.dog) puff(h.point, stage === 'office' ? [0xa8b0bc, 0x6c7684] : ud.road ? [0x6c7078, 0xa89878] : h.object === field ? [0xc88c3c, 0x80d010] : [0x48a808, 0x7c4410], 5, 1.6, 0.12);
 }
 
 // ---------- per-frame ----------
@@ -1448,7 +1562,8 @@ function updateArrows() {
 // ---------- sizing + loop ----------
 function resize() {
   const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight, asp = w / h;
-  const px = Math.max(2, Math.round(h / 300)); // chunky pixels: about 300 lines tall whatever the window
+  // chunky pixels, about 300 lines tall whatever the window; the billboard stage draws at full resolution so the board reads clean
+  const px = stage === 'billboard' ? 1 / Math.min(1.5, devicePixelRatio || 1) : Math.max(2, Math.round(h / 300));
   renderer.setSize(Math.max(1, Math.round(w / px)), Math.max(1, Math.round(h / px)), false);
   baseFov = asp < 1 ? 88 : 72;
   camera.aspect = asp; camera.fov = lerp(baseFov, scopeFov(), scopeT); camera.updateProjectionMatrix();
@@ -1462,7 +1577,7 @@ let last = performance.now(), T = 0;
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now;
-  if (state === 'playing') { updatePlayer(dt); updateWeapon(dt); updateGame(dt); updateTargets(dt); updateDog(dt); if (stage === 'field') updateRange(dt); else if (stage === 'office') updatePcs(dt); else updateDeer(dt); }
+  if (state === 'playing') { updatePlayer(dt); updateWeapon(dt); updateGame(dt); updateTargets(dt); updateDog(dt); if (stage === 'field') updateRange(dt); else if (stage === 'office') updatePcs(dt); else { updateDeer(dt); updateCars(dt); } }
   else if (state === 'menu') { updateTargets(dt); updateRange(dt); }
   if (state !== 'paused') { T += dt; updateDebris(dt); updateTracers(dt); poseView(dt, T); }
   renderer.clear();

@@ -15,9 +15,10 @@ a mezzanine; seven move, riding a conveyor, hanging from overhead trolleys and r
 show BoreBuddy's homepage and the other twelve show NEMO Arms and Smith & Wesson. The card reads "Let's see how your
 website stacks up against the competition. Shoot your website to score points." Hitting a competitor screen costs 500 points.
 
-**Stage three, the billboard.** Back outside, a roadside billboard reads "Want to stand out? Go with Mox" with a
-target on it. Deer wander the field and ducks fly over for bonus points (does 600, bucks 1,000). There is no clock and
-no shot limit. Hitting the billboard target loads the proposal page.
+**Stage three, the billboard.** Back outside, a billboard stands beside a two-lane highway and reads "Ready to stand
+out? Go with Mox" with a target on it. Pickup trucks drive by now and then. Deer wander the field and ducks fly over for
+bonus points (does 600, bucks 1,000). There is no clock and no shot limit. Hitting the billboard target loads the
+proposal page. This stage draws at full resolution, so the billboard reads clean; the first two keep the chunky pixels.
 
 The rifle carries BoreBuddy's AR22 Heavy Precision upper with the 18.5-inch Green Mountain barrel.
 
@@ -37,7 +38,8 @@ On a phone, drag anywhere to aim; on-screen buttons fire and scope. Players stay
 
 `proposal.html` is Mox's website proposal for BoreBuddy. The game links to it from the "I just want to see your
 proposal" button on the title card and the target on the billboard at the end of the game. The link lives in
-`const PROPOSAL_URL` near the top of the script in `index.html`.
+`const PROPOSAL_URL` near the top of the script in `index.html`. It is the relative path `proposal.html`, so the game
+and the proposal stay on whichever host serves them. The proposal's menu has a "Back to the Game" link.
 
 ## The office screens
 
@@ -48,10 +50,12 @@ the logo in view. Only add screenshots you have the right to publish.
 
 ## Files
 
-- `index.html` is the whole game: markup, styles and script in one file. It loads three.js r128 from cdnjs and the Press Start 2P font from Google Fonts.
+- `index.html` is the whole game: markup, styles and script in one file. It loads three.js r128 from cdnjs and the Press Start 2P and Archivo fonts from Google Fonts.
 - `borebuddy-logo.png` and `mox-logo.png` are the logos on the title card.
 - `screens/` holds the homepage screenshots shown on the office computers.
 - `proposal.html` is the proposal page the game links to.
+- `team/` and `logos/` hold images the proposal serves itself (a roster photo, the Micron logo).
+- `vercel.json` and `.vercelignore` set up the Vercel copy.
 
 ## Credits
 
