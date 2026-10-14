@@ -13,10 +13,10 @@ Ducks flush out of the grass for bonus points, and the dog fetches the ones you 
 **Stage two, the office.** The scene cuts to a warehouse office with fifteen computers. Eight sit still on desks and
 a mezzanine; seven move, riding a conveyor, hanging from overhead trolleys and rising on scissor lifts. Three screens
 show BoreBuddy's homepage and the other twelve show NEMO Arms and Smith & Wesson. The card reads "Let's see how your
-website stacks up against the competition. Shoot your website to score points." Hitting a competitor screen costs 500 points.
+website stacks up against the competition. Shoot your website to score points." Hitting a competitor screen costs 500 points. BoreBuddy screens are never dealt to the front row of machines.
 
-**Stage three, the billboard.** Back outside, a billboard stands beside a two-lane highway and reads "Ready to stand
-out? Go with Mox" with a target on it. Pickup trucks drive by now and then. Deer wander the field and ducks fly over for
+**Stage three, the billboard.** Back outside, a billboard stands far down a two-lane highway, about 120 metres out,
+and reads "Ready to stand out? Go with Mox" with a target on it. It takes the scope to read it and hit it. Pickup trucks drive by now and then. Deer wander the field and ducks fly over for
 bonus points (does 600, bucks 1,000). There is no clock and no shot limit. Hitting the billboard target loads the
 proposal page. This stage draws at full resolution, so the billboard reads clean; the first two keep the chunky pixels.
 

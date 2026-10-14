@@ -288,6 +288,9 @@
     letter-spacing: -0.01em;
     text-transform: uppercase;
   }
+  .hero h1.hero-title { display: flex; flex-direction: column; align-items: flex-start; gap: 0.3em; }
+  .hero-title .ht-for { font-size: clamp(30px, 5vw, 76px); }
+  .hero-title .ht-logo { display: block; width: min(820px, 84vw); height: auto; }
   .hero .scroll-hint {
     position: absolute; right: 40px; bottom: 8vh; z-index: 2;
     font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
@@ -1153,7 +1156,7 @@
   <div class="hero-bg">
   </div>
   <div class="hero-content">
-    <h1>Prove the<br>Unproven</h1>
+    <h1 class="hero-title"><span class="ht-for">Website Proposal for</span><img class="ht-logo" src="borebuddy-logo-white.png" alt="BoreBuddy" width="1269" height="269"></h1>
   </div>
   <div class="scroll-hint">Scroll</div>
 </section>

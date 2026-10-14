@@ -574,11 +574,13 @@ const pcs = [[-8, 1.06, -18, 1.25], [7, 1.06, -23, 1.25], [-17, 1.06, -31, 1.3],
   return pc;
 });
 function setPcs(on) { for (const pc of pcs) { pc.alive = on; pc.g.visible = on; unhit(pc.g); } }
-function dealPcs() { // three BoreBuddy screens hidden among twelve competitor screens, shuffled every visit
-  const deck = ['bb', 'bb', 'bb'];
-  for (let i = 0; i < 6; i++) deck.push('nemo', 'sw');
-  for (let i = deck.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0, t = deck[i]; deck[i] = deck[j]; deck[j] = t; }
-  pcs.forEach((pc, i) => { pc.site = deck[i]; pc.screen.material = screens[deck[i]].mat; });
+const FRONT_Z = -35; // the front row: every machine nearer than the conveyor
+function dealPcs() { // three BoreBuddy screens hidden among twelve competitor screens, shuffled every visit, never in the front row
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0, t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
+  const ours = shuffle(pcs.filter(pc => pc.g.position.z < FRONT_Z)).slice(0, 3), rivals = [];
+  for (let i = 0; i < 6; i++) rivals.push('nemo', 'sw');
+  shuffle(rivals);
+  for (const pc of pcs) { pc.site = ours.includes(pc) ? 'bb' : rivals.pop(); pc.screen.material = screens[pc.site].mat; }
   setPcs(true);
 }
 function updatePcs(dt) {
@@ -601,7 +603,7 @@ function updatePcs(dt) {
 }
 
 // ---------- the billboard: the last stop. "Ready to stand out? Go with Mox", and a target that opens the proposal ----------
-const billboard = new THREE.Group(); billboard.position.set(0, 0, -44); billboard.visible = false; scene.add(billboard);
+const billboard = new THREE.Group(); billboard.position.set(-4, 0, -120); billboard.scale.setScalar(1.3); billboard.visible = false; scene.add(billboard); // far out past the field: a scope shot
 const bbCanvas = document.createElement('canvas'); bbCanvas.width = 2048; bbCanvas.height = 1024;
 const bbTex = new THREE.CanvasTexture(bbCanvas), moxImg = new Image();
 bbTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -1106,7 +1108,7 @@ let nextDuck = 0;
 function beginBillboard() {
   phase = 'free'; phaseT = 0; nextDuck = 4; $('timer').hidden = true; $('hud').classList.add('free');
   for (let i = 0; i < 6; i++) spawnDeer();
-  showMsg('Hunt for bonus points.\nThen hit the target\non the billboard.'); sfx.next(); renderHud();
+  showMsg('Hunt for bonus points.\nThen scope in and hit\nthe target on the billboard.'); sfx.next(); renderHud();
 }
 function hitBillboard() {
   if (phase !== 'free') return;
@@ -1190,7 +1192,7 @@ function updateGame(dt) {
     else if (shots === 0 && outT > 0.7) endStage('Out of shots');
   }
   else if (phase === 'free') {
-    if (phaseT >= 5 && phaseT - dt < 5) { hideMsg(); tip(touchMode ? 'Hit the billboard target to see the proposal' : 'Deer and ducks are bonus points. Hit the billboard target to see the proposal', 9); }
+    if (phaseT >= 5 && phaseT - dt < 5) { hideMsg(); tip(touchMode ? 'Scope in and hit the billboard target to see the proposal' : 'Deer and ducks are bonus points. Scope in and hit the billboard target to see the proposal', 9); }
     if (phaseT >= nextDuck) { nextDuck = phaseT + rnd(6, 10); spawnDuck().life = 8; sfx.rustle(); sfx.quack(); }
   }
   else if (phase === 'result') { if (phaseT >= phaseDur) { hideMsg(); startTally(); } }
