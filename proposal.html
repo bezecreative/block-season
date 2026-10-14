@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Website Proposal for BoreBuddy | Mox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #f3efe9;
+    --paper-2: #ece7df;
+    --ink: #121110;
+    --ink-soft: #4a453f;
+    --line: rgba(18, 17, 16, 0.14);
+    --black: #010101;
+    --amber: #B91800;
+    --amber-2: #B91800;
+    --font: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+
+  body {
+    font-family: var(--font);
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .wrap { width: 100%; max-width: 1400px; margin: 0 auto; padding: 0 40px; }
+
+  /* ---------- Preloader: Mox × BoreBuddy reveal ---------- */
+  .preloader {
+    position: fixed; inset: 0; z-index: 300;
+    background: #000;
+    display: flex; align-items: center; justify-content: center; gap: clamp(22px, 4vw, 44px);
+    transition: clip-path 1s var(--ease), visibility 0s linear 1s;
+    clip-path: inset(0 0 0 0);
+  }
+  .preloader.done {
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+  }
+  .preloader .pl-step {
+    opacity: 0; transform: translateY(16px) scale(0.96);
+    animation: plIn 0.7s var(--ease) forwards;
+  }
+  .preloader .pl-mox { color: #f3efe9; animation-delay: 0.15s; }
+  .preloader .pl-mox svg { width: clamp(90px, 12vw, 150px); height: auto; display: block; }
+  .preloader .pl-x {
+    font-weight: 300; font-size: clamp(30px, 4.5vw, 54px); line-height: 1;
+    color: var(--amber-2); animation-delay: 0.75s;
+  }
+  .preloader .pl-client { animation-delay: 1.35s; }
+  .preloader .pl-client img { width: clamp(170px, 24vw, 300px); height: auto; display: block; filter: brightness(0) invert(1); }
+  @keyframes plIn { to { opacity: 1; transform: none; } }
+  /* Hold hero content until load completes, then reveal */
+  body:not(.loaded) { overflow: hidden; }
+  .hero h1 { opacity: 0; transform: translateY(40px); }
+  body.loaded .hero h1 { animation: heroIn 1.1s var(--ease) 0.15s forwards; }
+  .hero .scroll-hint { opacity: 0; }
+  body.loaded .hero .scroll-hint { animation: fadeIn 1s var(--ease) 0.7s forwards; }
+  @keyframes heroIn { to { opacity: 1; transform: none; } }
+  @keyframes fadeIn { to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .preloader { display: none; }
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- Header ---------- */
+  .top-logo {
+    position: fixed; top: 22px; left: 40px; z-index: 101;
+    color: #fff; display: inline-flex; pointer-events: auto;
+    opacity: 0; transition: opacity 0.5s var(--ease), transform 0.4s var(--ease);
+  }
+  .top-logo svg { width: 62px; height: auto; display: block; }
+  body.loaded .top-logo { opacity: 1; }
+  body.scrolled .top-logo { opacity: 0; transform: translateY(-12px); pointer-events: none; }
+  @media (max-width: 980px) { .top-logo { top: 18px; left: 22px; } .top-logo svg { width: 52px; } }
+  header {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 18px 40px;
+    color: #fff;
+    pointer-events: none;
+    transform: translateY(-150%);
+    opacity: 0;
+    transition: transform 0.55s var(--ease), opacity 0.4s var(--ease);
+  }
+  header.scrolled { transform: translateY(0); opacity: 1; }
+  .navbar {
+    display: flex; align-items: center; gap: 38px;
+    width: fit-content; max-width: 94vw;
+    margin: 0 auto;
+    padding: 11px 24px;
+    border-radius: 100px;
+    background: rgba(10, 10, 10, 0.92);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 12px 34px -12px rgba(0, 0, 0, 0.45);
+    pointer-events: auto;
+  }
+  .logo { display: inline-flex; align-items: center; }
+  .logo svg { display: block; width: 46px; height: auto; }
+  header.scrolled .logo svg { width: 46px; }
+  .nav-links { display: flex; align-items: center; gap: 24px; }
+  header.scrolled .nav-links { gap: 24px; }
+  .nav-links > a, .nav-drop-btn {
+    font-family: var(--font); font-size: 14px; font-weight: 500; letter-spacing: 0.01em;
+    color: #fff; background: none; border: none; cursor: pointer; padding: 0;
+    display: inline-flex; align-items: center; gap: 6px;
+    position: relative; white-space: nowrap;
+  }
+  .nav-links > a::after {
+    content: ''; position: absolute; left: 0; bottom: -4px;
+    width: 0; height: 1.5px; background: currentColor; transition: width 0.35s var(--ease);
+  }
+  .nav-links > a:hover::after { width: 100%; }
+  .nav-drop { position: relative; }
+  .nav-drop-btn .chev {
+    width: 8px; height: 8px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform 0.3s var(--ease);
+  }
+  .nav-drop:hover .nav-drop-btn .chev, .nav-drop:focus-within .nav-drop-btn .chev { transform: rotate(-135deg) translateY(-2px); }
+  .nav-drop-menu {
+    position: absolute; top: calc(100% + 14px); left: 50%; transform: translate(-50%, 8px);
+    background: rgba(10, 10, 10, 0.94); backdrop-filter: blur(12px);
+    border-radius: 14px; padding: 10px; min-width: 150px;
+    display: flex; flex-direction: column;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease), visibility 0s linear 0.3s;
+  }
+  .nav-drop:hover .nav-drop-menu, .nav-drop:focus-within .nav-drop-menu {
+    opacity: 1; visibility: visible; transform: translate(-50%, 0);
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease), visibility 0s;
+  }
+  .nav-drop-menu a {
+    color: rgba(255,255,255,0.85); font-size: 14px; padding: 9px 14px; border-radius: 8px;
+  }
+  .nav-drop-menu a:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .menu-btn {
+    display: none; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer; color: inherit;
+    padding: 0; width: 26px; height: 22px;
+  }
+  .menu-btn .burger {
+    position: relative; width: 22px; height: 2px; background: currentColor; display: block;
+    transition: background 0.2s var(--ease);
+  }
+  .menu-btn .burger::before, .menu-btn .burger::after {
+    content: ''; position: absolute; left: 0; width: 22px; height: 2px; background: currentColor;
+    transition: transform 0.35s var(--ease), top 0.35s var(--ease);
+  }
+  .menu-btn .burger::before { top: -7px; }
+  .menu-btn .burger::after { top: 7px; }
+  body.menu-open .menu-btn .burger { background: transparent; }
+  body.menu-open .menu-btn .burger::before { top: 0; transform: rotate(45deg); }
+  body.menu-open .menu-btn .burger::after { top: 0; transform: rotate(-45deg); }
+
+  /* ---------- Full-screen Menu ---------- */
+  .menu-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: #0a0a0a; color: #fff;
+    padding: 28px 40px 48px;
+    display: flex; flex-direction: column;
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+    transition: clip-path 0.8s var(--ease), visibility 0s linear 0.8s;
+    overflow-y: auto;
+  }
+  body.menu-open .menu-overlay {
+    clip-path: inset(0 0 0 0);
+    visibility: visible;
+    transition: clip-path 0.8s var(--ease), visibility 0s;
+  }
+  .menu-head { display: flex; justify-content: space-between; align-items: center; }
+  .menu-head .logo { color: #fff; }
+  .menu-close {
+    background: none; border: none; cursor: pointer; color: #fff;
+    width: 40px; height: 40px; position: relative;
+  }
+  .menu-close::before, .menu-close::after {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 22px; height: 1.5px; background: #fff;
+  }
+  .menu-close::before { transform: translate(-50%,-50%) rotate(45deg); }
+  .menu-close::after { transform: translate(-50%,-50%) rotate(-45deg); }
+  .menu-mark {
+    display: flex; justify-content: center; padding: 44px 0 34px;
+    color: #fff;
+  }
+  .menu-mark svg { width: clamp(220px, 34vw, 460px); height: auto; }
+  .menu-nav { max-width: 1400px; width: 100%; margin: 0 auto; }
+  .menu-nav-item { border-bottom: 1px solid rgba(255,255,255,0.16); }
+  .menu-nav-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 4px; cursor: pointer;
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  }
+  body.menu-open .menu-nav-row { opacity: 1; transform: none; }
+  body.menu-open .menu-nav-item:nth-child(1) .menu-nav-row { transition-delay: 0.28s; }
+  body.menu-open .menu-nav-item:nth-child(2) .menu-nav-row { transition-delay: 0.36s; }
+  body.menu-open .menu-nav-item:nth-child(3) .menu-nav-row { transition-delay: 0.44s; }
+  body.menu-open .menu-nav-item:nth-child(4) .menu-nav-row { transition-delay: 0.52s; }
+  body.menu-open .menu-nav-item:nth-child(5) .menu-nav-row { transition-delay: 0.60s; }
+  body.menu-open .menu-nav-item:nth-child(6) .menu-nav-row { transition-delay: 0.68s; }
+  body.menu-open .menu-nav-item:nth-child(7) .menu-nav-row { transition-delay: 0.76s; }
+  .menu-nav-row a, .menu-nav-row .label {
+    font-size: clamp(30px, 4vw, 48px); font-weight: 400; letter-spacing: -0.02em;
+    display: inline-flex; align-items: center; gap: 12px; color: #fff;
+    transition: opacity 0.3s var(--ease);
+  }
+  .menu-nav-row:hover a, .menu-nav-row:hover .label { opacity: 0.55; }
+  .menu-nav-row .ext { font-size: 0.42em; opacity: 0.6; }
+  .menu-nav-row .toggle {
+    width: 28px; height: 28px; position: relative; flex: none;
+    transition: transform 0.4s var(--ease);
+  }
+  .menu-nav-row .toggle::before, .menu-nav-row .toggle::after { content: ''; position: absolute; top: 50%; left: 50%; background: #fff; }
+  .menu-nav-row .toggle::before { width: 22px; height: 1.5px; transform: translate(-50%,-50%); }
+  .menu-nav-row .toggle::after { width: 1.5px; height: 22px; transform: translate(-50%,-50%); }
+  .menu-nav-item.open .toggle { transform: rotate(135deg); }
+  .menu-sub {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    max-height: 0; overflow: hidden; opacity: 0;
+    transition: max-height 0.6s var(--ease), opacity 0.5s var(--ease), padding 0.6s var(--ease);
+  }
+  .menu-nav-item.open .menu-sub { max-height: 240px; opacity: 1; padding: 6px 4px 26px; }
+  .menu-sub a {
+    font-size: 16px; color: rgba(255,255,255,0.7); padding: 14px 0; font-weight: 400;
+    border-top: 1px solid rgba(255,255,255,0.1); display: block; letter-spacing: 0;
+  }
+  .menu-sub a:hover { color: #fff; }
+  .menu-brands {
+    max-width: 1400px; width: 100%; margin: auto auto 0;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 300px));
+    gap: 6px 60px; padding-top: 60px;
+  }
+  .menu-brands a {
+    font-size: 18px; color: rgba(255,255,255,0.82); padding: 10px 0; font-weight: 400;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 0.6s var(--ease), transform 0.6s var(--ease), color 0.3s;
+  }
+  .menu-brands a:hover { color: #fff; }
+  body.menu-open .menu-brands a { opacity: 1; transform: none; transition-delay: 0.55s; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative; height: 100vh; min-height: 640px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    overflow: hidden;
+    color: #fff;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: #1a1712 url('https://framerusercontent.com/images/2gNWIA6zCrEwdQuvfnIhEqt1uM.webp?scale-down-to=2048') center / cover no-repeat;
+  }
+  .hero-bg video {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; z-index: 0;
+  }
+  .hero-bg::after {
+    content: ''; position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(to bottom, rgba(10,10,10,0.18) 0%, transparent 35%, rgba(10,10,10,0.55) 100%);
+  }
+  .hero-content { position: relative; z-index: 2; padding: 0 40px 8vh; }
+  .hero h1 {
+    font-weight: 900;
+    font-size: clamp(44px, 8.5vw, 124px);
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .hero .scroll-hint {
+    position: absolute; right: 40px; bottom: 8vh; z-index: 2;
+    font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 10px; opacity: 0.85;
+  }
+  .hero .scroll-hint::after {
+    content: ''; width: 40px; height: 1px; background: #fff;
+    animation: line 1.8s var(--ease) infinite; transform-origin: left;
+  }
+  @keyframes line { 0%,100%{transform:scaleX(0.4);opacity:0.4} 50%{transform:scaleX(1);opacity:1} }
+
+  /* ---------- Reveal ---------- */
+  .reveal { opacity: 0; transform: translateY(38px); transition: opacity 1s var(--ease), transform 1s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
+  .reveal.d1 { transition-delay: 0.1s; }
+  .reveal.d2 { transition-delay: 0.2s; }
+  .reveal.d3 { transition-delay: 0.3s; }
+
+  /* ---------- Intro statement ---------- */
+  section { position: relative; }
+  .intro { padding: 160px 0 140px; }
+  .intro .grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 60px; align-items: center; }
+  .intro .video-embed {
+    margin-top: 34px;
+    aspect-ratio: 16 / 9;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 30px 60px -30px rgba(30, 22, 14, 0.45);
+  }
+  .intro .video-embed iframe { width: 100%; height: 100%; display: block; border: 0; }
+  .intro p.lead {
+    font-size: clamp(16px, 1.7vw, 22px);
+    line-height: 1.6; font-weight: 400; letter-spacing: -0.005em; max-width: 900px;
+  }
+  .link-cta {
+    display: inline-flex; align-items: center; gap: 14px;
+    margin-top: 44px; font-size: 15px; font-weight: 600; letter-spacing: 0.02em;
+    border-bottom: 1px solid var(--ink); padding-bottom: 6px;
+    transition: gap 0.35s var(--ease);
+  }
+  .link-cta .arrow { transition: transform 0.35s var(--ease); }
+  .link-cta:hover { gap: 20px; }
+
+  /* ---------- Who We Are ---------- */
+  .who { padding: 110px 0 90px; background: #14110d; color: #f3efe9; }
+  .who-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 70px; align-items: center; }
+  .who .eyebrow { color: rgba(243,239,233,0.55); }
+  .who-facts { display: flex; gap: 52px; margin-top: 30px; flex-wrap: wrap; }
+  .wf-k {
+    display: block; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    font-weight: 700; color: var(--amber-2);
+  }
+  .wf-v { display: flex; align-items: center; gap: 7px; margin-top: 9px; font-size: 17px; font-weight: 600; }
+  .wf-v svg { width: 15px; height: 15px; color: var(--amber-2); flex: none; }
+  .who-text {
+    margin-top: 24px; font-size: 16px; line-height: 1.75;
+    color: rgba(243,239,233,0.7); font-weight: 300; max-width: 58ch;
+  }
+  .who-photo img { width: 100%; border-radius: 10px; display: block; }
+
+  /* ---------- Creative Philosophy ---------- */
+  .philosophy {
+    padding: 150px 0 160px; color: #f3efe9;
+    background: linear-gradient(170deg, #14110d, #221c15 70%, #2b2216);
+    position: relative; overflow: hidden;
+  }
+  .philosophy::before {
+    content: ''; position: absolute; top: -30%; left: -12%; width: 55%; height: 130%;
+    background: radial-gradient(circle, rgba(185,24,0,0.22), transparent 65%);
+  }
+  .philosophy .wrap { position: relative; }
+  .philosophy .eyebrow { color: rgba(243,239,233,0.55); }
+  .philosophy h2 {
+    font-size: clamp(38px, 5.5vw, 72px); font-weight: 900; text-transform: uppercase;
+    letter-spacing: -0.01em; line-height: 0.95; margin-top: 14px;
+  }
+  .philosophy .lead {
+    font-size: 19px; line-height: 1.6; color: rgba(243,239,233,0.72);
+    max-width: 640px; margin-top: 26px;
+  }
+  .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 44px; margin-top: 70px; }
+  .pillar {
+    border-top: 2px solid rgba(243,239,233,0.16); padding-top: 26px;
+    position: relative; transition: transform 0.35s var(--ease);
+  }
+  .pillar::before {
+    content: ''; position: absolute; top: -2px; left: 0; height: 2px; width: 36px;
+    background: var(--amber-2); transition: width 0.5s var(--ease);
+  }
+  .pillar:hover { transform: translateY(-5px); }
+  .pillar:hover::before { width: 100%; }
+  .pillar h3 {
+    font-weight: 800; font-size: 22px; text-transform: uppercase;
+    letter-spacing: -0.01em; line-height: 1.05; margin-bottom: 14px;
+  }
+  .pillar h3 em { color: var(--amber-2); font-style: normal; }
+  .pillar p { font-size: 15px; color: rgba(243,239,233,0.62); line-height: 1.7; font-weight: 300; }
+
+  /* Manifesto explorer */
+  .manifesto { margin-top: 110px; }
+  .manifesto-head {
+    font-weight: 900; font-size: clamp(26px, 3.6vw, 42px);
+    text-transform: uppercase; letter-spacing: -0.01em; margin-bottom: 10px;
+  }
+  .manifesto-hint {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(243,239,233,0.42); margin-bottom: 38px;
+  }
+  .tenex { display: grid; grid-template-columns: minmax(280px, 400px) 1fr; gap: 56px; align-items: start; }
+  .tenex-list { border-top: 1px solid rgba(243,239,233,0.14); }
+  .tenex-item {
+    display: block; width: 100%; text-align: left; background: none; border: none;
+    border-bottom: 1px solid rgba(243,239,233,0.14); padding: 17px 10px; cursor: pointer;
+    color: #f3efe9; font: inherit; position: relative;
+    transition: background 0.25s, padding-left 0.3s var(--ease);
+  }
+  .tenex-item:hover { background: rgba(243,239,233,0.05); }
+  .tenex-item:focus-visible { outline: 2px solid var(--amber-2); outline-offset: -2px; }
+  .tenex-row { display: flex; align-items: baseline; gap: 16px; }
+  .tenex-num { font-size: 11px; color: rgba(243,239,233,0.4); transition: color 0.25s; flex-shrink: 0; width: 2.4ch; font-variant-numeric: tabular-nums; }
+  .tenex-name {
+    font-weight: 700; font-size: 16px; text-transform: uppercase; letter-spacing: 0.02em;
+    color: rgba(243,239,233,0.72); transition: color 0.25s; line-height: 1.25;
+  }
+  .tenex-item.active { padding-left: 18px; background: rgba(185,24,0,0.14); }
+  .tenex-item.active .tenex-num { color: var(--amber-2); }
+  .tenex-item.active .tenex-name { color: #fff; }
+  .tenex-bar { display: block; height: 2px; background: rgba(243,239,233,0.1); margin-top: 13px; overflow: hidden; border-radius: 1px; opacity: 0; transition: opacity 0.25s; }
+  .tenex-item.active .tenex-bar { opacity: 1; }
+  .tenex-bar span { display: block; height: 100%; width: 0; background: var(--amber-2); }
+  .tenex-item.active .tenex-bar span { width: 100%; transition: width var(--tenex-dur, 6s) linear; }
+  .tenex.paused .tenex-item.active .tenex-bar { opacity: 0; }
+  .tenex-body { display: none; }
+  .tenex-panel { position: relative; min-height: 280px; padding: 16px 0 0 8px; }
+  .tenex-big {
+    font-weight: 900; font-size: clamp(96px, 12vw, 160px); line-height: 0.85;
+    color: transparent; -webkit-text-stroke: 1px rgba(243,239,233,0.16); user-select: none;
+  }
+  .tenex-title {
+    font-weight: 800; font-size: clamp(24px, 3vw, 35px); text-transform: uppercase;
+    letter-spacing: -0.01em; color: var(--amber-2); margin: 20px 0 16px; line-height: 1;
+  }
+  .tenex-text { font-size: 16px; color: rgba(243,239,233,0.68); font-weight: 300; line-height: 1.8; max-width: 52ch; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .tenex-panel.swap .tenex-title, .tenex-panel.swap .tenex-text, .tenex-panel.swap .tenex-big { animation: fadeUp 0.5s var(--ease); }
+
+  /* ---------- Logo walls ---------- */
+  .logos { padding: 130px 0 140px; position: relative; overflow: hidden; }
+  .logos .wrap { position: relative; z-index: 2; }
+  .logos.alt { background: var(--paper-2); border-top: 1px solid var(--line); }
+  .logos .head { margin-bottom: 54px; }
+  .logos h2 { font-size: clamp(30px, 4vw, 52px); font-weight: 400; letter-spacing: -0.02em; margin-top: 12px; }
+  /* client-work background that fades in behind the grids on hover */
+  .logos-bg {
+    position: absolute; inset: 0; z-index: 1;
+    background-position: center; background-size: cover;
+    opacity: 0; transition: opacity 0.7s var(--ease);
+    pointer-events: none;
+  }
+  .logos-bg::after {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(243, 239, 233, 0.82); /* paper wash keeps logos and grid legible */
+  }
+  .logos-bg.on { opacity: 1; }
+  .logo-wall {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+  }
+  .logo-wall.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .logo-wall.cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .logo-tile {
+    aspect-ratio: 3 / 2;
+    display: flex; align-items: center; justify-content: center;
+    border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    position: relative; overflow: hidden;
+    transition: background 0.35s var(--ease);
+  }
+  .logo-tile:hover { background: rgba(255, 255, 255, 0.5); }
+  .logo-tile img {
+    max-width: 58%; max-height: 46%; object-fit: contain;
+    mix-blend-mode: multiply; /* hides white logo backgrounds on the paper bg */
+    filter: brightness(1.06) contrast(1.06) saturate(0.95);
+    opacity: 0.85;
+    transition: opacity 0.3s var(--ease), transform 0.35s var(--ease);
+  }
+  .logo-tile:hover img { opacity: 1; transform: translateY(-13px) scale(1.03); }
+  /* brand name appears on hover */
+  .logo-tile::after {
+    content: attr(data-name);
+    position: absolute; left: 8px; right: 8px; bottom: 13px;
+    text-align: center; pointer-events: none;
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600;
+    color: var(--ink);
+    opacity: 0; transform: translateY(6px);
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+  }
+  .logo-tile:hover::after { opacity: 1; transform: none; }
+
+  .sub-head {
+    margin: 84px 0 30px;
+    font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+    font-weight: 600; color: var(--ink-soft);
+  }
+
+  /* ---------- Roster: starting lineup board ---------- */
+  .roster-sec {
+    padding: 130px 0 150px; color: #f3efe9;
+    background: #12100c; position: relative; overflow: hidden;
+  }
+  .roster-sec::before {
+    /* faint yard lines */
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(to bottom, transparent 0 119px, rgba(243,239,233,0.045) 119px 120px);
+    pointer-events: none;
+  }
+  .roster-sec .wrap { position: relative; }
+  .roster-sec .eyebrow { color: rgba(243,239,233,0.55); }
+  .roster-sec h2 {
+    font-size: clamp(38px, 5.5vw, 72px); font-weight: 900; text-transform: uppercase;
+    letter-spacing: -0.01em; line-height: 0.95; margin-top: 14px;
+  }
+  .roster-hint {
+    margin-top: 14px; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(243,239,233,0.45);
+  }
+  .lineup {
+    display: grid; grid-template-columns: minmax(0, 1.5fr) 1fr;
+    gap: 80px; align-items: start; margin-top: 60px;
+  }
+  .lineup-list { border-top: 1px solid rgba(243,239,233,0.16); }
+  .lu-row {
+    display: flex; align-items: baseline; gap: 26px; width: 100%;
+    background: none; border: none; border-bottom: 1px solid rgba(243,239,233,0.16);
+    padding: 20px 10px; cursor: pointer; text-align: left;
+    font-family: var(--font); color: #f3efe9;
+    transition: background 0.3s var(--ease), padding-left 0.35s var(--ease);
+  }
+  .lu-row:hover, .lu-row.active { background: rgba(243,239,233,0.045); padding-left: 22px; }
+  .lu-row:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+  .lu-num {
+    font-size: 13px; font-weight: 600; color: var(--amber);
+    font-variant-numeric: tabular-nums; flex: none; width: 3ch;
+  }
+  .lu-name {
+    font-size: clamp(26px, 3.4vw, 46px); font-weight: 800; text-transform: uppercase;
+    letter-spacing: -0.01em; line-height: 1;
+    color: transparent; -webkit-text-stroke: 1px rgba(243,239,233,0.45);
+    transition: color 0.35s var(--ease), -webkit-text-stroke-color 0.35s var(--ease);
+  }
+  .lu-row:hover .lu-name, .lu-row.active .lu-name {
+    color: #f3efe9; -webkit-text-stroke-color: transparent;
+  }
+  .lu-role {
+    margin-left: auto; flex: none;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 500;
+    color: rgba(243,239,233,0.45);
+  }
+  /* player card */
+  .player-card { position: sticky; top: 110px; }
+  .pc-inner {
+    position: relative; overflow: hidden;
+    border: 1px solid rgba(243,239,233,0.18); border-radius: 10px;
+    padding: 42px 36px 40px;
+    background: linear-gradient(165deg, rgba(243,239,233,0.05), rgba(243,239,233,0.015));
+  }
+  .pc-ghost {
+    position: absolute; top: -30px; right: 6px;
+    font-size: 170px; font-weight: 900; line-height: 1;
+    color: transparent; -webkit-text-stroke: 1px rgba(243,239,233,0.1);
+    user-select: none; pointer-events: none;
+  }
+  .pc-head { display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px; }
+  .pc-id { flex: 1; min-width: 0; padding-bottom: 4px; }
+  .pc-photo {
+    flex: 0 0 50%; width: 50%; aspect-ratio: 4 / 5; border-radius: 8px; overflow: hidden;
+    position: relative; background: rgba(243,239,233,0.08);
+    border-bottom: 3px solid var(--role-color, var(--amber));
+  }
+  .pc-photo img {
+    width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block;
+    filter: grayscale(1) contrast(1.05);
+  }
+  .pc-photo.dual { aspect-ratio: 4 / 5; display: grid; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); gap: 2px; }
+  .pc-photo.dual img { min-height: 0; }
+  .pc-photo.dual img { border-radius: 0; }
+  .pc-name { font-size: clamp(22px, 2vw, 30px); font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; line-height: 1.02; }
+  .pc-role {
+    display: inline-block; margin-top: 10px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600;
+    color: var(--amber);
+  }
+  .pc-note { margin-top: 18px; font-size: 15px; line-height: 1.7; color: rgba(243,239,233,0.62); max-width: 40ch;
+    white-space: pre-line; max-height: 46vh; overflow-y: auto; padding-right: 8px;
+    scrollbar-width: thin; scrollbar-color: rgba(243,239,233,0.3) transparent; }
+  .pc-note::-webkit-scrollbar { width: 6px; }
+  .pc-note::-webkit-scrollbar-thumb { background: rgba(243,239,233,0.25); border-radius: 6px; }
+  .pc-logos-label {
+    margin-top: 28px; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    font-weight: 600; color: rgba(243,239,233,0.42);
+  }
+  .pc-logos { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .pc-logos .chip {
+    width: 78px; height: 52px; border-radius: 6px;
+    background: var(--paper); display: flex; align-items: center; justify-content: center;
+  }
+  .pc-logos .chip img {
+    max-width: 68%; max-height: 62%; object-fit: contain; display: block;
+    mix-blend-mode: multiply;
+  }
+  /* mobile: bio pops out under the tapped row */
+  .lu-detail { display: none; }
+  .lud-photos { width: 58%; max-width: 220px; aspect-ratio: 4 / 5; border-radius: 8px; overflow: hidden; margin: 14px 0 16px; }
+  .lud-photos img { width: 100%; height: 100%; object-fit: cover; object-position: center top; filter: grayscale(1) contrast(1.05); display: block; }
+  .lud-photos.dual { display: grid; grid-template-columns: 1fr 1fr; aspect-ratio: 8 / 5; gap: 2px; width: 82%; max-width: 300px; }
+  .lud-photos.dual img { min-height: 0; }
+  .lud-role { display: block; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; color: var(--amber-2); margin-bottom: 10px; }
+  .lud-bio { font-size: 14px; line-height: 1.7; color: rgba(243,239,233,0.68); white-space: pre-line; margin: 0 0 16px; max-width: 60ch; }
+  .lud-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; color: rgba(243,239,233,0.45); margin-bottom: 8px; }
+  .lud-logos { display: flex; gap: 8px; flex-wrap: wrap; }
+  .lud-logos .chip { width: 66px; height: 44px; background: var(--paper); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+  .lud-logos .chip img { max-width: 68%; max-height: 60%; object-fit: contain; mix-blend-mode: multiply; display: block; }
+
+  .pc-inner.swap .pc-name, .pc-inner.swap .pc-role, .pc-inner.swap .pc-note,
+  .pc-inner.swap .pc-photo, .pc-inner.swap .pc-ghost, .pc-inner.swap .pc-logos { animation: fadeUp 0.45s var(--ease); }
+  .stub { padding: 110px 0; border-top: 1px solid var(--line); }
+  .stub.alt { background: var(--paper-2); }
+  .stub h2 {
+    font-size: clamp(38px, 5.5vw, 72px); font-weight: 900; text-transform: uppercase;
+    letter-spacing: -0.01em; line-height: 0.95; margin-top: 14px;
+  }
+  .stub-note { margin-top: 18px; font-size: 15px; color: var(--ink-soft); font-style: italic; }
+
+  /* The Heart of It: why BoreBuddy */
+  .welove { padding: 130px 0; border-top: 1px solid var(--line); }
+  .welove-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 60px; align-items: center; }
+  .welove h2 {
+    font-size: clamp(38px, 5.5vw, 72px); font-weight: 900; text-transform: uppercase;
+    letter-spacing: -0.01em; line-height: 0.95; margin-top: 14px;
+  }
+  .welove-copy p {
+    font-size: 17px; line-height: 1.8; color: var(--ink-soft);
+    max-width: 52ch; margin: 26px 0 0;
+  }
+  .wl-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .wl-photos img {
+    width: 100%; height: 100%; object-fit: cover; border-radius: 8px;
+    display: block; aspect-ratio: 1 / 1;
+  }
+  .wl-photos img:first-child { grid-column: span 2; aspect-ratio: 16 / 9; }
+
+  /* ---------- Bid accordion ---------- */
+  .bid-acc { margin-top: 50px; border-top: 1px solid var(--ink); }
+  .acc-item { border-bottom: 1px solid var(--line); }
+  .acc-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    width: 100%; background: none; border: none; cursor: pointer;
+    padding: 24px 6px; text-align: left;
+    font-family: var(--font); color: var(--ink);
+    transition: padding-left 0.3s var(--ease);
+  }
+  .acc-head:hover { padding-left: 14px; }
+  .acc-head:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+  .acc-title { font-size: clamp(17px, 1.8vw, 22px); font-weight: 600; letter-spacing: -0.01em; }
+  .acc-icon { width: 22px; height: 22px; position: relative; flex: none; transition: transform 0.4s var(--ease); }
+  .acc-icon::before, .acc-icon::after { content: ''; position: absolute; top: 50%; left: 50%; background: var(--ink); }
+  .acc-icon::before { width: 16px; height: 1.5px; transform: translate(-50%, -50%); }
+  .acc-icon::after { width: 1.5px; height: 16px; transform: translate(-50%, -50%); }
+  .acc-item.open .acc-icon { transform: rotate(135deg); }
+  .acc-body {
+    display: grid; grid-template-rows: 0fr;
+    transition: grid-template-rows 0.5s var(--ease);
+  }
+  .acc-body-inner { overflow: hidden; }
+  .acc-body-inner p {
+    padding: 2px 6px 28px; font-size: 15px; line-height: 1.7;
+    color: var(--ink-soft); max-width: 70ch;
+  }
+  .acc-item.open .acc-body { grid-template-rows: 1fr; }
+  .ref-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px 44px; padding: 6px 6px 28px; }
+  .ref-name { display: block; font-weight: 700; color: var(--ink); font-size: 15px; }
+  .ref-line { display: block; font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+  .ref-contact { display: block; font-size: 14px; color: var(--amber); line-height: 1.5; }
+  .ref-contact:hover { text-decoration: underline; }
+  @media (max-width: 640px) { .ref-grid { grid-template-columns: 1fr; } }
+  .prop { padding: 4px 6px 30px; max-width: 76ch; }
+  .prop p { padding: 0; margin: 0 0 16px; font-size: 15px; line-height: 1.75; color: var(--ink-soft); max-width: none; }
+  .prop p:last-child { margin-bottom: 0; }
+  .prop .lead { color: var(--ink); font-weight: 600; }
+  .prop-list { list-style: none; margin: 4px 0 18px; padding: 0; display: grid; gap: 15px; }
+  .prop-list li { font-size: 15px; line-height: 1.7; color: var(--ink-soft); padding-left: 18px; position: relative; }
+  .prop-list li::before { content: ''; position: absolute; left: 0; top: 10px; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); }
+  .prop-list li b { color: var(--ink); font-weight: 700; }
+  .prop-note { font-style: italic; font-size: 13px; color: var(--amber); }
+  .prop-contact { line-height: 1.85; }
+  .prop-contact .n { color: var(--ink); font-weight: 700; font-size: 16px; }
+  .prop-contact a { color: var(--amber); }
+  .prop-contact a:hover { text-decoration: underline; }
+  .prop-sign { color: var(--ink); }
+  .prop-sign b { font-weight: 700; }
+  .rate-table { width: 100%; max-width: 420px; border-collapse: collapse; margin: 8px 0 20px; }
+  .rate-table th, .rate-table td { text-align: left; padding: 11px 14px; font-size: 14px; border-bottom: 1px solid var(--line); }
+  .rate-table th { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; }
+  .rate-table td { color: var(--ink-soft); }
+  .rate-table td:first-child { color: var(--ink); font-weight: 600; }
+  .rate-table th:last-child, .rate-table td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  .rate-table tbody tr:last-child td { border-bottom: none; }
+
+  /* ---------- Brands ---------- */
+  .brands { padding: 120px 0 130px; background: var(--paper-2); border-top: 1px solid var(--line); position: relative; overflow: hidden; }
+  .brands .wrap, .brands .marquee { position: relative; z-index: 2; }
+  .brands h2 {
+    font-size: clamp(52px, 10vw, 128px); line-height: 0.92; font-weight: 400; letter-spacing: -0.03em;
+  }
+  /* Floating portfolio tiles behind headline */
+  .float-imgs { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .float-card {
+    position: absolute;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px -25px rgba(30,22,14,0.4);
+    opacity: 0;
+    transform: translateY(60px) rotate(var(--rot, 0deg));
+    transition: opacity 1.2s var(--ease), transform 1.2s var(--ease);
+    will-change: transform;
+  }
+  .brands.in-view .float-card { opacity: 1; transform: translateY(0) rotate(var(--rot, 0deg)); }
+  .float-card .fc-inner {
+    width: 100%; height: 100%; position: relative;
+    animation: floatDrift var(--dur, 7s) ease-in-out var(--delay, 0s) infinite alternate;
+  }
+  .float-card img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    filter: saturate(0.82) contrast(0.96);
+  }
+  /* warm wash so fillers sit in the palette */
+  .float-card .fc-inner::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(160deg, rgba(243,239,233,0.22), rgba(185,24,0,0.18));
+    mix-blend-mode: soft-light;
+  }
+  .float-card .fc-tag {
+    position: absolute; left: 12px; bottom: 10px; z-index: 2;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600;
+    color: rgba(255,255,255,0.92); text-shadow: 0 1px 8px rgba(0,0,0,0.35);
+  }
+  @keyframes floatDrift {
+    from { transform: translateY(-10px); }
+    to   { transform: translateY(12px); }
+  }
+  /* tile placement — staggered around the headline */
+  .fc-1 { width: 220px; aspect-ratio: 3/4;  top: 10%;  right: 24%; --rot: -4deg; --dur: 8s;   --delay: -2s; }
+  .fc-2 { width: 300px; aspect-ratio: 4/3;  top: 30%;  right: 3%;  --rot: 3deg;  --dur: 9.5s; --delay: -5s; }
+  .fc-3 { width: 180px; aspect-ratio: 3/4;  bottom: 6%; right: 40%; --rot: 5deg;  --dur: 7s;   --delay: -1s; }
+  .fc-4 { width: 250px; aspect-ratio: 4/3;  bottom: -4%; right: 12%; --rot: -3deg; --dur: 8.5s; --delay: -4s; }
+  .fc-5 { width: 160px; aspect-ratio: 1/1;  top: 4%;   left: 38%;  --rot: 6deg;  --dur: 10s;  --delay: -6s; }
+  @media (max-width: 980px) {
+    .fc-1, .fc-3, .fc-5 { display: none; }
+    .fc-2 { width: 180px; top: 4%; right: 4%; }
+    .fc-4 { width: 160px; bottom: 26%; right: 6%; }
+    .float-card { opacity: 0; }
+    .brands.in-view .float-card { opacity: 0.55; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .float-card .fc-inner { animation: none; }
+  }
+  .marquee { margin: 70px 0 40px; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .marquee-track { display: flex; gap: 72px; width: max-content; animation: scroll-x 32s linear infinite; }
+  .marquee-track span {
+    font-size: clamp(28px, 3.4vw, 46px); font-weight: 600; letter-spacing: -0.01em;
+    color: var(--ink); white-space: nowrap; opacity: 0.85;
+  }
+  .brands:hover .marquee-track { animation-play-state: paused; }
+  @keyframes scroll-x { to { transform: translateX(-50%); } }
+
+  /* ---------- Annual Report ---------- */
+  .report { padding: 150px 0; }
+  .report .grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 70px; align-items: center; }
+  .report .visual {
+    aspect-ratio: 4/5; border-radius: 4px; overflow: hidden; position: relative;
+    background: linear-gradient(150deg, #26221c, #4a3c29 55%, #B91800);
+    display: flex; align-items: flex-end; padding: 40px;
+    box-shadow: 0 40px 80px -30px rgba(30,22,14,0.5);
+  }
+  .report .visual .yr { color: #f3efe9; font-size: 15px; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.8; }
+  .report .visual::after {
+    content: ''; position: absolute; top: 40px; left: 40px; right: 40px;
+    height: 1px; background: rgba(243,239,233,0.3);
+  }
+  .report h2 { font-size: clamp(40px, 5vw, 60px); line-height: 1; font-weight: 400; letter-spacing: -0.02em; }
+  .report h2 .big { display: block; font-size: 1.35em; }
+  .report p { font-size: 19px; line-height: 1.55; color: var(--ink-soft); margin-top: 30px; max-width: 480px; }
+  .report .pill {
+    display: inline-flex; align-items: center; gap: 12px; margin-top: 40px;
+    background: var(--ink); color: var(--paper); padding: 16px 26px; border-radius: 100px;
+    font-size: 14px; font-weight: 600; letter-spacing: 0.02em;
+    transition: transform 0.35s var(--ease);
+  }
+  .report .pill:hover { transform: translateY(-3px); }
+  .report .pill .ext { font-size: 11px; opacity: 0.6; border: 1px solid rgba(243,239,233,0.4); padding: 2px 6px; border-radius: 4px; }
+
+  /* ---------- Culture ---------- */
+  .culture {
+    padding: 160px 0; color: #f3efe9;
+    background: linear-gradient(160deg, #1b1814, #2c261d 60%, #3a2c1c);
+    position: relative; overflow: hidden;
+  }
+  .culture::before {
+    content: ''; position: absolute; top: -20%; right: -10%; width: 60%; height: 140%;
+    background: radial-gradient(circle, rgba(185,24,0,0.35), transparent 65%);
+  }
+  .culture .grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 60px; align-items: end; position: relative; }
+  .culture h2 { font-size: clamp(32px, 4.4vw, 60px); line-height: 1.05; font-weight: 400; letter-spacing: -0.02em; }
+  .culture p { font-size: 18px; line-height: 1.6; opacity: 0.78; max-width: 440px; }
+  .culture .link-cta { border-color: rgba(243,239,233,0.6); margin-top: 34px; }
+
+  /* ---------- Market Snapshot ---------- */
+  .market { padding: 150px 0; }
+  .market .head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 50px; flex-wrap: wrap; gap: 20px; }
+  .market h2 { font-size: clamp(30px, 4vw, 52px); font-weight: 400; letter-spacing: -0.02em; }
+  .stock-card {
+    border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+    background: #fff; box-shadow: 0 30px 60px -40px rgba(30,22,14,0.35);
+  }
+  .stock-top { padding: 34px 40px; display: flex; align-items: baseline; gap: 30px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+  .stock-top .name h3 { font-size: 16px; font-weight: 600; }
+  .stock-top .name small { color: var(--ink-soft); font-size: 13px; }
+  .stock-price { font-size: clamp(40px, 6vw, 72px); font-weight: 500; letter-spacing: -0.02em; margin-left: auto; line-height: 1; }
+  .stock-price small { font-size: 0.28em; font-weight: 500; color: var(--ink-soft); letter-spacing: 0; margin-left: 8px; }
+  .stock-metrics { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .stock-metrics div { padding: 28px 40px; border-right: 1px solid var(--line); }
+  .stock-metrics div:last-child { border-right: none; }
+  .stock-metrics .k { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); }
+  .stock-metrics .v { font-size: 24px; font-weight: 500; margin-top: 8px; }
+
+  /* ---------- News ---------- */
+  .news { padding: 130px 0 150px; background: var(--paper-2); border-top: 1px solid var(--line); }
+  .news .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 46px; }
+  .news h2 { font-size: clamp(30px, 4vw, 52px); font-weight: 400; letter-spacing: -0.02em; }
+  .news-nav { display: flex; gap: 12px; }
+  .news-nav button {
+    width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--ink);
+    background: none; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;
+    transition: background 0.3s var(--ease), color 0.3s var(--ease);
+  }
+  .news-nav button:hover { background: var(--ink); color: var(--paper); }
+  .news-track { display: flex; gap: 28px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 20px; scrollbar-width: none; }
+  .news-track::-webkit-scrollbar { display: none; }
+  .news-card {
+    flex: 0 0 380px; scroll-snap-align: start; border-top: 1px solid var(--ink);
+    padding-top: 26px; display: flex; flex-direction: column; min-height: 340px;
+  }
+  .news-card .cat { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); font-weight: 600; }
+  .news-card h3 { font-size: 20px; line-height: 1.25; font-weight: 600; margin-top: 18px; letter-spacing: -0.01em; }
+  .news-card p { font-size: 15px; line-height: 1.55; color: var(--ink-soft); margin-top: 14px; }
+  .news-card .more { margin-top: auto; padding-top: 22px; font-size: 13px; font-weight: 600; display: inline-flex; gap: 8px; }
+
+  /* ---------- Case Studies ---------- */
+  .cases { padding: 130px 0 150px; border-top: 1px solid var(--line); }
+  .cases h2 {
+    font-size: clamp(38px, 5.5vw, 72px); font-weight: 900; text-transform: uppercase;
+    letter-spacing: -0.01em; line-height: 0.95; margin-top: 14px;
+  }
+  .cases-hint {
+    margin-top: 14px; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  /* vertical-tab case studies: rail selects, content shows active study */
+  .case-layout { display: grid; grid-template-columns: 172px 1fr; gap: 30px; margin-top: 56px; align-items: start; }
+  .cases .sub-head { margin: 100px 0 34px; }
+  .case-rail { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 100px; }
+  .case-tab {
+    position: relative; aspect-ratio: 4 / 3; border-radius: 8px; overflow: hidden;
+    background-size: cover; background-position: center; cursor: pointer;
+    border: 2px solid transparent; padding: 0;
+    filter: grayscale(0.55); opacity: 0.62;
+    transition: opacity 0.35s var(--ease), filter 0.35s var(--ease), border-color 0.35s var(--ease);
+  }
+  .case-tab::before { content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.08) 60%); }
+  .case-tab:hover { opacity: 0.9; filter: grayscale(0.15); }
+  .case-tab.active { opacity: 1; filter: none; border-color: var(--amber); }
+  .case-tab:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+  .ct-name {
+    position: absolute; left: 12px; right: 10px; bottom: 10px; z-index: 2;
+    color: #fff; font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.02em; line-height: 1.15; text-align: left;
+  }
+  .case-content {
+    border: 1px solid var(--line); border-radius: 12px;
+    padding: 46px 50px; background: #fff; min-height: 460px;
+  }
+  .case-reader { display: none; }
+  .case-reader.active { display: block; animation: fadeUp 0.45s var(--ease); }
+  .cr-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 40px; flex-wrap: wrap;
+    border-bottom: 2px solid var(--ink); padding-bottom: 24px;
+  }
+  .cr-title {
+    font-size: clamp(28px, 3.4vw, 48px); font-weight: 800;
+    text-transform: uppercase; letter-spacing: -0.01em; line-height: 1;
+  }
+  .cr-meta { display: flex; gap: 50px; flex-wrap: wrap; }
+  .cr-k {
+    display: block; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    font-weight: 700; color: var(--amber);
+  }
+  .cr-v { display: block; margin-top: 7px; font-size: 15px; font-weight: 600; }
+  .cr-body { margin-top: 36px; }
+  .cr-body p {
+    font-size: 17px; line-height: 1.85; color: #3f3a34;
+    max-width: 72ch; margin: 0 0 24px;
+  }
+  .cr-body p strong { color: var(--ink); font-weight: 700; }
+  .cr-photo { margin: 38px 0; border-radius: 10px; overflow: hidden; }
+  .cr-photo img { width: 100%; display: block; }
+  .cr-photo-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 38px 0; }
+  .cr-photo-pair .cr-photo { margin: 0; }
+  .cr-photo-pair img { aspect-ratio: 4 / 3; object-fit: cover; }
+  .cr-photo-trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 38px 0; }
+  .cr-photo-trio .cr-photo { margin: 0; }
+  .cr-photo-trio img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; display: block; }
+  .cr-photo-trio.fit img { aspect-ratio: 1 / 1; object-fit: contain; background: #fff; padding: 10px; box-sizing: border-box; border: 1px solid var(--line); border-radius: 10px; }
+  .cr-photo-pair.fit img { aspect-ratio: 1 / 1; object-fit: contain; background: #fff; padding: 10px; box-sizing: border-box; border: 1px solid var(--line); border-radius: 10px; }
+  .cr-video { margin: 38px 0; border-radius: 10px; overflow: hidden; aspect-ratio: 16 / 9; background: #000; }
+  .cr-video iframe { width: 100%; height: 100%; display: block; border: 0; }
+  .cr-tour { margin: 38px 0; border-radius: 10px; overflow: hidden; background: #000; }
+  .cr-tour iframe { display: block; width: 100%; height: 420px; border: 0; }
+  .cr-photo-pair.sq img { aspect-ratio: 1 / 1; }
+  .cr-ref { font-size: 14px; color: var(--ink-soft); border-top: 1px solid var(--line); padding-top: 18px; margin-top: 34px; }
+  .cr-ref a { color: var(--amber); }
+  .cr-ref a:hover { text-decoration: underline; }
+
+  /* other-work marquee + lightbox */
+  .work-scroller {
+    margin-top: 34px; overflow-x: auto; overflow-y: hidden; cursor: grab;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 2.5%, #000 97.5%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 2.5%, #000 97.5%, transparent);
+  }
+  .work-scroller.dragging { cursor: grabbing; }
+  .work-scroller::-webkit-scrollbar { display: none; }
+  .work-track { display: flex; gap: 16px; width: max-content; padding-bottom: 14px; }
+  .work-item {
+    flex: 0 0 auto; height: 320px; border: none; padding: 0; background: none; cursor: pointer;
+    border-radius: 10px; overflow: hidden; position: relative;
+  }
+  .work-item img { height: 100%; width: auto; display: block; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+  .work-item::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.3s var(--ease); }
+  .work-item:hover::after { background: rgba(0,0,0,0.12); }
+  .work-item:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+  .lightbox {
+    position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,0.93);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden; transition: opacity 0.35s var(--ease), visibility 0s linear 0.35s;
+  }
+  .lightbox.open { opacity: 1; visibility: visible; transition: opacity 0.35s var(--ease); }
+  .lb-img { max-width: 86vw; max-height: 82vh; border-radius: 8px; box-shadow: 0 30px 80px rgba(0,0,0,0.6); user-select: none; }
+  .lb-btn { position: absolute; background: rgba(255,255,255,0.1); border: none; color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: background 0.25s; z-index: 2; }
+  .lb-btn:hover { background: rgba(255,255,255,0.22); }
+  .lb-close { top: 22px; right: 26px; width: 46px; height: 46px; border-radius: 50%; font-size: 26px; line-height: 1; }
+  .lb-prev, .lb-next { top: 50%; transform: translateY(-50%); width: 56px; height: 56px; border-radius: 50%; font-size: 30px; line-height: 1; }
+  .lb-prev { left: 24px; } .lb-next { right: 24px; }
+  .lb-count { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0.8); font-size: 13px; letter-spacing: 0.1em; font-variant-numeric: tabular-nums; }
+  @media (max-width: 700px) { .lb-prev { left: 10px; } .lb-next { right: 10px; } .lb-prev, .lb-next { width: 44px; height: 44px; } }
+
+  /* ---------- Closer: thank you ---------- */
+  .closer {
+    padding: 150px 0; text-align: center; color: #f3efe9;
+    background: var(--black); position: relative; overflow: hidden;
+  }
+  .closer::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(55% 55% at 50% 20%, rgba(185,24,0,0.28), transparent 70%);
+  }
+  .closer .wrap { position: relative; }
+  .closer .eyebrow { color: var(--amber); }
+  .closer h2 {
+    font-size: clamp(40px, 6vw, 76px); font-weight: 900; text-transform: uppercase;
+    letter-spacing: -0.02em; line-height: 0.95; margin-top: 16px;
+  }
+  .closer p {
+    max-width: 56ch; margin: 28px auto 40px; font-size: 16px;
+    line-height: 1.75; color: rgba(255,255,255,0.7); font-weight: 300;
+  }
+  .closer p a { color: var(--amber); }
+  .closer p a:hover { text-decoration: underline; }
+  .btn-book {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--amber); color: #fff;
+    font-size: 14px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 18px 40px; border-radius: 4px;
+    transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), filter 0.25s;
+  }
+  .btn-book:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(185,24,0,0.35); filter: brightness(1.1); }
+  .btn-book svg { width: 16px; height: 16px; }
+  .closer-sign {
+    margin-top: 48px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(255,255,255,0.5); line-height: 1.9;
+  }
+  .closer-sign b { color: #fff; font-weight: 600; }
+
+  /* ---------- Footer ---------- */
+  .foot {
+    background: var(--black);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .btn-pdf {
+    display: inline-flex; align-items: center; gap: 10px;
+    color: #fff; border: 1px solid rgba(255, 255, 255, 0.35); background: transparent;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 14px 26px; border-radius: 4px; margin-bottom: 28px;
+    transition: border-color 0.2s, background 0.2s, transform 0.2s;
+  }
+  .btn-pdf:hover { border-color: var(--amber); background: rgba(185, 24, 0, 0.15); transform: translateY(-1px); }
+  .btn-pdf svg { width: 15px; height: 15px; }
+  .foot-logo {
+    height: 18px; width: auto;
+    margin: 0 auto; display: block;
+    color: #fff; opacity: 0.45;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 980px) {
+    .wrap { padding: 0 24px; }
+    header { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .menu-btn { display: inline-flex; }
+    .navbar { gap: 20px; }
+    .hero-content { padding: 0 24px 10vh; }
+    .intro .grid { grid-template-columns: 1fr; gap: 40px; }
+    .who-grid { grid-template-columns: 1fr; gap: 40px; }
+    .pillars { grid-template-columns: 1fr; gap: 30px; }
+    .tenex { grid-template-columns: 1fr; gap: 0; }
+    .tenex-panel { display: none; }
+    .tenex-body {
+      display: none; font-size: 14px; color: rgba(243,239,233,0.62);
+      font-weight: 300; line-height: 1.7; padding: 12px 2px 0; max-width: 60ch;
+    }
+    .tenex-item.active .tenex-body { display: block; }
+    .logo-wall, .logo-wall.cols-4, .logo-wall.cols-5 { grid-template-columns: repeat(2, 1fr); }
+    .lineup { grid-template-columns: 1fr; gap: 44px; }
+    .welove-grid { grid-template-columns: 1fr; gap: 36px; }
+    .case-layout { grid-template-columns: 1fr; gap: 18px; }
+    .case-rail { position: static; flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
+    .case-tab { flex: 0 0 118px; }
+    .case-content { padding: 30px 22px; }
+    .cr-photo-pair { grid-template-columns: 1fr; }
+    .cr-photo-trio { grid-template-columns: 1fr; }
+    .cr-head { border-bottom-width: 1px; }
+    .player-card { display: none; }
+    .lu-row { padding-top: 20px; padding-bottom: 20px; }
+    .lu-row.active + .lu-detail { display: block; padding: 4px 10px 28px; border-bottom: 1px solid rgba(243,239,233,0.16); animation: fadeUp 0.4s var(--ease); }
+    .lu-row.active { border-bottom-color: transparent; }
+    .lu-name { font-size: 22px; }
+  }
+
+  /* ---- Tablet (641–980): denser logo walls than the mobile 2-col ---- */
+  @media (min-width: 641px) and (max-width: 980px) {
+    .logo-wall, .logo-wall.cols-4, .logo-wall.cols-5 { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* ---- Phone (≤600px): fine-tuning ---- */
+  @media (max-width: 600px) {
+    /* roster: role label wraps under the name instead of clipping off-screen */
+    .lu-row { flex-wrap: wrap; column-gap: 16px; }
+    .lu-name { flex: 1 1 auto; }
+    .lu-role { margin: 3px 0 0; flex-basis: 100%; padding-left: calc(3ch + 16px); }
+    /* decorative scroll hint can crowd the headline on small screens */
+    .hero .scroll-hint { display: none; }
+    /* tighten oversized section padding on phones */
+    .intro { padding: 110px 0 90px; }
+    .who { padding: 84px 0 70px; }
+    .roster-sec, .cases, .logos, .philosophy, .welove { padding-top: 90px; padding-bottom: 90px; }
+    .stub, .closer { padding: 90px 0; }
+  }
+</style>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xnzugcb7j2");
+</script>
+</head>
+<body>
+
+<!-- Mox logo symbol (fill follows currentColor) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mox-logo" viewBox="0 0 46 13">
+    <path d="M12.2651 5.04408C12.1903 5.26763 11.8702 5.27895 11.7898 5.05681C11.3385 3.80181 10.7448 1.99358 10.7448 1.99358C10.4416 0.925339 9.39095 0.509361 8.28389 0.509361L7.26427 0.52068C7.36299 3.44384 5.27298 4.14138 4.13489 4.94079C1.79809 6.58348 0 9.33968 0 12.7354H6.78619L6.77914 7.34186C6.77914 5.98923 7.03158 3.43677 8.42351 3.43677C10.0368 3.43677 10.2315 7.45222 10.8238 8.99728C11.0395 9.55899 11.8081 9.54343 12.0225 8.93503C12.0239 8.93078 13.2142 5.12048 13.2142 5.12048C13.3651 4.66913 13.9108 4.78374 13.9108 5.25914V12.676H16.895V0.52068H13.7628L12.2651 5.04408Z" fill="currentColor"/>
+    <path d="M31.2952 6.57357C31.2938 1.76153 25.3453 -1.5578 21.2132 0.752717C16.9232 3.16793 17.3406 9.83914 21.5531 12.1412C25.7331 14.5705 31.4954 11.5865 31.2952 6.57357ZM29.8905 7.7168C29.7904 8.02525 29.6353 8.31388 29.4252 8.56007C27.4353 10.8961 23.3145 9.0949 21.9465 6.71648C20.3487 4.36776 21.0143 0.881472 24.2862 0.966366C27.4903 0.902696 30.9327 4.51915 29.8891 7.71539L29.8905 7.7168Z" fill="currentColor"/>
+    <path d="M40.7581 6.18781L41.789 5.71524C42.3193 5.47329 42.8298 5.1889 43.3121 4.86064C43.9185 4.44608 44.4558 3.97917 45.0679 3.19815C45.7011 2.39166 45.8717 1.7493 46.0522 0.579189H40.0953L40.084 3.2505C40.0389 6.18073 38.4157 5.57516 37.7599 4.66114C37.396 4.15461 37.0308 2.99016 36.6923 2.37185C36.0097 1.12392 34.2808 0.577774 32.6801 0.577774V4.93139H35.5317C35.7221 4.93139 35.9138 4.94695 36.1 4.98515C36.3581 5.03609 36.5682 5.11391 36.8601 5.24408C35.715 5.34878 34.4909 6.38306 33.9113 7.91114C32.9946 10.3249 32.3938 11.2163 30.088 12.7939H36.045L36.4314 12.0355C37.0336 10.6659 37.5498 8.14743 38.4932 7.03533C39.1673 6.24157 40.1037 6.25572 40.7412 7.07777C41.1304 7.57864 41.3772 9.15342 41.648 9.79012C42.2459 11.1951 43.7211 12.7402 45.3189 12.7911C45.3767 12.7925 45.436 12.7939 45.4952 12.7939L45.4811 7.13578C43.3812 7.39188 42.1176 6.92497 40.7553 6.18781H40.7581Z" fill="currentColor"/>
+  </symbol>
+</svg>
+
+<!-- Preloader: Mox × BoreBuddy -->
+<div class="preloader" id="preloader">
+  <div class="pl-step pl-mox"><svg viewBox="0 0 46 13" aria-label="Mox"><use href="#mox-logo"/></svg></div>
+  <div class="pl-step pl-x" aria-hidden="true">&times;</div>
+  <div class="pl-step pl-client"><img src="borebuddy-logo.png" alt="BoreBuddy"></div>
+</div>
+
+<a class="top-logo" href="#top" aria-label="Mox home"><svg viewBox="0 0 46 13" aria-hidden="true"><use href="#mox-logo"/></svg></a>
+
+<header id="header">
+  <div class="navbar">
+    <a class="logo" href="#top" aria-label="Mox home">
+      <svg viewBox="0 0 46 13" aria-hidden="true"><use href="#mox-logo"/></svg>
+    </a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="#who">Who We Are</a>
+      <a href="#portfolio">Portfolio</a>
+      <a href="#roster">Roster</a>
+      <a href="#cases">Case Studies</a>
+      <a href="#philosophy">Creative Philosophy</a>
+      <a href="#bid">Proposal</a>
+    </nav>
+    <button class="menu-btn" id="menuOpen" aria-label="Open menu" aria-expanded="false"><span class="burger" aria-hidden="true"></span></button>
+  </div>
+</header>
+
+<!-- Full-screen Menu -->
+<div class="menu-overlay" id="menuOverlay" role="dialog" aria-modal="true" aria-label="Main menu">
+  <div class="menu-head">
+    <a class="logo" href="#top" aria-label="Mox home"><svg viewBox="0 0 46 13" aria-hidden="true"><use href="#mox-logo"/></svg></a>
+    <button class="menu-close" id="menuClose" aria-label="Close menu"></button>
+  </div>
+  <nav class="menu-nav">
+    <div class="menu-nav-item">
+      <div class="menu-nav-row"><a href="#who">Who We Are</a></div>
+    </div>
+    <div class="menu-nav-item">
+      <div class="menu-nav-row"><a href="#portfolio">Portfolio</a></div>
+    </div>
+    <div class="menu-nav-item">
+      <div class="menu-nav-row"><a href="#roster">Roster</a></div>
+    </div>
+    <div class="menu-nav-item">
+      <div class="menu-nav-row"><a href="#cases">Case Studies</a></div>
+    </div>
+    <div class="menu-nav-item">
+      <div class="menu-nav-row"><a href="#philosophy">Creative Philosophy</a></div>
+    </div>
+    <div class="menu-nav-item">
+      <div class="menu-nav-row"><a href="#bid">Proposal</a></div>
+    </div>
+  </nav>
+</div>
+
+<!-- Hero -->
+<section class="hero" id="top">
+  <div class="hero-bg">
+  </div>
+  <div class="hero-content">
+    <h1>Prove the<br>Unproven</h1>
+  </div>
+  <div class="scroll-hint">Scroll</div>
+</section>
+
+<!-- Intro statement -->
+<section class="intro" id="about">
+  <div class="wrap">
+    <div class="grid">
+      <div class="reveal">
+        <span class="eyebrow">Your Guide</span>
+        <!-- Swap in your video: https://www.youtube.com/embed/YOUR_VIDEO_ID -->
+        <div class="video-embed">
+          <iframe src="https://www.youtube.com/embed/vvlqLtnL0iw?rel=0" title="Mox brand video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen loading="lazy"></iframe>
+        </div>
+      </div>
+      <div>
+        <p class="lead reveal d1">We built Mox to help brands make major shifts. We bring together the right minds to push past basic creative work and drive true transformation. When you find it is time to step into the unknown, step into it boldly. But wherever you go&hellip; Go with Mox.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Who We Are -->
+<section class="who" id="who">
+  <div class="wrap">
+    <div class="who-grid">
+      <div class="who-info">
+        <span class="eyebrow reveal">Who We Are</span>
+        <div class="who-facts reveal d1">
+          <div><span class="wf-k">Name</span><span class="wf-v">Mox</span></div>
+          <div><span class="wf-k">Location</span><span class="wf-v"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>Boise, ID</span></div>
+          <div><span class="wf-k">Founded</span><span class="wf-v">2021</span></div>
+        </div>
+        <p class="who-text reveal d1">A standard agency is limited by who sits in the room. We are not. We run a sharp in-house core, backed by a roster of independent talent we represent. We bring the exact right minds to the table for every job. This allows us to scale fast, hit harder, and build work most shops cannot touch.</p>
+        <p class="who-text reveal d2">Proven methods secure results, and that is important. But repeating the &lsquo;industry standard&rsquo; will only take you so far. To find true success, calculated risk is required. At Mox we&rsquo;re not afraid of testing unproven strategies. This is where strategic foundations and novel ideas collide.</p>
+      </div>
+      <div class="who-photo reveal d1">
+        <img src="https://framerusercontent.com/images/eBNPLYu1H1IIWw082UVV2QIkpI.webp?scale-down-to=2048" alt="Mox" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Logo wall: partners (6 x 4) -->
+<section class="logos" id="portfolio">
+  <div class="logos-bg" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow reveal">Our Roster Has Worked With</span>
+    </div>
+    <div class="logo-wall cols-4 reveal d1">
+      <div class="logo-tile" data-name="Boise State University" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784220143/BSU_BG.jpg"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784218800/BSU.png" alt="Boise State University" loading="lazy"></div>
+      <div class="logo-tile" data-name="NFL" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784220143/NFL_BG.jpg"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145146/National_Football_League_logo.svg_1.png" alt="NFL" loading="lazy"></div>
+      <div class="logo-tile" data-name="NBA 2K" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784220138/2K_BG.jpg"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145146/NBA2K_1.png" alt="NBA 2K" loading="lazy"></div>
+      <div class="logo-tile" data-name="Humanitarian Bowl" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784220143/H_Bowl_BG.jpg"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145145/images_1_1.png" alt="Humanitarian Bowl" loading="lazy"></div>
+      <div class="logo-tile" data-name="Orlando Solar Bears" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784291083/SB_new.jpg"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145148/Solar_Bears_1.png" alt="Orlando Solar Bears" loading="lazy"></div>
+      <div class="logo-tile" data-name="Derrick Rose" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784291250/DROSE.jpg"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145145/Drose_Logo_1.png" alt="Derrick Rose" loading="lazy"></div>
+      <div class="logo-tile" data-name="Orlando Magic" data-bg="https://www.gilbaneco.com/wp-content/uploads/2024/12/Orlando-Arena_01.jpeg"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145147/Orlando_Magic_1.png" alt="Orlando Magic" loading="lazy"></div>
+      <div class="logo-tile" data-name="World Cup" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784220138/France_WC_BG.webp"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145149/WC_1.png" alt="World Cup" loading="lazy"></div>
+      <div class="logo-tile" data-name="PGA" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784220137/PGA_BG.webp"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145147/PGA_Real_1.png" alt="PGA" loading="lazy"></div>
+      <div class="logo-tile" data-name="USA Men's National Team" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784220137/USA_MEN_BG.jpg"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145149/USA_MEN_1.png" alt="USA Men's National Team" loading="lazy"></div>
+      <div class="logo-tile" data-name="AC Boise" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784291125/Ac_Boise_Kit.webp"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145144/Ad_boise_1.png" alt="AC Boise" loading="lazy"></div>
+      <div class="logo-tile" data-name="Trail Blazers" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784291198/Trailbladdzers.jpg"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145148/Trail_1.png" alt="Trail Blazers" loading="lazy"></div>
+    </div>
+
+    <h3 class="sub-head reveal">More Work</h3>
+    <div class="logo-wall reveal">
+      <div class="logo-tile" data-name="Nike"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145147/Nike_1.png" alt="Nike" loading="lazy"></div>
+      <div class="logo-tile" data-name="Adidas"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145144/Add_1.png" alt="Adidas" loading="lazy"></div>
+      <div class="logo-tile" data-name="Gatorade"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145145/Gatorade_1.png" alt="Gatorade" loading="lazy"></div>
+      <div class="logo-tile" data-name="M&M's"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145146/MM_1.png" alt="M&M's" loading="lazy"></div>
+      <div class="logo-tile" data-name="Sony"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145148/Sony_1.png" alt="Sony" loading="lazy"></div>
+      <div class="logo-tile" data-name="Google"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145145/google-logo-icon-symbol-free-png_1.png" alt="Google" loading="lazy"></div>
+      <div class="logo-tile" data-name="Reebok"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145148/Reebok_1.png" alt="Reebok" loading="lazy"></div>
+      <div class="logo-tile" data-name="Albertsons"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145145/Albertsons-logo_1.png" alt="Albertsons" loading="lazy"></div>
+      <div class="logo-tile" data-name="Johnson &amp; Johnson"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145146/Logo-Johnson-Johnson_1.png" alt="Johnson &amp; Johnson" loading="lazy"></div>
+      <div class="logo-tile" data-name="Treefort"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145148/Treefort_1.png" alt="Treefort" loading="lazy"></div>
+      <div class="logo-tile" data-name="711"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784146663/711.png" alt="711" loading="lazy"></div>
+      <div class="logo-tile" data-name="Sockeye"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784218427/Sockeye_Brewing_Logo_Primary_Black_Dark.png" alt="Sockeye" loading="lazy"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Our Roster: starting lineup board -->
+<section class="roster-sec" id="roster">
+  <div class="wrap">
+    <span class="eyebrow reveal">The Team</span>
+    <h2 class="reveal d1">Our Starting Lineup</h2>
+    <div class="lineup reveal d1">
+      <div class="lineup-list" role="tablist" aria-label="Mox roster">
+        <button class="lu-row" role="tab" data-num="01" data-name="Nathan Zanders" data-role="Creative Director"
+          data-photo="https://framerusercontent.com/images/HLQv6zLxpTdzjVGQKAT1EmbjIbg.jpg?scale-down-to=1024"
+          data-bio="Nathan oversees visual strategy, community research, and discovery workflows. With more than ten years of experience in creative direction and project production management, Nathan's background is key to grounding Mox's creative process in community needs."
+          data-logos="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145144/Ad_boise_1.png|https://res.cloudinary.com/dbwtszgtb/image/upload/v1784146663/711.png|https://res.cloudinary.com/dbwtszgtb/image/upload/v1784218427/Sockeye_Brewing_Logo_Primary_Black_Dark.png">
+          <span class="lu-num">01</span>
+          <span class="lu-name">Nathan Zanders</span>
+          <span class="lu-role">Creative Director</span>
+        </button>
+        <button class="lu-row" role="tab" data-num="02" data-name="DJ Ramirez" data-role="Creative Director"
+          data-photo="https://framerusercontent.com/images/0k0amyAfZHABvOBTZoMMFZ1JTaA.jpg?scale-down-to=1024"
+          data-bio="DJ Ramirez is a Content Director specializing in content-driven campaigns that connect brands to culture. He works closely with marketing teams and agencies to develop content ecosystems that are both creatively strong and strategically effective.
+
+DJ brings a hands-on approach to direction, ensuring every piece of content is aligned with the broader narrative and built for how audiences engage today. His work is rooted in storytelling, but designed to live and evolve within culture."
+          data-logos="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145144/Ad_boise_1.png|https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145148/Sony_1.png">
+          <span class="lu-num">02</span>
+          <span class="lu-name">DJ Ramirez</span>
+          <span class="lu-role">Creative Director</span>
+        </button>
+        <button class="lu-row" role="tab" data-num="03" data-name="Jonathan Marshall" data-role="Creative Director"
+          data-photo="https://framerusercontent.com/images/9xL3BLZQzcCJlNkgBo7ZFP5WJe8.jpg?scale-down-to=1024"
+          data-bio="15+ years in creative strategy and branding for agencies and Fortune 100 names — Nike, AKQA, J&amp;J, Umpqua — with a focus on public-sector and social-impact work."
+          data-logos="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145147/Nike_1.png|https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145145/google-logo-icon-symbol-free-png_1.png|https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145149/USA_MEN_1.png">
+          <span class="lu-num">03</span>
+          <span class="lu-name">Jonathan Marshall</span>
+          <span class="lu-role">Creative Director</span>
+        </button>
+        <button class="lu-row" role="tab" data-num="04" data-name="Jeremy James" data-role="Senior Designer"
+          data-photo="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784225505/Screenshot_2026-07-16_at_12.11.38_PM.png"
+          data-bio="Art Director with 20+ years leading scalable brand systems and integrated campaigns across sports, culture, retail and experiential marketing. Directed national creative initiatives for Gatorade across NFL, NBA, MLB, and NCAA partnerships, translating campaign concepts into multi-channel executions at scale."
+          data-logos="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145146/National_Football_League_logo.svg_1.png|https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145145/Gatorade_1.png|https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145146/MM_1.png">
+          <span class="lu-num">04</span>
+          <span class="lu-name">Jeremy James</span>
+          <span class="lu-role">Senior Designer</span>
+        </button>
+        <button class="lu-row" role="tab" data-num="05" data-name="Nathan Warner" data-role="Senior Designer"
+          data-photo="https://framerusercontent.com/images/8DC42a4QfaGgTwCbtV8cYfbG24.jpg?scale-down-to=1024"
+          data-bio="Being born and raised in Westchester, California, I was lucky to have access to California's beautiful landscapes - enjoying the sunshine and access to the beaches, deserts, and mountainous terrain. As my love for skateboarding, and the culture that surrounded it in the late 90's and early 2000's, I began to find myself listening to early punk albums, reading zines, and engulfing myself in the counter-cultures associated with those at the time.
+
+With 10 years of experience, and counting, I have had great mentors, and amazing opportunities to learn from very talented creatives."
+          data-logos="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145148/Treefort_1.png|https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145145/Drose_Logo_1.png|https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145145/Klay_Logo_1.png">
+          <span class="lu-num">05</span>
+          <span class="lu-name">Nathan Warner</span>
+          <span class="lu-role">Senior Designer</span>
+        </button>
+        <button class="lu-row" role="tab" data-num="06" data-name="Ally Miller Buck" data-role="Production Designer"
+          data-photo="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784225585/Screenshot_2026-07-16_at_12.12.54_PM.png"
+          data-bio="Ally brings 7+ years of experience in web and graphic design, shaped by working in fast-paced environments where flexibility and efficiency matter. I handle everything from quick-turn production work to building out brands and launching campaigns — often wearing multiple hats to get things across the finish line. With 5+ years specializing in the car wash industry, I also partner with a wide range of businesses outside of that space — keeping my work diverse and constantly evolving. I enjoy work that challenges me to think creatively while still delivering something clear, functional, and effective."
+          data-logos="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145147/Orlando_Magic_1.png|https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145148/Solar_Bears_1.png">
+          <span class="lu-num">06</span>
+          <span class="lu-name">Ally Miller Buck</span>
+          <span class="lu-role">Production Designer</span>
+        </button>
+        <button class="lu-row" role="tab" data-num="07" data-name="Coaching Staff" data-role="Coaching Staff"
+          data-photos="https://framerusercontent.com/images/5Y4tc5esXsMNlwYvk00OVIwrMC0.jpg?scale-down-to=1024|https://framerusercontent.com/images/wHb4RMZPmYVLFUBtXb7X5XxSR9A.jpg?scale-down-to=1024"
+          data-bio="Jeff Barker (Co-Founder) and Matt McMorrow — the producers, coordinators, and specialists who keep every play on schedule."
+          data-logos="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145147/Orlando_Magic_1.png|https://res.cloudinary.com/dbwtszgtb/image/upload/v1784218427/Sockeye_Brewing_Logo_Primary_Black_Dark.png|https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145148/Solar_Bears_1.png">
+          <span class="lu-num">07</span>
+          <span class="lu-name">Coaching Staff</span>
+          <span class="lu-role">Coaching Staff</span>
+        </button>
+      </div>
+      <aside class="player-card">
+        <div class="pc-inner" id="pcInner">
+          <div class="pc-ghost" id="pcGhost">01</div>
+          <div class="pc-head">
+            <div class="pc-photo" id="pcPhotoWrap"></div>
+            <div class="pc-id">
+              <h3 class="pc-name" id="pcName">Nathan Zanders</h3>
+              <span class="pc-role" id="pcRole">Creative Director</span>
+            </div>
+          </div>
+          <p class="pc-note" id="pcNote"></p>
+          <div class="pc-logos-label" id="pcLogosLabel">Worked With</div>
+          <div class="pc-logos" id="pcLogos"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- Case Studies -->
+<section class="cases" id="cases">
+  <div class="wrap">
+    <span class="eyebrow reveal">The Proof</span>
+    <h2 class="reveal d1">Case Studies</h2>
+    <div class="case-layout reveal d1">
+      <div class="case-rail" role="tablist" aria-label="Case studies">
+        <button class="case-tab active" role="tab" aria-selected="true" style="background-image:url('https://res.cloudinary.com/dbwtszgtb/image/upload/v1784302624/Screenshot_2026-07-17_at_9.36.53_AM.png')">
+          <span class="ct-name">Gatorade</span>
+        </button>
+        <button class="case-tab" role="tab" aria-selected="false" style="background-image:url('https://framerusercontent.com/images/mwERdMMwZZxkw86JFuaaOFCCo.webp?scale-down-to=2048')">
+          <span class="ct-name">AC Boise</span>
+        </button>
+        <button class="case-tab" role="tab" aria-selected="false" style="background-image:url('https://res.cloudinary.com/dbwtszgtb/image/upload/v1784294796/Screenshot_2026-07-17_at_7.26.29_AM.png')">
+          <span class="ct-name">NCS</span>
+        </button>
+        <button class="case-tab" role="tab" aria-selected="false" style="background-image:url('https://res.cloudinary.com/dbwtszgtb/image/upload/v1784294718/speeders_brandguide_8_v4.png')">
+          <span class="ct-name">Summit Wash Holdings</span>
+        </button>
+        <button class="case-tab" role="tab" aria-selected="false" style="background-image:url('https://framerusercontent.com/images/1M2vZd0VEP6cdi7IneyrBnhuFo.jpg?scale-down-to=2048')">
+          <span class="ct-name">RivTek</span>
+        </button>
+        <button class="case-tab" role="tab" aria-selected="false" style="background-image:url('https://framerusercontent.com/images/RCbpUmlzBdGUZdesEIgT6UXXmU.jpg?scale-down-to=2048')">
+          <span class="ct-name">USA Towel</span>
+        </button>
+      </div>
+      <div class="case-content">
+
+<article class="case-reader active">
+      <div class="cr-head">
+        <h3 class="cr-title">Gatorade</h3>
+        <div class="cr-meta">
+          <div><span class="cr-k">Project Scope</span><span class="cr-v">2025 NFL Key Visual</span></div>
+        </div>
+      </div>
+      <div class="cr-body">
+        <p><strong>The Challenge &mdash;</strong> In the past two seasons, the NFL had a no helmet policy, wanting to leverage stars by face recognition only. For the 2025 season, we were granted permission to feature players in action. But, with that, came a ton of photo research time finding shots that kept players somewhat recognizable.</p>
+        <p><strong>The Strategy &mdash;</strong> Aidan Hutchinson of the Detroit Lions had the perfect blend of both action and identity. He was the best choice to use for laying out the key visual for the season.</p>
+        <p>For composition, his rushing pose had nice visual weight that held the left space on top of the Gatorade orange gradient. Detroit's team flavor also paired perfectly with the Lions uniforms. Combined with the far right logo lockup, that powder blue united Gatorade and the NFL that made both big brands happy. As the protein supplier to the NFL, Muscle Milk brand was also very pleased with the alliance.</p>
+        <div class="cr-photo-trio fit">
+          <figure class="cr-photo"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784302624/Screenshot_2026-07-17_at_9.36.53_AM.png" alt="Gatorade 2025 NFL key visual featuring Aidan Hutchinson" loading="lazy"></figure>
+          <figure class="cr-photo"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784302624/Screenshot_2026-07-17_at_9.36.43_AM.png" alt="" loading="lazy"></figure>
+          <figure class="cr-photo"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784302664/Screenshot_2026-07-17_at_9.37.38_AM.png" alt="" loading="lazy"></figure>
+        </div>
+        <p><strong>The Result &mdash;</strong> Putting star players to action proved to be a more successful approach, as 2025 Gatorade sales in large NFL markets were up from '24. The look was so successful, that it was extended to Major League Baseball for '26.</p>
+      </div>
+    </article>
+<article class="case-reader">
+      <div class="cr-head">
+        <h3 class="cr-title">AC Boise</h3>
+        <div class="cr-meta">
+          <div><span class="cr-k">Project Scope</span><span class="cr-v">Kit Launch Campaign</span></div>
+        </div>
+      </div>
+      <div class="cr-body">
+        <p><strong>Description &mdash;</strong> You do not launch a local club's kit in a blank studio. You take it outside. To reveal the new AC Boise gear, we teamed up with Against, director DJ Ramirez, and DP Nathan Zanders to put the city on screen. We framed Boise as a living character, filming real people wearing the kit in the places they do life. Built for both the live launch event and social channels, the film skips the standard sports hype. It gives a clear, honest look at a city standing behind its team.</p>
+        <div class="cr-video"><iframe src="https://www.youtube.com/embed/dTzb_Ck8vJ4" title="AC Boise — Kit Launch" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+        <figure class="cr-photo"><img src="https://framerusercontent.com/images/mwERdMMwZZxkw86JFuaaOFCCo.webp?scale-down-to=2048" alt="AC Boise kit launch film still" loading="lazy"></figure>
+        <div class="cr-photo-pair">
+          <figure class="cr-photo"><img src="https://framerusercontent.com/images/NsMJRFw2y8iEh5HSUOQBYBdElU.webp?scale-down-to=2048" alt="" loading="lazy"></figure>
+          <figure class="cr-photo"><img src="https://framerusercontent.com/images/0tbvSRYuvB2fidAe9oUEZUrjdg.jpg?scale-down-to=2048" alt="" loading="lazy"></figure>
+        </div>
+      </div>
+    </article>
+<article class="case-reader">
+      <div class="cr-head">
+        <h3 class="cr-title">NCS</h3>
+        <div class="cr-meta">
+          <div><span class="cr-k">Length of Retainer</span><span class="cr-v">5+</span></div>
+          <div><span class="cr-k">Project Scope</span><span class="cr-v">Design Retainer</span></div>
+          <div><span class="cr-k">Assets Created</span><span class="cr-v">2000+</span></div>
+        </div>
+      </div>
+      <div class="cr-body">
+        <p>We've partnered with National Carwash Solutions (NCS) for five years running, and we're still going. Over that time we've worked with them in just about every way a creative partner can — but if you boil it down, we've been their strongest problem solvers.</p>
+        <p>When NCS had a problem, they came to us. How do we launch a new product? How do we get people to actually stop by our booth instead of walking past it? How do we become completely unmissable at a show? Those are the kinds of questions we've answered for them, again and again — and the answers showed up as real, produced creative.</p>
+        <div class="cr-tour"><iframe id="tour-embeded" name="NCS Booth Tour" src="https://tour.panoee.net/iframe/680fb252ad5d3dd2fafe3171" frameborder="0" width="100%" height="400px" scrolling="no" allowvr="yes" allow="vr; xr; accelerometer; gyroscope; autoplay;" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" loading="lazy" title="NCS Booth Tour, 360 virtual tour"></iframe></div>
+        <p>The range speaks for itself. Social media graphics, websites, landing pages, videos, event and booth materials, decks and presentations — honestly, just about anything a marketing team could dream up, we've built for NCS. Whatever the channel or the deadline, we've been the team they trust to figure it out and deliver.</p>
+        <div class="cr-photo-pair sq">
+          <figure class="cr-photo"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784294362/IBA_1080x1080_Option2.png" alt="" loading="lazy"></figure>
+          <figure class="cr-photo"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784294361/GoogleAds_1200x1200_DesignA.png" alt="" loading="lazy"></figure>
+        </div>
+        <p>What makes this relevant to BoreBuddy is how we work. NCS has its own internal marketing team and in-house designers, and we don't step on them — we work right alongside them. We regularly share larger projects, dividing the work in whatever way serves the goal. We can lead as creative director and set the vision, or roll up our sleeves as the production design team executing the details — often both on the same project. If people on your team already run the store, the photos or the social posts, we work with them, not around them.</p>
+        <p>The through-line across five years is simple: NCS keeps coming back because we solve their problems, integrate with their team, and make them unmissable. That's the same partner we'd be for you.</p>
+        <p class="cr-ref">Reference contact: Sydney Quintana, Director of Regional Marketing, National Carwash Solutions — <a href="mailto:squintana@ncswash.com">squintana@ncswash.com</a></p>
+      </div>
+    </article>
+<article class="case-reader">
+      <div class="cr-head">
+        <h3 class="cr-title">Summit Wash Holdings</h3>
+        <div class="cr-meta">
+          <div><span class="cr-k">Length of Retainer</span><span class="cr-v">4+</span></div>
+          <div><span class="cr-k">Project Scope</span><span class="cr-v">Design Retainer</span></div>
+          <div><span class="cr-k">Assets Created</span><span class="cr-v">700+</span></div>
+        </div>
+      </div>
+      <div class="cr-body">
+        <p>We've partnered with Summit Wash Holdings for four years running, supporting all three of their brands — Speeders Carwash, Waters Carwash, and Russell Speeders Carwash. Managing creative across a multi-brand portfolio means keeping each identity distinct while holding a consistent standard of quality across the whole family, and that's exactly the kind of work we thrive on.</p>
+        <p>Over those four years we've done a little of everything for Summit: full rebrands, ongoing social media, landing pages, custom promotional email campaigns, and on-site signage. We've also helped them show up where it counts — building promotions in partnership with the Orlando Magic and the Orlando Solar Bears, tying their brands to the energy of live sports and local fandom.</p>
+        <p><strong>The campaign below is the proof.</strong> It's Summit's highest-performing ad campaign to date — outperforming their previous best by 3.5&times; — and their longest-running, still working for them today.</p>
+        <div class="cr-video"><iframe src="https://www.youtube.com/embed/tMHOvcXqXq4" title="Summit Wash Holdings campaign" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+        <div class="cr-photo-pair fit">
+          <figure class="cr-photo"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784305804/Waters_Reflection_GoogleDisiplayAds_300x250_001a.png" alt="Waters Carwash Reflection display ad" loading="lazy"></figure>
+          <figure class="cr-photo"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784305804/Waters_Promo_Winter_15Off_Email_001a.png" alt="Waters Carwash winter promotion email" loading="lazy"></figure>
+        </div>
+      </div>
+    </article>
+<article class="case-reader">
+      <div class="cr-head">
+        <h3 class="cr-title">RivTek</h3>
+        <div class="cr-meta">
+          <div><span class="cr-k">Project Scope</span><span class="cr-v">Go To Market Campaign</span></div>
+        </div>
+      </div>
+      <div class="cr-body">
+        <p><strong>Description &mdash;</strong> We shot RIVTEK&rsquo;s &ldquo;More White Water&rdquo; campaign to show what the boat can actually do. Using fast drones and low-angle cameras, we tracked the raft through extreme drops. No camera tricks. Just a clear, fast-paced look at a heavy-duty raft doing exactly what it was built to do.</p>
+        <div class="cr-video"><iframe src="https://www.youtube.com/embed/u7PyW3uGzFA" title="RIVTEK — More White Water" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+        <div class="cr-photo-trio">
+          <figure class="cr-photo"><img src="https://framerusercontent.com/images/BrdrPckQ6zrz32WkE2GU17nV98I.png?scale-down-to=2048" alt="" loading="lazy"></figure>
+          <figure class="cr-photo"><img src="https://framerusercontent.com/images/7m2faWE1m7r9QfQ1eeeaPjcrvk.jpg?scale-down-to=2048" alt="" loading="lazy"></figure>
+          <figure class="cr-photo"><img src="https://framerusercontent.com/images/4YJ0WpMiGhYCMsJgeCoSBilnJbA.jpg?scale-down-to=2048" alt="" loading="lazy"></figure>
+        </div>
+      </div>
+    </article>
+<article class="case-reader">
+      <div class="cr-head">
+        <h3 class="cr-title">USA Towel</h3>
+        <div class="cr-meta">
+          <div><span class="cr-k">Project Scope</span><span class="cr-v">Go To Market Campaign</span></div>
+        </div>
+      </div>
+      <div class="cr-body">
+        <p><strong>Description &mdash;</strong> Telling a buyer your product is better rarely works; you have to prove it. To show the value of a USA Towel over cheap bulk towels, we skipped the sales pitch and ran a blind test. We brought in real people, covered their eyes, and put both towels in their hands. The campaign captures their raw, immediate reactions, proving a single fact: you do not need to see the real thing to know you are holding it.</p>
+        <figure class="cr-photo"><img src="https://framerusercontent.com/images/RCbpUmlzBdGUZdesEIgT6UXXmU.jpg?scale-down-to=2048" alt="USA Towel blind test campaign" loading="lazy"></figure>
+        <p><strong>The Campaign &mdash;</strong> The blind test became the backbone of a hero film and a suite of stills built to travel &mdash; cut for social, retail, and sales conversations alike. No scripts, no paid reactions &mdash; just genuine first impressions doing the selling. It&rsquo;s proof-first creative: let the product win the moment, then get out of the way.</p>
+        <div class="cr-video"><iframe src="https://www.youtube.com/embed/cEjXpVONVSw" title="USA Towel — Blind Test" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+        <div class="cr-photo-pair">
+          <figure class="cr-photo"><img src="https://framerusercontent.com/images/UbUaS0TvDocDKkgtHGVpZTUCe8o.png?scale-down-to=2048" alt="" loading="lazy"></figure>
+          <figure class="cr-photo"><img src="https://framerusercontent.com/images/7J4zWglklZxqemuN2yL2iz4NH8Q.png?scale-down-to=2048" alt="" loading="lazy"></figure>
+        </div>
+        <figure class="cr-photo"><img src="https://framerusercontent.com/images/dPyFtPYTa6qUzf1ZGMDYg0eio.jpg?scale-down-to=2048" alt="" loading="lazy"></figure>
+      </div>
+    </article>
+      </div>
+    </div><h3 class="sub-head reveal">Other Work Our Roster Has Done</h3>
+    <div class="work-scroller reveal" id="workScroller">
+      <div class="work-track">
+        <button class="work-item" data-i="0" data-full="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226393/Screenshot_2026-07-16_at_12.23.53_PM.png" aria-label="Open work 1"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226393/Screenshot_2026-07-16_at_12.23.53_PM.png" alt=""></button>
+        <button class="work-item" data-i="1" data-full="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226393/Screenshot_2026-07-16_at_12.22.41_PM.png" aria-label="Open work 2"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226393/Screenshot_2026-07-16_at_12.22.41_PM.png" alt=""></button>
+        <button class="work-item" data-i="2" data-full="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226392/Screenshot_2026-07-16_at_12.22.52_PM.png" aria-label="Open work 3"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226392/Screenshot_2026-07-16_at_12.22.52_PM.png" alt=""></button>
+        <button class="work-item" data-i="3" data-full="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226391/Screenshot_2026-07-16_at_12.23.03_PM.png" aria-label="Open work 4"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226391/Screenshot_2026-07-16_at_12.23.03_PM.png" alt=""></button>
+        <button class="work-item" data-i="4" data-full="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226390/Screenshot_2026-07-16_at_12.23.42_PM.png" aria-label="Open work 5"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226390/Screenshot_2026-07-16_at_12.23.42_PM.png" alt=""></button>
+        <button class="work-item" data-i="5" data-full="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226390/Screenshot_2026-07-16_at_12.23.13_PM.png" aria-label="Open work 6"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226390/Screenshot_2026-07-16_at_12.23.13_PM.png" alt=""></button>
+        <button class="work-item" data-i="6" data-full="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226390/Screenshot_2026-07-16_at_12.23.30_PM.png" aria-label="Open work 7"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226390/Screenshot_2026-07-16_at_12.23.30_PM.png" alt=""></button>
+        <button class="work-item" data-i="7" data-full="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226389/Screenshot_2026-07-16_at_12.25.20_PM.png" aria-label="Open work 8"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226389/Screenshot_2026-07-16_at_12.25.20_PM.png" alt=""></button>
+        <button class="work-item" data-i="8" data-full="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226781/Previous_work.png" aria-label="Open work 9"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226781/Previous_work.png" alt=""></button>
+        <button class="work-item" data-i="9" data-full="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226781/AMP_LICarousel_IndustryInsights_Design1.png" aria-label="Open work 10"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226781/AMP_LICarousel_IndustryInsights_Design1.png" alt=""></button>
+        <button class="work-item" data-i="10" data-full="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226781/ncs_website_webbanner_partsnetwork_v1.png" aria-label="Open work 11"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226781/ncs_website_webbanner_partsnetwork_v1.png" alt=""></button>
+        <button class="work-item" data-i="11" data-full="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226870/MetaAds_1200x1200_Design4.png" aria-label="Open work 12"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784226870/MetaAds_1200x1200_Design4.png" alt=""></button>
+      </div>
+    </div>
+    <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Work viewer">
+      <button class="lb-btn lb-close" id="lbClose" aria-label="Close">&times;</button>
+      <button class="lb-btn lb-prev" id="lbPrev" aria-label="Previous">&#8249;</button>
+      <img class="lb-img" id="lbImg" src="" alt="">
+      <button class="lb-btn lb-next" id="lbNext" aria-label="Next">&#8250;</button>
+      <div class="lb-count"><span id="lbNow">1</span> / <span id="lbTotal">8</span></div>
+    </div>
+    </div></section>
+
+<!-- Creative Philosophy -->
+<section class="philosophy" id="philosophy">
+  <div class="wrap">
+    <span class="eyebrow reveal">Our Approach</span>
+    <h2 class="reveal">Our Philosophy</h2>
+    <p class="lead reveal d1">A holistic philosophy that ensures our work delivers maximum impact and integrity — from first research to final launch.</p>
+    <div class="pillars">
+      <div class="pillar reveal">
+        <h3>Train like <em>athletes</em></h3>
+        <p>We engage in continuous learning and creative-thinking exercises to build stamina and master our craft — so every project is delivered with peak efficiency and performance.</p>
+      </div>
+      <div class="pillar reveal d1">
+        <h3>Think like <em>creatives</em></h3>
+        <p>We embrace curiosity, empathy, and strategic questioning to ensure the final design resonates deeply and ethically with the user.</p>
+      </div>
+      <div class="pillar reveal d2">
+        <h3>Work like <em>engineers</em></h3>
+        <p>We apply rigorous, scalable, secure technical solutions — platforms that aren't only beautiful but are engineered for long-term compliance, staff maintainability, and security.</p>
+      </div>
+    </div>
+
+    <div class="manifesto">
+      <h3 class="manifesto-head reveal">Our creative manifesto</h3>
+      <p class="manifesto-hint reveal">Six principles &middot; Click any one to explore</p>
+      <div class="tenex reveal" id="tenex">
+        <div class="tenex-list" role="tablist" aria-label="Creative manifesto principles">
+          <button class="tenex-item" role="tab" data-i="0">
+            <span class="tenex-row"><span class="tenex-num">01</span><span class="tenex-name">Creativity is wise</span></span>
+            <span class="tenex-body">Being intellectual is not enough in a creative setting. Knowledge is being right, but wisdom is being right at the right time, in the right way, about the right thing.</span>
+            <span class="tenex-bar"><span></span></span>
+          </button>
+          <button class="tenex-item" role="tab" data-i="1">
+            <span class="tenex-row"><span class="tenex-num">02</span><span class="tenex-name">Creativity is humble</span></span>
+            <span class="tenex-body">Creativity takes vulnerability and curiosity. A fight to be right no matter the cost is corrupt business — no longer a creative endeavor. Good creativity is not about me, it is about us.</span>
+            <span class="tenex-bar"><span></span></span>
+          </button>
+          <button class="tenex-item" role="tab" data-i="2">
+            <span class="tenex-row"><span class="tenex-num">03</span><span class="tenex-name">Creativity is persistent</span></span>
+            <span class="tenex-body">Having an idea is an insufficient end for the creative. The honest creative wrestles with ideas until the right idea proves itself. This is not easy work, but it is honest work.</span>
+            <span class="tenex-bar"><span></span></span>
+          </button>
+          <button class="tenex-item" role="tab" data-i="3">
+            <span class="tenex-row"><span class="tenex-num">04</span><span class="tenex-name">Creativity is empathetic</span></span>
+            <span class="tenex-body">The word empathy itself came into being for the sake of art. Without empathy — an insistent relationship with the audience — creativity becomes imbalanced self-indulgence.</span>
+            <span class="tenex-bar"><span></span></span>
+          </button>
+          <button class="tenex-item" role="tab" data-i="4">
+            <span class="tenex-row"><span class="tenex-num">05</span><span class="tenex-name">Creativity is about questions</span></span>
+            <span class="tenex-body">Many treat creativity as a space to present an answer. The creative should be the one who has bigger questions than they have answers for — and invites others into that same questioning.</span>
+            <span class="tenex-bar"><span></span></span>
+          </button>
+          <button class="tenex-item" role="tab" data-i="5">
+            <span class="tenex-row"><span class="tenex-num">06</span><span class="tenex-name">Creativity is ethical</span></span>
+            <span class="tenex-body">Creativity is about the relationship between creator and audience. Any unethical attempt to manipulate the audience or the truth is a failure of the creative — not art, but gas-lighting dressed up.</span>
+            <span class="tenex-bar"><span></span></span>
+          </button>
+        </div>
+        <div class="tenex-panel" id="tenexPanel" aria-live="polite">
+          <div class="tenex-big" id="tenexBig">01</div>
+          <div class="tenex-title" id="tenexTitle">Creativity is wise</div>
+          <p class="tenex-text" id="tenexText">Being intellectual is not enough in a creative setting. Knowledge is being right, but wisdom is being right at the right time, in the right way, about the right thing.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Why This Matters (placeholder) -->
+<section class="welove" id="why">
+  <div class="wrap">
+    <div class="welove-grid">
+      <div class="welove-copy">
+        <span class="eyebrow reveal">The Heart of It</span>
+        <h2 class="reveal d1">Rimfire Perfected. Online Too.</h2>
+        <p class="reveal d1">You make parts people build their rifles around: no-tune AR22 uppers, the 10/22 anti-bounce bolt, Apogee barrels. Rimfire Perfected is a big promise, and your parts keep it.</p>
+        <p class="reveal d2">Your website should keep it too. Right now it shares the screen with NEMO Arms, Smith &amp; Wesson and every other shop chasing the same shooter. (You may have just shot a few of them.) We want BoreBuddy to be the site people remember: faster to shop, easier to build an upper on, and unmistakably yours.</p>
+      </div>
+      <div class="wl-photos reveal d1">
+        <img src="screens/borebuddy.jpg" alt="The BoreBuddy homepage today" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Bid (placeholder) -->
+<section class="stub alt" id="bid">
+  <div class="wrap">
+    <h2 class="reveal d1">Our Proposal</h2>
+    <div class="bid-acc reveal d1">
+      <div class="acc-item">
+        <button class="acc-head" aria-expanded="false">
+          <span class="acc-title">Website Scope</span>
+          <span class="acc-icon" aria-hidden="true"></span>
+        </button>
+        <div class="acc-body"><div class="acc-body-inner"><div class="prop">
+        <p class="lead">Here is how we would rebuild borebuddy.com, start to finish. Every phase can flex once we understand your priorities.</p>
+        <ul class="prop-list">
+        <li><b>Discovery and Planning.</b> We start with your data, not our taste. We audit your analytics, search rankings and checkout, talk with your team about what sells and what stalls, and study the competition. You approve a sitemap and design direction before we build anything.</li>
+        <li><b>Store Structure.</b> Your catalog spans the AR22, the 10/22 and 9mm, from complete uppers to bolts, barrels and trigger parts. We organize it around how your buyers actually search, and we test the navigation before we commit to it.</li>
+        <li><b>Product Pages and Build Configurator.</b> Your uppers come with real choices: barrel length, bolt group, FRT or full-auto readiness, bolt weights, buffer systems and the VIP accurizing package. We turn that stack of options into a guided build that shows price and compatibility as the buyer goes.</li>
+        <li><b>Design.</b> Figma wireframes first, then high-fidelity mockups for desktop, tablet and mobile. We build on the identity you already have, the stencil wordmark and the Rimfire Perfected orange.</li>
+        <li><b>Development.</b> Your store runs on WordPress today. We build on that foundation with Elementor Pro and custom code, so your team keeps control of products, prices and content without calling a developer.</li>
+        <li><b>Migration and Redirects.</b> Products, options and customer accounts come across cleanly. Every old URL gets a permanent redirect, so your search rankings and the links in forum threads and video descriptions keep working.</li>
+        <li><b>Age Check and Checkout.</b> Today a first-time visitor meets an age check and an SMS signup in the same pop-up. We keep every check your business needs, including shipping restrictions and payment rules, and make the first impression about your parts.</li>
+        <li><b>Video and Photography.</b> Your technical videos live on Rumble. We bring them onto the product pages where buyers decide, and we direct new product photography where the catalog needs it.</li>
+        <li><b>Analytics, SEO and Heatmaps.</b> We set up Google Analytics 4 with tracking on the moments that matter: configurator steps, add to cart and checkout. Technical SEO is built in, and Microsoft Clarity heatmaps show us how shooters really use the site.</li>
+        <li><b>Testing, Launch and Training.</b> We test every page on desktop, tablet and mobile, launch in a low-traffic window, and record training sessions so your team can run the store on its own.</li>
+        </ul>
+        <p><b>How we'll work with you.</b> We keep in touch by email, phone, Slack and video calls. A shared project tracker shows what is in progress at any time. You see the work at every milestone, and we flag timing, scope or budget concerns before they become problems.</p>
+        <p><b>Team and subcontractors.</b> Our core team is led in-house out of our Boise office and managed end to end by Mox — you'll always have a single point of contact and one team accountable for the work. We operate on a talent-agency model, which means we bring in vetted contract specialists from our national roster (senior designers, motion artists, photographers, video producers) as a project calls for them. Any specialist we bring in works under Mox's direction and standards, so you get the right expertise for each job without ever managing a patchwork of vendors. If a project ever calls for an outside production house or specialized partner, we'll identify them to you transparently before we engage them.</p>
+      </div></div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-head" aria-expanded="false">
+          <span class="acc-title">Cost Information</span>
+          <span class="acc-icon" aria-hidden="true"></span>
+        </button>
+        <div class="acc-body"><div class="acc-body-inner"><div class="prop">
+        <p>Our financial approach is rooted in transparency and flexibility. A website rebuild is a defined project, so once discovery confirms the scope we will quote the build as a fixed project fee. No surprises, and no paying for hours you don't use.</p>
+        <p>We will be upfront: without the full scope defined yet, we can't hand you a single clean number today. We would rather scope it honestly with you than guess high or low.</p>
+        <p>After launch, many clients keep us on for ongoing design, development and marketing support. Our retainers typically run anywhere from $3,500 a month to $20,000 a month, depending on scope and complexity.</p>
+        <p>We typically work one of two ways, and we're glad to do either (or a mix of both):</p>
+        <p><b>Active Project Retainer.</b> For a single flat monthly fee, your team gets a set number of active projects running at any given time. As one wraps, the next moves into an open slot — so you have a predictable monthly cost and a steady creative pipeline without renegotiating every piece of work. It's the simplest way to keep a consistent flow of creative moving, and we'll size the number of concurrent projects to match your needs.</p>
+        <p><b>Hourly.</b> For ongoing, as-needed creative and quick-turn work, we bill by the hour at the rates below:</p>
+        <table class="rate-table">
+          <thead><tr><th>Role</th><th>Hourly Rate</th></tr></thead>
+          <tbody>
+            <tr><td>Creative Director</td><td>$200 / hour</td></tr>
+            <tr><td>Senior Designer</td><td>$125 / hour</td></tr>
+            <tr><td>Production Designer</td><td>$75 / hour</td></tr>
+            <tr><td>Other Staff</td><td>$125 / hour</td></tr>
+          </tbody>
+        </table>
+        <p>We assign the right level of talent to each task, so you're never paying Creative Director rates for production work that a Production Designer should handle. That keeps your spend efficient and honest.</p>
+        <p><b>We flex with your launches.</b> A new batch or product drop runs hotter than a normal month. When you need more of us, we are there. When things quiet down, you are not carrying overhead you don't need.</p>
+        <p>There are no ancillary fees, tariffs, or hidden costs in the rates above. If a project ever requires a specialized third-party tool, license, or outside production cost, we'll present it to you transparently up front and pass it through at cost with zero markup. We don't anticipate any supply-chain disruptions affecting our ability to deliver.</p>
+      </div></div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-head" aria-expanded="false">
+          <span class="acc-title">Enhancements/Miscellaneous Information</span>
+          <span class="acc-icon" aria-hidden="true"></span>
+        </button>
+        <div class="acc-body"><div class="acc-body-inner"><div class="prop">
+        <p class="lead">Here's what we think sets us apart, beyond the services listed in the scope.</p>
+        <ul class="prop-list">
+        <li><b>We're built for quick-turn creative.</b> A product drop doesn't wait. Our project manager keeps everything organized and on schedule, so when you need a banner, a landing page or a launch email turned around fast, we are ready.</li>
+        <li><b>A talent-agency model, not a fixed roster.</b> Our in-house team is intentionally lean, but we represent a deep bench of top creatives across the country — designers, copywriters, motion artists, photographers, and video producers. That means we staff each project with the right people for the job, not just whoever happens to be free. You get big-agency range with boutique-agency attention.</li>
+        <li><b>We play well with others.</b> If you already work with developers, photographers or marketing partners, we are used to being one piece of a larger team. We keep the work aligned so everything feels like one BoreBuddy brand, not a patchwork of vendors.</li>
+        <li><b>Evidence over guesswork.</b> A lot of creative shops design on instinct. We do too, but we back it up. We've run real behavioral research — including webcam eye-tracking studies — to figure out exactly what people actually see, read, and act on. When the stakes are high (a product page, a configurator, a checkout), we can bring that rigor to make sure the work performs, not just looks good.</li>
+        <li><b>We use AI differently.</b> We don't use it to cut corners or replace the human element. We use it to handle the heavy lifting — data, organization, first-pass options — which buys us more time to think, refine, and do the thoughtful work that actually matters. For us, it's a tool to make better work, not cheaper work.</li>
+        <li><b>Organized files, always.</b> Every concept, draft, revision, and final asset lives in one shared, agreed-upon platform. We deliver final files in the right formats for print, digital, social, presentation, signage, or production use — and you'll never have to dig through email threads to find the latest version.</li>
+        <li><b>Bigger than the bottom line.</b> This is the principle we built Mox on. We care about what our clients care about. For BoreBuddy, that is the shooter at the bench who wants a part that runs right the first time. We show up with the discipline of athletes, the rigor of engineers and the heart of creatives.</li>
+        </ul>
+      </div></div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-head" aria-expanded="false">
+          <span class="acc-title">Contact Information</span>
+          <span class="acc-icon" aria-hidden="true"></span>
+        </button>
+        <div class="acc-body"><div class="acc-body-inner"><div class="prop">
+        <p class="prop-contact"><span class="n">Jeff Barker</span><br>Co-Owner &amp; Chief Operating Officer, Mox Collective<br>Managing this proposal on behalf of Mox</p>
+        <p class="prop-contact">Address: 1020 S. Main St. #310, Boise, ID 83702<br>Phone: <a href="tel:2082407013">208-240-7013</a><br>Email: <a href="mailto:jeff@wearemox.com">jeff@wearemox.com</a><br>Website: <a href="https://wearemox.com" target="_blank" rel="noopener">wearemox.com</a><br>Portfolio: <a href="https://wearemox.com/portfolio" target="_blank" rel="noopener">wearemox.com/portfolio</a></p>
+      </div></div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-head" aria-expanded="false">
+          <span class="acc-title">References</span>
+          <span class="acc-icon" aria-hidden="true"></span>
+        </button>
+        <div class="acc-body"><div class="acc-body-inner"><div class="ref-grid">
+        <div class="ref">
+          <span class="ref-name">Drew Roberts</span>
+          <span class="ref-line">Marketing Director</span>
+          <span class="ref-line">Unie.com</span>
+          <span class="ref-line">Phoenix, AZ</span>
+          <a class="ref-contact" href="mailto:drew@unie.com">drew@unie.com</a>
+        </div>
+        <div class="ref">
+          <span class="ref-name">Sydney Quintana</span>
+          <span class="ref-line">Director, Regional Marketing</span>
+          <span class="ref-line">National Carwash Solutions</span>
+          <span class="ref-line">Grimes, IA</span>
+          <a class="ref-contact" href="mailto:squintana@ncswash.com">squintana@ncswash.com</a>
+        </div>
+        <div class="ref">
+          <span class="ref-name">Claire Davis</span>
+          <span class="ref-line">Director of Digital</span>
+          <span class="ref-line">Oregon Tilth</span>
+          <a class="ref-contact" href="tel:3146260682">(314) 626-0682</a>
+        </div>
+        <div class="ref">
+          <span class="ref-name">Ben Tester</span>
+          <span class="ref-line">Founder</span>
+          <span class="ref-line">RivTek</span>
+          <a class="ref-contact" href="mailto:ben@rivtek.com">ben@rivtek.com</a>
+        </div>
+        <div class="ref">
+          <span class="ref-name">Blake Brunk</span>
+          <span class="ref-line">Owner</span>
+          <span class="ref-line">Briva Pools and Spa</span>
+          <span class="ref-line">Boise, ID</span>
+          <a class="ref-contact" href="mailto:blake@brivapools.com">blake@brivapools.com</a>
+          <a class="ref-contact" href="tel:7193311659">719-331-1659</a>
+        </div>
+        <div class="ref">
+          <span class="ref-name">Tom Lillicrap</span>
+          <span class="ref-line">TMN Events</span>
+          <span class="ref-line">Boise, ID</span>
+          <a class="ref-contact" href="mailto:tlillicrap@tmnevents.com">tlillicrap@tmnevents.com</a>
+          <a class="ref-contact" href="tel:2083859510">208-385-9510</a>
+        </div>
+        </div>
+        <div class="prop" style="padding-bottom:0; margin-top:26px;">
+        <p><b>What we're watching for.</b> The risk in a store rebuild isn't the design. It's continuity. Products, options, customer accounts and search rankings all have to survive the move, so we plan the migration and redirect map first and test checkout end to end before launch.</p>
+        <p><b>Licenses, certifications &amp; awards.</b> Mox Collective is a registered LLC in good standing in the State of Idaho. We carry comprehensive business liability and professional services insurance and can provide certificates meeting your requirements upon award. Our roster includes an award-winning film crew. If there's a specific certification or credential you would like to see documented, we're glad to provide it.</p>
+        </div></div></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-head" aria-expanded="false">
+          <span class="acc-title">Next Steps</span>
+          <span class="acc-icon" aria-hidden="true"></span>
+        </button>
+        <div class="acc-body"><div class="acc-body-inner"><div class="prop">
+        <ul class="prop-list">
+        <li><b>A first call.</b> We walk through this proposal and hear what matters most to you.</li>
+        <li><b>Discovery.</b> We audit the current store and agree on goals, sitemap and design direction.</li>
+        <li><b>A fixed quote.</b> With the scope confirmed, you get one clear number and a timeline.</li>
+        <li><b>Design, build and launch.</b> Mockups, development, migration, testing and training, with your sign-off at every milestone.</li>
+        </ul>
+        <p>We'd love to build this with you.</p>
+        <p class="prop-sign">Sincerely,<br><b>Jeff Barker</b><br>Co-Owner &amp; Chief Operating Officer, Mox</p>
+      </div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Closer: Let's Build It -->
+<section class="closer" id="careers">
+  <div class="wrap">
+    <span class="eyebrow reveal">Let's Build It</span>
+    <h2 class="reveal d1">Thank You</h2>
+    <p class="reveal d1">Thank you for taking the time to review this proposal. We would love to be BoreBuddy's web partner and build a store as precise as the parts you make. This is a flexible proposal, so tell us if anything is missing or needs to change. Reach us anytime at <a href="mailto:hello@wearemox.com">hello@wearemox.com</a> or 208-240-7013.</p>
+    <a href="https://calendar.app.google/ANpi84u73dTkNG7R7" class="btn-book reveal d2" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Book a Call
+    </a>
+    <div class="closer-sign reveal d2">Thank you so much,<br><b>The Mox Team</b></div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="foot">
+  <svg class="foot-logo" viewBox="0 0 46 13" aria-label="Mox"><use href="#mox-logo"/></svg>
+</footer>
+
+<script>
+  // Preloader: Mox, then ×, then BoreBuddy. Hold the lockup, then reveal
+  (function () {
+    const pre = document.getElementById('preloader');
+    setTimeout(() => {
+      pre.classList.add('done');
+      document.body.classList.add('loaded');
+    }, 2700);
+  })();
+
+  // Full-screen menu
+  (function () {
+    const openBtn = document.getElementById('menuOpen');
+    const closeBtn = document.getElementById('menuClose');
+    const overlay = document.getElementById('menuOverlay');
+    const open = () => { document.body.classList.add('menu-open'); openBtn.setAttribute('aria-expanded', 'true'); };
+    const close = () => { document.body.classList.remove('menu-open'); openBtn.setAttribute('aria-expanded', 'false'); };
+    openBtn.addEventListener('click', open);
+    closeBtn.addEventListener('click', close);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    // Expandable sub-menus (Responsibility)
+    overlay.querySelectorAll('[data-expandable] .menu-nav-row').forEach(row => {
+      row.addEventListener('click', () => row.parentElement.classList.toggle('open'));
+    });
+    // Close when a real in-page link is chosen
+    overlay.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', close));
+  })();
+
+  const header = document.getElementById('header');
+  const onScroll = () => {
+    const past = window.scrollY > 90;
+    header.classList.toggle('scrolled', past);
+    document.body.classList.toggle('scrolled', past);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Logo walls: hovering a tile fades that client's work in as the section background
+  document.querySelectorAll('.logos').forEach(section => {
+    const bg = section.querySelector('.logos-bg');
+    if (!bg) return;
+    let hideTimer = null;
+    section.querySelectorAll('.logo-tile[data-bg]').forEach(tile => {
+      tile.addEventListener('mouseenter', () => {
+        clearTimeout(hideTimer);
+        const url = tile.dataset.bg;
+        const img = new Image();
+        img.onload = () => {
+          bg.style.backgroundImage = `url("${url}")`;
+          bg.classList.add('on');
+        };
+        img.src = url;
+        if (img.complete) { bg.style.backgroundImage = `url("${url}")`; bg.classList.add('on'); }
+      });
+      tile.addEventListener('mouseleave', () => {
+        hideTimer = setTimeout(() => bg.classList.remove('on'), 120);
+      });
+    });
+  });
+
+  // Bid accordion: one section open at a time
+  document.querySelectorAll('.bid-acc').forEach(acc => {
+    const acc_items = [...acc.querySelectorAll('.acc-item')];
+    acc_items.forEach(item => {
+      item.querySelector('.acc-head').addEventListener('click', () => {
+        const isOpen = item.classList.contains('open');
+        acc_items.forEach(i => {
+          i.classList.remove('open');
+          i.querySelector('.acc-head').setAttribute('aria-expanded', 'false');
+        });
+        if (!isOpen) {
+          item.classList.add('open');
+          item.querySelector('.acc-head').setAttribute('aria-expanded', 'true');
+          // once the panels finish animating, bring the opened section to the top of the viewport
+          setTimeout(() => {
+            if (item.classList.contains('open')) {
+              item.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 530);
+        }
+      });
+    });
+  });
+
+  // Case studies: rail tabs select; the content column swaps the active study
+  document.querySelectorAll('.case-layout').forEach(layout => {
+    const tabs = [...layout.querySelectorAll('.case-tab')];
+    const readers = [...layout.querySelectorAll('.case-reader')];
+    const select = i => {
+      tabs.forEach((t, j) => {
+        t.classList.toggle('active', j === i);
+        t.setAttribute('aria-selected', j === i ? 'true' : 'false');
+      });
+      readers.forEach((r, j) => r.classList.toggle('active', j === i));
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(i));
+      t.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(i); }
+      });
+    });
+    select(0);
+  });
+
+  // Other-work reel: auto-loops, and you can drag / wheel / swipe through it
+  (() => {
+    const sc = document.getElementById('workScroller');
+    const lb = document.getElementById('lightbox');
+    if (!sc || !lb) return;
+    const track = sc.querySelector('.work-track');
+    const originals = [...sc.querySelectorAll('.work-item')];
+    const images = originals.map(el => el.dataset.full);
+    originals.forEach(el => track.appendChild(el.cloneNode(true)));  // duplicate for seamless loop
+    const items = [...sc.querySelectorAll('.work-item')];
+
+    // lightbox
+    const lbImg = document.getElementById('lbImg');
+    const lbNow = document.getElementById('lbNow');
+    document.getElementById('lbTotal').textContent = images.length;
+    let idx = 0;
+    const render = () => { lbImg.src = images[idx]; lbNow.textContent = idx + 1; };
+    const open = i => { idx = i; render(); lb.classList.add('open'); lb.setAttribute('aria-hidden', 'false'); };
+    const close = () => { lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true'); };
+    const move = d => { idx = (idx + d + images.length) % images.length; render(); };
+
+    // auto-loop with seamless wrap
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let auto = !reduce, down = false, hovering = false;
+    const wrap = () => {
+      const half = track.scrollWidth / 2;
+      if (half > 0) {
+        if (sc.scrollLeft >= half) sc.scrollLeft -= half;
+        else if (sc.scrollLeft < 0) sc.scrollLeft += half;
+      }
+    };
+    const tick = () => {
+      if (auto && !down && !hovering && !lb.classList.contains('open')) sc.scrollLeft += 0.22;
+      wrap();
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    sc.addEventListener('mouseenter', () => hovering = true);
+    sc.addEventListener('mouseleave', () => hovering = false);
+
+    // drag to scroll
+    let startX = 0, startScroll = 0, moved = 0;
+    sc.addEventListener('pointerdown', e => {
+      down = true; moved = 0; startX = e.clientX; startScroll = sc.scrollLeft;
+      sc.classList.add('dragging');
+      try { sc.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    sc.addEventListener('pointermove', e => {
+      if (!down) return;
+      const dx = e.clientX - startX; moved = Math.max(moved, Math.abs(dx));
+      sc.scrollLeft = startScroll - dx;
+    });
+    const endDrag = () => { down = false; sc.classList.remove('dragging'); };
+    sc.addEventListener('pointerup', endDrag);
+    sc.addEventListener('pointercancel', endDrag);
+    // vertical wheel scrolls the reel horizontally
+    sc.addEventListener('wheel', e => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { sc.scrollLeft += e.deltaY; e.preventDefault(); }
+    }, { passive: false });
+    // click opens lightbox unless it was a drag
+    items.forEach(it => it.addEventListener('click', e => {
+      if (moved > 6) { e.preventDefault(); return; }
+      open(+it.dataset.i);
+    }));
+    document.getElementById('lbPrev').addEventListener('click', e => { e.stopPropagation(); move(-1); });
+    document.getElementById('lbNext').addEventListener('click', e => { e.stopPropagation(); move(1); });
+    document.getElementById('lbClose').addEventListener('click', close);
+    lb.addEventListener('click', e => { if (e.target === lb) close(); });
+    document.addEventListener('keydown', e => {
+      if (!lb.classList.contains('open')) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') move(-1);
+      else if (e.key === 'ArrowRight') move(1);
+    });
+  })();
+
+  // Manifesto explorer: auto-advances until the user interacts
+  (() => {
+    const tenex = document.getElementById('tenex');
+    if (!tenex) return;
+    const items = [...tenex.querySelectorAll('.tenex-item')];
+    const panel = document.getElementById('tenexPanel');
+    const big = document.getElementById('tenexBig');
+    const title = document.getElementById('tenexTitle');
+    const text = document.getElementById('tenexText');
+    let current = 0, timer = null;
+    let auto = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const DUR = 6000;
+    tenex.style.setProperty('--tenex-dur', (DUR / 1000) + 's');
+
+    const activate = (i, userDriven) => {
+      current = i;
+      items.forEach((it, j) => {
+        const on = j === i;
+        it.classList.remove('active');
+        it.setAttribute('aria-selected', on ? 'true' : 'false');
+        if (on) { void it.offsetWidth; it.classList.add('active'); }
+      });
+      const it = items[i];
+      big.textContent = ('0' + (i + 1)).slice(-2);
+      title.textContent = it.querySelector('.tenex-name').textContent;
+      text.textContent = it.querySelector('.tenex-body').textContent;
+      panel.classList.remove('swap'); void panel.offsetWidth; panel.classList.add('swap');
+      if (userDriven) {
+        auto = false;
+        tenex.classList.add('paused');
+        if (timer) { clearInterval(timer); timer = null; }
+      }
+    };
+    const startAuto = () => {
+      if (!auto || timer) return;
+      timer = setInterval(() => activate((current + 1) % items.length, false), DUR);
+    };
+    items.forEach((it, i) => it.addEventListener('click', () => activate(i, true)));
+    // only rotate while the section is on screen
+    new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (en.isIntersecting) startAuto();
+        else if (timer) { clearInterval(timer); timer = null; }
+      });
+    }, { threshold: 0.35 }).observe(tenex);
+    activate(0, false);
+  })();
+
+  // Roster lineup: hover/click/focus a row to scout that player on the card
+  (() => {
+    const rows = [...document.querySelectorAll('.lu-row')];
+    if (!rows.length) return;
+    const inner = document.getElementById('pcInner');
+    const ghost = document.getElementById('pcGhost');
+    const photoWrap = document.getElementById('pcPhotoWrap');
+    const name = document.getElementById('pcName');
+    const role = document.getElementById('pcRole');
+    const note = document.getElementById('pcNote');
+    const logos = document.getElementById('pcLogos');
+    const ROLE_COLORS = {
+      'Creative Director': '#B91800',
+      'Senior Designer': '#33465E',
+      'Production Designer': '#2F7F93',
+      'Support Staff': '#B06188'
+    };
+    let current = null;
+    const show = row => {
+      if (row === current) return;
+      current = row;
+      rows.forEach(r => {
+        r.classList.toggle('active', r === row);
+        r.setAttribute('aria-selected', r === row ? 'true' : 'false');
+      });
+      ghost.textContent = row.dataset.num;
+      const photoUrls = (row.dataset.photos || row.dataset.photo || '').split('|').filter(Boolean);
+      photoWrap.classList.toggle('dual', photoUrls.length > 1);
+      photoWrap.innerHTML = photoUrls.map(u => `<img src="${u}" alt="${row.dataset.name}">`).join('');
+      photoWrap.style.setProperty('--role-color', ROLE_COLORS[row.dataset.role] || 'var(--amber)');
+      name.textContent = row.dataset.name;
+      role.textContent = row.dataset.role;
+      note.textContent = row.dataset.bio;
+      const logoUrls = (row.dataset.logos || '').split('|').filter(Boolean);
+      logos.innerHTML = logoUrls
+        .map(u => `<span class="chip"><img src="${u}" alt="" loading="lazy"></span>`).join('');
+      const logosLabel = document.getElementById('pcLogosLabel');
+      logosLabel.style.display = logoUrls.length ? '' : 'none';
+      logos.style.display = logoUrls.length ? '' : 'none';
+      inner.classList.remove('swap'); void inner.offsetWidth; inner.classList.add('swap');
+    };
+    // inline mobile details: one per row, revealed when that row is active
+    rows.forEach(row => {
+      const d = document.createElement('div');
+      d.className = 'lu-detail';
+      const photoUrls = (row.dataset.photos || row.dataset.photo || '').split('|').filter(Boolean);
+      const logoUrls = (row.dataset.logos || '').split('|').filter(Boolean);
+      d.innerHTML =
+        `<span class="lud-role">${row.dataset.role}</span>` +
+        `<div class="lud-photos${photoUrls.length > 1 ? ' dual' : ''}">` +
+          photoUrls.map(u => `<img src="${u}" alt="${row.dataset.name}" loading="lazy">`).join('') + '</div>' +
+        `<p class="lud-bio">${row.dataset.bio}</p>` +
+        (logoUrls.length
+          ? '<div class="lud-label">Worked With</div><div class="lud-logos">' +
+            logoUrls.map(u => `<span class="chip"><img src="${u}" alt="" loading="lazy"></span>`).join('') + '</div>'
+          : '');
+      row.after(d);
+    });
+
+    rows.forEach(row => {
+      row.addEventListener('mouseenter', () => show(row));
+      row.addEventListener('focus', () => show(row));
+      row.addEventListener('click', () => show(row));
+    });
+    show(rows[0]);
+  })();
+
+
+</script>
+</body>
+</html>

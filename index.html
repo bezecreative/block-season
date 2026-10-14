@@ -226,7 +226,7 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const canvas = $('view');
 // Paste the proposal link between the quotes. It switches on "I just want to see your proposal" on the
 // title card and "View proposal" on the card that follows the office.
-const PROPOSAL_URL = '';
+const PROPOSAL_URL = 'https://bezecreative.github.io/block-season/proposal.html';
 if (PROPOSAL_URL) for (const id of ['seeprop', 'pc-view']) { $(id).href = PROPOSAL_URL; $(id).hidden = false; }
 const menuItems = [...document.querySelectorAll('#menu .mode')].filter(el => !el.hidden);
 

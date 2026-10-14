@@ -32,10 +32,11 @@ The rifle carries BoreBuddy's AR22 Heavy Precision upper with the 18.5-inch Gree
 
 On a phone, drag anywhere to aim; on-screen buttons fire and scope. Players stay in one spot and don't walk.
 
-## Adding the proposal link
+## The proposal
 
-In `index.html`, find `const PROPOSAL_URL = '';` and paste the link between the quotes. That switches on the
-"I just want to see your proposal" button on the title card and the "View proposal" link on the card after the office.
+`proposal.html` is Mox's website proposal for BoreBuddy. The game links to it from the "I just want to see your
+proposal" button on the title card and the "View proposal" link on the card after the office. The link lives in
+`const PROPOSAL_URL` near the top of the script in `index.html`.
 
 ## The office screens
 
@@ -49,6 +50,7 @@ the logo in view. Only add screenshots you have the right to publish.
 - `index.html` is the whole game: markup, styles and script in one file. It loads three.js r128 from cdnjs and the Press Start 2P font from Google Fonts.
 - `borebuddy-logo.png` and `mox-logo.png` are the logos on the title card.
 - `screens/` holds the homepage screenshots shown on the office computers.
+- `proposal.html` is the proposal page the game links to.
 
 ## Credits
 
