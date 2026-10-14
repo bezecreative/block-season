@@ -34,6 +34,7 @@ body.playing #view{cursor:crosshair}
 
 /* ---------- status bar ---------- */
 #hud{position:absolute;inset:0;pointer-events:none}
+#hud.free .shotwrap,#hud.free .hitbox{display:none}
 .bar{position:absolute;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;align-items:flex-end;gap:clamp(6px,2vw,24px);--dw:clamp(11px,2.5vw,19px)}
 .box{background:var(--ink);border:3px solid var(--grass);border-radius:9px;padding:8px 10px 7px}
 .box .lbl{font-size:clamp(8px,1.5vw,11px);line-height:1}
@@ -207,7 +208,6 @@ a.mode{display:block;text-decoration:none}
     <p class="big">Go with Mox</p>
     <div class="modes">
       <a class="mode cta" id="pc-view" href="#" target="_blank" rel="noopener" hidden>View proposal</a>
-      <button class="mode" id="pc-next" type="button">Keep playing</button>
     </div>
   </section>
 </div>
@@ -576,6 +576,99 @@ function updatePcs(dt) {
   }
 }
 
+// ---------- the billboard: the last stop. "Want to stand out? Go with Mox", and a target that opens the proposal ----------
+const billboard = new THREE.Group(); billboard.position.set(0, 0, -36); billboard.visible = false; scene.add(billboard);
+const bbCanvas = document.createElement('canvas'); bbCanvas.width = 1024; bbCanvas.height = 512;
+const bbTex = new THREE.CanvasTexture(bbCanvas), moxImg = new Image();
+function drawBillboard() {
+  const x = bbCanvas.getContext('2d');
+  x.fillStyle = '#000'; x.fillRect(0, 0, 1024, 512);
+  x.strokeStyle = '#80d010'; x.lineWidth = 14; x.strokeRect(7, 7, 1010, 498);
+  x.textBaseline = 'top'; x.textAlign = 'center';
+  x.font = '48px "Press Start 2P", monospace'; x.fillStyle = '#3cbcfc'; x.fillText('WANT TO STAND OUT?', 512, 48);
+  x.fillStyle = '#fc9838'; x.fillRect(48, 122, 928, 8);
+  x.textAlign = 'left'; x.fillStyle = '#fcfcfc'; x.font = '36px "Press Start 2P", monospace'; x.fillText('GO WITH', 60, 196);
+  if (moxImg.complete && moxImg.naturalWidth) x.drawImage(moxImg, 60, 270, 400, 113);
+  else { x.font = '72px "Press Start 2P", monospace'; x.fillText('MOX', 60, 280); }
+  x.textAlign = 'center'; x.fillStyle = '#fc9838'; x.font = '20px "Press Start 2P", monospace';
+  x.fillText('SHOOT THE TARGET', 760, 420); x.fillText('TO SEE THE PROPOSAL', 760, 452);
+  bbTex.needsUpdate = true;
+}
+drawBillboard(); moxImg.onload = drawBillboard; moxImg.src = 'mox-logo.png';
+if (document.fonts && document.fonts.load) document.fonts.load('20px "Press Start 2P"').then(drawBillboard, () => {});
+const BB_W = 24, BB_H = 12, BB_Y = 3.5;
+{
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(BB_W, BB_H), new THREE.MeshBasicMaterial({ map: bbTex }));
+  face.position.set(0, BB_Y + BB_H / 2, 0.2); billboard.add(face);
+  B(billboard, 0x2c3035, BB_W + 0.6, BB_H + 0.6, 0.3, 0, BB_Y + BB_H / 2, 0);
+  for (const px of [-7, 7]) B(billboard, 0x586070, 0.6, BB_Y + 1, 0.6, px, (BB_Y + 1) / 2, -0.4);
+  B(billboard, 0x586070, BB_W, 0.15, 1.2, 0, BB_Y - 0.1, 0.6); // catwalk
+  for (const lx of [-8, 0, 8]) { B(billboard, 0x2c3035, 0.12, 0.12, 1.4, lx, BB_Y - 0.05, 1.6); B(billboard, 0xfcfcd8, 0.7, 0.25, 0.4, lx, BB_Y + 0.05, 2.3); }
+}
+// the target sits over the right side of the art, centred on canvas point (760, 270)
+const bbTarget = new THREE.Mesh(BOX, boardMats); bbTarget.scale.set(4.4, 4.4, 0.35);
+bbTarget.position.set((760 / 1024 - 0.5) * BB_W, BB_Y + BB_H * (1 - 270 / 512), 0.45); bbTarget.castShadow = true;
+bbTarget.userData.billboardTarget = true; billboard.add(bbTarget);
+const bbSolids = []; billboard.traverse(o => { if (o.isMesh && o !== bbTarget) bbSolids.push(o); });
+
+// ---------- deer around the billboard, for bonus points ----------
+function buildDeer(buck) {
+  const g = new THREE.Group(), legs = [], hide = buck ? 0x9a6a3c : 0xb07a48, belly = 0xc49a68, dark = 0x3b2a1d, bone = 0xe9dfc6, white = 0xf2ece0;
+  B(g, hide, 0.62, 0.7, 1.5, 0, 1.22, 0); B(g, belly, 0.5, 0.16, 1.3, 0, 0.86, 0); B(g, white, 0.14, 0.22, 0.1, 0, 1.42, -0.8);
+  const head = new THREE.Group(); head.position.set(0, 1.42, 0.66); g.add(head);
+  B(head, hide, 0.28, 0.78, 0.3, 0, 0.3, 0.12).rotation.x = 0.35;
+  B(head, hide, 0.3, 0.32, 0.5, 0, 0.74, 0.42); B(head, dark, 0.2, 0.2, 0.2, 0, 0.68, 0.74);
+  for (const s of [-1, 1]) {
+    B(head, hide, 0.08, 0.2, 0.12, s * 0.2, 0.94, 0.22);
+    if (buck) { B(head, bone, 0.07, 0.52, 0.07, s * 0.16, 1.14, 0.26).rotation.z = -s * 0.38; B(head, bone, 0.07, 0.07, 0.34, s * 0.27, 1.34, 0.42); B(head, bone, 0.07, 0.28, 0.07, s * 0.33, 1.5, 0.28); }
+  }
+  for (const q of [[-0.2, 0.58], [0.2, 0.58], [-0.2, -0.58], [0.2, -0.58]]) {
+    const l = new THREE.Group(); l.position.set(q[0], 0.9, q[1]); g.add(l);
+    B(l, hide, 0.15, 0.78, 0.15, 0, -0.39, 0); B(l, dark, 0.16, 0.12, 0.16, 0, -0.84, 0); legs.push(l);
+  }
+  g.scale.setScalar(1.25);
+  return { g, legs, head };
+}
+const deer = [], deerWait = [];
+function spawnDeer() {
+  const buck = Math.random() < 0.45, b = buildDeer(buck), a = rnd(-1.1, 1.1), r = rnd(18, 42);
+  const d = { buck, g: b.g, legs: b.legs, head: b.head, heading: rnd(0, TAU), want: 0, speed: 0, state: 'graze', timer: rnd(1, 4), tx: 0, tz: 0, phase: rnd(0, 6), alive: true, pts: buck ? 1000 : 600 };
+  d.want = d.heading; b.g.position.set(Math.sin(a) * r, 0, -Math.cos(a) * r); b.g.rotation.y = d.heading;
+  b.g.traverse(o => { if (o.isMesh) o.userData.deer = d; });
+  scene.add(b.g); hittables.push(b.g); deer.push(d);
+}
+function clearDeer() { for (const d of deer) { scene.remove(d.g); unhit(d.g); } deer.length = 0; deerWait.length = 0; }
+function spookDeer() { // a shot sends nearby deer bolting sideways
+  for (const d of deer) {
+    const dx = d.g.position.x - P.pos.x, dz = d.g.position.z - P.pos.z;
+    if (dx * dx + dz * dz < 2025 && d.state !== 'flee') { d.state = 'flee'; d.timer = rnd(2.5, 4); d.want = d.heading + (Math.random() < 0.5 ? -1 : 1) * Math.PI / 2; }
+  }
+}
+function updateDeer(dt) {
+  for (let i = deerWait.length - 1; i >= 0; i--) { deerWait[i] -= dt; if (deerWait[i] <= 0) { deerWait.splice(i, 1); spawnDeer(); } }
+  for (const d of deer) {
+    const p = d.g.position, r = Math.hypot(p.x, p.z), ang = Math.atan2(p.x, -p.z);
+    const out = r < 14 || r > 44 || Math.abs(ang) > 1.25 || p.z > -6; // keep them in the field in front of you
+    let speed = 0;
+    d.timer -= dt;
+    if (d.state === 'flee') { speed = 7.5; if (out) d.want = Math.atan2(-p.x, -30 - p.z); if (d.timer <= 0) { d.state = 'graze'; d.timer = rnd(2, 4); } }
+    else if (d.state === 'walk') {
+      const tx = d.tx - p.x, tz = d.tz - p.z;
+      if (Math.hypot(tx, tz) < 0.8 || d.timer <= 0) { d.state = 'graze'; d.timer = rnd(2.5, 6); } else { d.want = Math.atan2(tx, tz); speed = 1.6; }
+    } else if (d.timer <= 0) { const a = rnd(-1.15, 1.15), rr = rnd(16, 42); d.tx = Math.sin(a) * rr; d.tz = -Math.cos(a) * rr; d.state = 'walk'; d.timer = 16; }
+    let da = d.want - d.heading; da = Math.atan2(Math.sin(da), Math.cos(da));
+    d.heading += da * Math.min(1, dt * (d.state === 'flee' ? 6 : 3));
+    d.speed += (speed - d.speed) * Math.min(1, dt * 4);
+    p.x += Math.sin(d.heading) * d.speed * dt; p.z += Math.cos(d.heading) * d.speed * dt;
+    d.g.rotation.y = d.heading;
+    d.phase += d.speed * dt * 3.6;
+    const sw = Math.sin(d.phase) * Math.min(1, d.speed / 1.6) * 0.6;
+    d.legs[0].rotation.x = sw; d.legs[1].rotation.x = -sw; d.legs[2].rotation.x = -sw; d.legs[3].rotation.x = sw;
+    const hx = d.state === 'graze' ? 1.0 : d.state === 'flee' ? -0.15 : 0;
+    d.head.rotation.x += (hx - d.head.rotation.x) * Math.min(1, dt * 4);
+  }
+}
+
 // ---------- the dog ----------
 const dogUp = new THREE.Group(), dogWalk = new THREE.Group();
 const dogP = { head: null, arms: [], hands: [], whead: null, legs: [] };
@@ -612,7 +705,7 @@ const dog = { mode: 'hidden', t: 0, dur: 0, A: null, B: null, J: null };
 
 // ---------- debris, tracers ----------
 const debris = [], tracers = [];
-const v1 = new THREE.Vector3(), v2 = new THREE.Vector3();
+const v1 = new THREE.Vector3(), v2 = new THREE.Vector3(), v3 = new THREE.Vector3(), q1 = new THREE.Quaternion();
 function addDebris(m, vx, vy, vz, life) {
   scene.add(m);
   debris.push({ m, vx, vy, vz, sx: rnd(-7, 7), sy: rnd(-7, 7), sz: rnd(-7, 7), life, age: 0, s0: m.scale.clone() });
@@ -808,12 +901,14 @@ function clearTargets() { for (const t of targets) { scene.remove(t.g); unhit(t.
 function hideDog() { dog.mode = 'hidden'; dogUp.visible = dogWalk.visible = false; dogUp.position.y = -4; }
 function setWorld(w) {
   stage = w;
-  fieldWorld.visible = w === 'field'; officeWorld.visible = w === 'office';
-  renderer.setClearColor(w === 'field' ? 0x5cb8ff : 0x20242c);
-  hemi.groundColor.setHex(w === 'field' ? 0x9cc060 : 0x8c8c94);
-  clearTargets(); hideDog(); setRange(false); setPcs(false);
+  const outdoors = w !== 'office';
+  fieldWorld.visible = outdoors; officeWorld.visible = !outdoors; billboard.visible = w === 'billboard'; rangeProps.visible = w === 'field';
+  renderer.setClearColor(outdoors ? 0x5cb8ff : 0x20242c);
+  hemi.groundColor.setHex(outdoors ? 0x9cc060 : 0x8c8c94);
+  clearTargets(); hideDog(); setRange(false); setPcs(false); clearDeer(); $('hud').classList.remove('free');
   clearTimeout(tipTimer); $('tip').hidden = true;
-  hittables = w === 'field' ? solids.concat([dogUp]) : officeSolids.slice();
+  hittables = outdoors ? solids.concat([dogUp]) : officeSolids.slice();
+  if (w === 'billboard') { bbTarget.visible = true; hittables.push(...bbSolids, bbTarget); }
   P.pos.set(0, 0, 0); P.vx = P.vz = P.vy = 0; P.yaw = 0; P.pitch = 0.04; scopeToggle = false; $('tb-scope').classList.remove('on');
 }
 function startGame() {
@@ -875,12 +970,31 @@ function startTally() {
 }
 function swapTo(w) { phase = 'swap'; phaseT = 0; swapNext = w; swapped = false; fadeEl.style.opacity = '1'; } // cut to black, change the scenery, cut back
 function saveTop() { if (score > top) { top = score; try { localStorage.setItem('blockseason.top', String(top)); } catch (e) {} } }
-// The office always ends on the pitch: "Want to stand out? Go with Mox", then on to the proposal or back to the game.
-let pitchPass = false;
-function showPitch(pass) {
-  pitchPass = pass; saveTop();
-  $('pc-next').textContent = pass ? 'Keep playing' : 'Play again';
-  setState('pitch');
+// The last stop: a billboard with a target. Hitting it loads the proposal; deer and ducks are there for bonus points.
+let nextDuck = 0;
+function beginBillboard() {
+  phase = 'free'; phaseT = 0; nextDuck = 4; $('timer').hidden = true; $('hud').classList.add('free');
+  for (let i = 0; i < 6; i++) spawnDeer();
+  showMsg('Hunt for bonus points.\nThen hit the target\non the billboard.'); sfx.next(); renderHud();
+}
+function hitBillboard() {
+  if (phase !== 'free') return;
+  phase = 'done'; phaseT = 0; unhit(bbTarget);
+  for (let i = 0; i < 16; i++) { // the target breaks into its sixteen blocks
+    const cx = (i % 4) - 1.5, cy = Math.floor(i / 4) - 1.5, inner = Math.abs(cx) < 1 && Math.abs(cy) < 1;
+    const m = new THREE.Mesh(BOX, mat(inner ? 0xfcfcfc : 0xf83800)); m.scale.setScalar(1.0);
+    m.position.set(cx * 0.25, cy * 0.25, 0); bbTarget.localToWorld(m.position);
+    addDebris(m, cx * rnd(2, 4), cy * rnd(2, 4) + rnd(2, 5), rnd(1, 4), rnd(1.6, 2.6));
+  }
+  bbTarget.visible = false;
+  saveTop(); sfx.perfect(); showMsg('Loading the proposal');
+  setTimeout(() => {
+    if (PROPOSAL_URL) { try { window.location.assign(PROPOSAL_URL); } catch (e) {} }
+    setTimeout(showPitch, 1500); // still here (some embeds block the jump): offer the link instead
+  }, 1300);
+}
+function showPitch() {
+  hideMsg(); setState('pitch');
   if (locked && document.exitPointerLock) document.exitPointerLock();
   $('pitchcard').focus({ preventScroll: true });
 }
@@ -944,11 +1058,15 @@ function updateGame(dt) {
     else if (timeLeft <= 0) endStage('Time up');
     else if (shots === 0 && outT > 0.7) endStage('Out of shots');
   }
+  else if (phase === 'free') {
+    if (phaseT >= 5 && phaseT - dt < 5) { hideMsg(); tip(touchMode ? 'Hit the billboard target to see the proposal' : 'Deer and ducks are bonus points. Hit the billboard target to see the proposal', 9); }
+    if (phaseT >= nextDuck) { nextDuck = phaseT + rnd(6, 10); spawnDuck().life = 8; sfx.rustle(); sfx.quack(); }
+  }
   else if (phase === 'result') { if (phaseT >= phaseDur) { hideMsg(); startTally(); } }
-  else if (phase === 'tally') { if (phaseT >= phaseDur) { hideMsg(); if (stage === 'office') showPitch(tallyPass); else swapTo('office'); } }
+  else if (phase === 'tally') { if (phaseT >= phaseDur) { hideMsg(); swapTo(stage === 'office' ? 'billboard' : 'office'); } }
   else if (phase === 'swap') {
     if (!swapped && phaseT >= 0.4) { swapped = true; if (swapNext === 'field') round++; setWorld(swapNext); fadeEl.style.opacity = '0'; }
-    if (phaseT >= 0.75) { if (swapNext === 'office') beginOffice(); else beginRound(); }
+    if (phaseT >= 0.75) { if (swapNext === 'office') beginOffice(); else if (swapNext === 'billboard') beginBillboard(); else beginRound(); }
   }
 }
 function updateTargets(dt) {
@@ -1060,7 +1178,6 @@ document.addEventListener('visibilitychange', () => { if (document.hidden && sta
 $('play').addEventListener('click', () => { initAudio(); startGame(); begin(); });
 $('resume').addEventListener('click', begin);
 $('quit').addEventListener('click', toTitle);
-$('pc-next').addEventListener('click', () => { if (pitchPass) swapTo('field'); else startGame(); begin(); });
 $('pausebtn').addEventListener('click', () => { if (state === 'playing') setState('paused'); });
 window.addEventListener('touchstart', () => {
   if (touchMode) return;
@@ -1165,12 +1282,29 @@ function fire() {
   const sy = Math.sin(aimYaw), cy = Math.cos(aimYaw), side = scoped ? 0 : 0.2;
   muzzle.copy(origin).addScaledVector(dir, 1.0); muzzle.x += cy * side; muzzle.z += -sy * side; muzzle.y -= scoped ? 0.06 : 0.17;
   tracer(muzzle, endPt);
-  sfx.shot();
+  sfx.shot(); if (stage === 'billboard') spookDeer();
   recoilP += scoped ? 0.006 : 0.012; gunKick = 1; flashT = 0.05;
   if (live) renderHud();
 }
+function bagDeer(d, h) { // bonus points; the deer goes to blocks
+  if (!d.alive) return;
+  d.alive = false; score += d.pts;
+  d.g.updateMatrixWorld(true);
+  const parts = []; d.g.traverse(o => { if (o.isMesh) parts.push(o); });
+  for (const m of parts) {
+    m.getWorldPosition(v1); m.getWorldQuaternion(q1); m.getWorldScale(v3);
+    const c = new THREE.Mesh(BOX, m.material); c.position.copy(v1); c.quaternion.copy(q1); c.scale.copy(v3); c.castShadow = true;
+    const dx = v1.x - h.point.x, dz = v1.z - h.point.z, l = Math.hypot(dx, dz) || 1;
+    addDebris(c, dx / l * rnd(1.5, 4) + dir.x * 3, rnd(2, 5.5), dz / l * rnd(1.5, 4) + dir.z * 3, rnd(2, 3));
+  }
+  popup(v3.set(d.g.position.x, 3.2, d.g.position.z), '+' + d.pts);
+  scene.remove(d.g); unhit(d.g); deer.splice(deer.indexOf(d), 1); deerWait.push(rnd(3, 6));
+  sfx.hit(); sfx.gotcha(); renderHud();
+}
 function onHit(h) {
   const ud = h.object.userData, t = ud.target, rg = ud.range, pc = ud.pc;
+  if (ud.billboardTarget) { hitBillboard(); return; }
+  if (ud.deer) { bagDeer(ud.deer, h); return; }
   if (pc) {
     if (!pc.alive || phase !== 'active') return;
     pc.alive = false; pc.g.visible = false; unhit(pc.g);
@@ -1219,7 +1353,7 @@ function pushOut(p, r, list) {
 }
 function updatePlayer(dt) {
   P.vx = P.vz = 0; // a fixed firing position: players aim and shoot, they don't walk
-  if (stage === 'field') {
+  if (stage !== 'office') {
     pushOut(P.pos, PR, colliders);
     const r = Math.hypot(P.pos.x, P.pos.z); if (r > WORLD_R) { P.pos.x *= WORLD_R / r; P.pos.z *= WORLD_R / r; }
   } else { P.pos.x = clamp(P.pos.x, -13, 13); P.pos.z = clamp(P.pos.z, -9, 9); } // stay behind the yellow line
@@ -1306,7 +1440,7 @@ let last = performance.now(), T = 0;
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now;
-  if (state === 'playing') { updatePlayer(dt); updateWeapon(dt); updateGame(dt); updateTargets(dt); updateDog(dt); if (stage === 'field') updateRange(dt); else updatePcs(dt); }
+  if (state === 'playing') { updatePlayer(dt); updateWeapon(dt); updateGame(dt); updateTargets(dt); updateDog(dt); if (stage === 'field') updateRange(dt); else if (stage === 'office') updatePcs(dt); else updateDeer(dt); }
   else if (state === 'menu') { updateTargets(dt); updateRange(dt); }
   if (state !== 'paused') { T += dt; updateDebris(dt); updateTracers(dt); poseView(dt, T); }
   renderer.clear();

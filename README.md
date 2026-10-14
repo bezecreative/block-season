@@ -15,8 +15,9 @@ a mezzanine; seven move, riding a conveyor, hanging from overhead trolleys and r
 show BoreBuddy's homepage and the other twelve show NEMO Arms and Smith & Wesson. The card reads "Let's see how your
 website stacks up against the competition. Shoot your website to score points." Hitting a competitor screen costs 500 points.
 
-**The pitch.** When the office ends, a card reads "Want to stand out? Go with Mox", with a link to the proposal and a
-button to keep playing. Carrying on starts the next round back at the range, faster.
+**Stage three, the billboard.** Back outside, a roadside billboard reads "Want to stand out? Go with Mox" with a
+target on it. Deer wander the field and ducks fly over for bonus points (does 600, bucks 1,000). There is no clock and
+no shot limit. Hitting the billboard target loads the proposal page.
 
 The rifle carries BoreBuddy's AR22 Heavy Precision upper with the 18.5-inch Green Mountain barrel.
 
@@ -35,7 +36,7 @@ On a phone, drag anywhere to aim; on-screen buttons fire and scope. Players stay
 ## The proposal
 
 `proposal.html` is Mox's website proposal for BoreBuddy. The game links to it from the "I just want to see your
-proposal" button on the title card and the "View proposal" link on the card after the office. The link lives in
+proposal" button on the title card and the target on the billboard at the end of the game. The link lives in
 `const PROPOSAL_URL` near the top of the script in `index.html`.
 
 ## The office screens
