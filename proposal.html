@@ -1130,6 +1130,8 @@
   .gp .fee-sum { font-weight: 800; font-size: 1.3rem; color: #fff; }
   .gp .fee-chev { width: 11px; height: 11px; border-right: 2px solid var(--accent-2); border-bottom: 2px solid var(--accent-2); transform: rotate(45deg); transition: transform .3s var(--ease); flex-shrink: 0; }
   .gp .fee-card.open .fee-chev { transform: rotate(-135deg); }
+  .gp .fee-card.static .fee-head { cursor: default; }
+  .gp .fee-card.static .fee-head:hover { background: none; }
   .gp .fee-body { max-height: 0; overflow: hidden; transition: max-height .4s var(--ease); }
   .gp .fee-lines { padding: 0 1.75rem 1.5rem; }
   .gp .fee-line { display: grid; grid-template-columns: 1fr auto auto auto; gap: 1rem; align-items: center; padding: .7rem 0; border-top: 1px solid rgba(255,255,255,.09); font-size: .82rem; }
@@ -1412,11 +1414,14 @@
           <div class="fee-line"><span class="fee-item">Launching Website</span><span class="fee-who">Jeff Barker</span><span class="fee-units">2 hrs</span><span class="fee-cost">$400</span></div>
         </div></div>
       </div>
+      <div class="fee-card static reveal">
+        <div class="fee-head"><div class="fee-head-l"><span class="fee-phase">Phase 04</span><span class="fee-title">Photo &middot; Video</span></div><div class="fee-head-r"><span class="fee-sum">~$10K</span></div></div>
+      </div>
     </div>
 
     <div class="fee-total reveal">
-      <div><div class="t-lbl">Total Investment</div><div class="t-sub">Website subtotal $30,500 &middot; Agency fee 15% $4,575</div></div>
-      <div class="t-val">$35,075</div>
+      <div><div class="t-lbl">Total Investment</div><div class="t-sub">Estimated range</div></div>
+      <div class="t-val">$30K&ndash;$40K</div>
     </div>
   </div>
 </section>
@@ -2003,6 +2008,7 @@ With 10 years of experience, and counting, I have had great mentors, and amazing
   (function () {
     document.querySelectorAll('.fee-card').forEach(card => {
       const head = card.querySelector('.fee-head'), body = card.querySelector('.fee-body');
+      if (!body) return; // a flat-rate phase has no line items to open
       head.setAttribute('role', 'button'); head.setAttribute('tabindex', '0'); head.setAttribute('aria-expanded', 'false');
       const toggle = () => { const open = card.classList.toggle('open'); body.style.maxHeight = open ? body.scrollHeight + 'px' : '0px'; head.setAttribute('aria-expanded', String(open)); };
       head.addEventListener('click', toggle);
