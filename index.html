@@ -59,6 +59,11 @@ body.playing #view{cursor:crosshair}
 .scorebox{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
 #score{font-size:clamp(10px,2.1vw,15px);line-height:1;font-variant-numeric:tabular-nums}
 @keyframes blink{50%{opacity:.15}}
+#mutebtn{position:absolute;left:16px;top:16px;pointer-events:auto;width:46px;height:40px;display:grid;place-items:center;color:var(--white);background:var(--ink);border:3px solid var(--grass);border-radius:9px;padding:0;cursor:pointer}
+#mutebtn svg{display:block;width:22px;height:22px;fill:currentColor}
+#mutebtn .x{display:none;fill:var(--red)}
+#mutebtn.off .x{display:inline}
+#mutebtn.off .w{display:none}
 #pausebtn{position:absolute;right:16px;top:16px;pointer-events:auto;font:inherit;font-size:10px;text-transform:uppercase;color:var(--white);background:var(--ink);border:3px solid var(--grass);border-radius:9px;padding:9px 10px 8px;cursor:pointer}
 
 .cross{position:absolute;left:50%;top:50%;width:0;height:0}
@@ -89,7 +94,8 @@ body.playing #view{cursor:crosshair}
 
 /* ---------- touch controls ---------- */
 #touch{position:absolute;inset:0;z-index:3;touch-action:none}
-.bar,#msg,#tip,#pops,#pausebtn,.arr{z-index:2}
+.bar,#msg,#tip,#pops,.arr{z-index:2}
+#pausebtn,#mutebtn{z-index:4}
 #pops{position:absolute;inset:0}
 #stick{position:absolute;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;border:3px solid var(--white);background:rgba(0,0,0,.3);pointer-events:none}
 #stick b{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:var(--white)}
@@ -147,6 +153,7 @@ a.mode{display:block;text-decoration:none}
     <div id="msg" hidden aria-live="polite"></div>
     <div id="tip" hidden></div>
     <button id="pausebtn" type="button" hidden>Pause</button>
+    <button id="mutebtn" type="button" aria-label="Turn sound off" title="Sound on/off (M)"><svg viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><rect x="1" y="4" width="2" height="3"/><rect x="3" y="3" width="1" height="5"/><rect x="4" y="2" width="1" height="7"/><rect x="5" y="1" width="1" height="9"/><g class="w"><rect x="7" y="4" width="1" height="3"/><rect x="9" y="2" width="1" height="7"/></g><g class="x"><rect x="7" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="8" y="4" width="2" height="2"/><rect x="7" y="6" width="1" height="1"/><rect x="10" y="6" width="1" height="1"/></g></svg></button>
     <div class="bar">
       <div class="shotwrap">
         <div class="roundrow"><div id="round">R=1</div><div id="timer" hidden>T=30</div></div>
@@ -176,12 +183,14 @@ a.mode{display:block;text-decoration:none}
     <p class="pitch" id="pitch">Play your way through the proposal.</p>
     <div class="modes">
       <button class="mode" id="play" type="button">Play</button>
+      <button class="mode" id="m-sound" type="button">Sound = On</button>
     </div>
     <dl class="keys" id="keys-desk">
       <div><dt>Mouse</dt><dd>Aim</dd></div>
       <div><dt>Space</dt><dd>Fire (or click)</dd></div>
       <div><dt>R-click</dt><dd>Scope (or Q)</dd></div>
       <div><dt>Esc</dt><dd>Pause</dd></div>
+      <div><dt>M</dt><dd>Sound on/off</dd></div>
     </dl>
     <dl class="keys" id="keys-touch" hidden>
       <div><dt>Drag</dt><dd>Aim</dd></div>
@@ -199,6 +208,7 @@ a.mode{display:block;text-decoration:none}
     <p id="p-msg" hidden></p>
     <div class="modes">
       <button class="mode" id="resume" type="button">Continue</button>
+      <button class="mode" id="p-sound" type="button">Sound = On</button>
       <button class="mode" id="quit" type="button">Quit to title</button>
     </div>
   </section>
@@ -790,7 +800,7 @@ function initAudio() {
   if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
   try {
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-    ac = new AC(); master = ac.createGain(); master.gain.value = 0.45; master.connect(ac.destination);
+    ac = new AC(); master = ac.createGain(); master.gain.value = muted ? 0 : 0.45; master.connect(ac.destination);
     noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
     const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
   } catch (e) { ac = null; }
@@ -810,6 +820,14 @@ function tone(f0, f1, dur, vol, delay, type) {
   g.gain.setValueAtTime(vol, t); g.gain.setValueAtTime(vol, t + dur * 0.8); g.gain.linearRampToValueAtTime(0.0001, t + dur);
   o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.02);
 }
+function setMuted(m) {
+  muted = m;
+  if (master) master.gain.setValueAtTime(m ? 0 : 0.45, ac.currentTime); // cuts sounds already playing too
+  for (const id of ['m-sound', 'p-sound']) $(id).textContent = 'Sound = ' + (m ? 'Off' : 'On');
+  $('mutebtn').classList.toggle('off', m); $('mutebtn').setAttribute('aria-label', m ? 'Turn sound on' : 'Turn sound off');
+  try { localStorage.setItem('blockseason.muted', m ? '1' : '0'); } catch (e) {}
+}
+try { setMuted(localStorage.getItem('blockseason.muted') === '1'); } catch (e) { setMuted(false); }
 const tune = (notes, step, vol, type) => notes.forEach((f, i) => { if (f) tone(f, f, step * 0.9, vol, i * step, type); });
 const sfx = {
   shot() { noise(0.22, 'lowpass', 6000, 500, 0.8); noise(0.06, 'highpass', 2500, 5000, 0.35); },
@@ -1179,6 +1197,10 @@ $('play').addEventListener('click', () => { initAudio(); startGame(); begin(); }
 $('resume').addEventListener('click', begin);
 $('quit').addEventListener('click', toTitle);
 $('pausebtn').addEventListener('click', () => { if (state === 'playing') setState('paused'); });
+for (const id of ['m-sound', 'p-sound', 'mutebtn']) $(id).addEventListener('click', () => {
+  setMuted(!muted);
+  if (state === 'playing') canvas.focus({ preventScroll: true }); // keep the spacebar on the trigger
+});
 window.addEventListener('touchstart', () => {
   if (touchMode) return;
   touchMode = true; showKeys();
@@ -1194,7 +1216,7 @@ function look(dx, dy, s) {
   lookDX += dx; lookDY += dy;
 }
 addEventListener('keydown', e => {
-  if (e.code === 'KeyM' && !e.repeat) { muted = !muted; if (state === 'playing') tip(muted ? 'Sound off' : 'Sound on', 1.5); }
+  if (e.code === 'KeyM' && !e.repeat) { setMuted(!muted); if (state === 'playing') tip(muted ? 'Sound off' : 'Sound on', 1.5); }
   if (state === 'playing') {
     if (/^(Space|Arrow)/.test(e.code)) e.preventDefault();
     if (e.repeat) return;

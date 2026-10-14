@@ -29,7 +29,7 @@ The rifle carries BoreBuddy's AR22 Heavy Precision upper with the 18.5-inch Gree
 | Space or click | Fire |
 | Right-click or Q | Scope |
 | Esc | Pause |
-| M | Sound on or off |
+| M | Sound on or off (also the speaker button on screen) |
 
 On a phone, drag anywhere to aim; on-screen buttons fire and scope. Players stay in one spot and don't walk.
 
