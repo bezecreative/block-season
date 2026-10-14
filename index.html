@@ -123,6 +123,7 @@ a.mode{display:block;text-decoration:none}
 .mode.cta{color:var(--white)}
 .mode.cta::before{border-left-color:var(--orange)}
 #pitchcard{outline:none}
+#pc-title{color:#b91800;text-shadow:3px 3px 0 #4c0a00} /* Mox red */
 .card h2{margin:0;font-size:clamp(18px,5vw,28px);font-weight:400;color:var(--blue);text-shadow:3px 3px 0 #0c48b8}
 .card p{margin:0;font-size:clamp(8px,1.9vw,10px);line-height:1.9;max-width:46ch}
 .modes{display:flex;flex-direction:column;gap:2px;align-self:center}
@@ -636,7 +637,7 @@ function drawBillboard() { // laid out on a 1024 x 512 grid, drawn at double tha
   x.fillStyle = '#000'; x.fillRect(0, 0, 1024, 512);
   x.strokeStyle = '#80d010'; x.lineWidth = 14; x.strokeRect(7, 7, 1010, 498);
   x.textBaseline = 'top'; x.textAlign = 'center';
-  fitFont(x, 'Ready to stand out?', 900, 92, 900); x.fillStyle = '#3cbcfc'; x.fillText('Ready to stand out?', 512, 36);
+  fitFont(x, 'Ready to stand out?', 900, 92, 900); x.fillStyle = '#b91800'; x.fillText('Ready to stand out?', 512, 36); // Mox red
   x.fillStyle = '#fc9838'; x.fillRect(48, 150, 928, 8);
   x.textAlign = 'left'; x.fillStyle = '#fcfcfc'; x.font = '800 54px ' + SANS; x.fillText('Go with', 60, 196);
   if (moxImg.complete && moxImg.naturalWidth) x.drawImage(moxImg, 60, 276, 400, 113);
@@ -1175,7 +1176,7 @@ function saveTop() { if (score > top) { top = score; try { localStorage.setItem(
 let nextDuck = 0;
 function beginBillboard() {
   phase = 'free'; phaseT = 0; nextDuck = 4; $('timer').hidden = true; $('hud').classList.add('free');
-  for (let i = 0; i < 6; i++) spawnDeer();
+  for (let i = 0; i < 3; i++) spawnDeer();
   showMsg('Scope in and hit\nthe target on the billboard.'); sfx.next(); renderHud();
 }
 function hitBillboard() {
