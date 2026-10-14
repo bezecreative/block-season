@@ -444,18 +444,6 @@
   .logos.alt { background: var(--paper-2); border-top: 1px solid var(--line); }
   .logos .head { margin-bottom: 54px; }
   .logos h2 { font-size: clamp(30px, 4vw, 52px); font-weight: 400; letter-spacing: -0.02em; margin-top: 12px; }
-  /* client-work background that fades in behind the grids on hover */
-  .logos-bg {
-    position: absolute; inset: 0; z-index: 1;
-    background-position: center; background-size: cover;
-    opacity: 0; transition: opacity 0.7s var(--ease);
-    pointer-events: none;
-  }
-  .logos-bg::after {
-    content: ''; position: absolute; inset: 0;
-    background: rgba(243, 239, 233, 0.82); /* paper wash keeps logos and grid legible */
-  }
-  .logos-bg.on { opacity: 1; }
   .logo-wall {
     display: grid; grid-template-columns: repeat(6, 1fr);
     border-top: 1px solid var(--line); border-left: 1px solid var(--line);
@@ -1297,20 +1285,19 @@
 
 <!-- Logo wall: partners (6 x 4) -->
 <section class="logos" id="portfolio">
-  <div class="logos-bg" aria-hidden="true"></div>
   <div class="wrap">
     <div class="head">
       <span class="eyebrow reveal">Our Roster Has Worked With</span>
     </div>
     <div class="logo-wall cols-5 reveal d1">
-      <div class="logo-tile" data-name="Sockeye" data-bg="https://sockeyebrew.com/wp-content/uploads/2026/05/Can-on-Post-1.jpg"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784218427/Sockeye_Brewing_Logo_Primary_Black_Dark.png" alt="Sockeye" loading="lazy"></div>
-      <div class="logo-tile" data-name="AC Boise" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784291125/Ac_Boise_Kit.webp"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145144/Ad_boise_1.png" alt="AC Boise" loading="lazy"></div>
+      <div class="logo-tile" data-name="Sockeye"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784218427/Sockeye_Brewing_Logo_Primary_Black_Dark.png" alt="Sockeye" loading="lazy"></div>
+      <div class="logo-tile" data-name="AC Boise"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145144/Ad_boise_1.png" alt="AC Boise" loading="lazy"></div>
       <div class="logo-tile" data-name="Sony"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145148/Sony_1.png" alt="Sony" loading="lazy"></div>
       <div class="logo-tile" data-name="Micron"><img src="logos/micron.png" alt="Micron" loading="lazy"></div>
       <div class="logo-tile" data-name="Google"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145145/google-logo-icon-symbol-free-png_1.png" alt="Google" loading="lazy"></div>
-      <div class="logo-tile" data-name="Orlando Magic" data-bg="https://www.gilbaneco.com/wp-content/uploads/2024/12/Orlando-Arena_01.jpeg"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145147/Orlando_Magic_1.png" alt="Orlando Magic" loading="lazy"></div>
-      <div class="logo-tile" data-name="USA Men's National Team" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784220137/USA_MEN_BG.jpg"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145149/USA_MEN_1.png" alt="USA Men's National Team" loading="lazy"></div>
-      <div class="logo-tile" data-name="Trail Blazers" data-bg="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784291198/Trailbladdzers.jpg"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145148/Trail_1.png" alt="Trail Blazers" loading="lazy"></div>
+      <div class="logo-tile" data-name="Orlando Magic"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145147/Orlando_Magic_1.png" alt="Orlando Magic" loading="lazy"></div>
+      <div class="logo-tile" data-name="USA Men's National Team"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145149/USA_MEN_1.png" alt="USA Men's National Team" loading="lazy"></div>
+      <div class="logo-tile" data-name="Trail Blazers"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145148/Trail_1.png" alt="Trail Blazers" loading="lazy"></div>
       <div class="logo-tile" data-name="Adidas"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145144/Add_1.png" alt="Adidas" loading="lazy"></div>
       <div class="logo-tile" data-name="Albertsons"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145145/Albertsons-logo_1.png" alt="Albertsons" loading="lazy"></div>
       <div class="logo-tile" data-name="Johnson &amp; Johnson"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784145146/Logo-Johnson-Johnson_1.png" alt="Johnson &amp; Johnson" loading="lazy"></div>
@@ -1734,29 +1721,6 @@ With 10 years of experience, and counting, I have had great mentors, and amazing
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
   }, { threshold: 0.15 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-  // Logo walls: hovering a tile fades that client's work in as the section background
-  document.querySelectorAll('.logos').forEach(section => {
-    const bg = section.querySelector('.logos-bg');
-    if (!bg) return;
-    let hideTimer = null;
-    section.querySelectorAll('.logo-tile[data-bg]').forEach(tile => {
-      tile.addEventListener('mouseenter', () => {
-        clearTimeout(hideTimer);
-        const url = tile.dataset.bg;
-        const img = new Image();
-        img.onload = () => {
-          bg.style.backgroundImage = `url("${url}")`;
-          bg.classList.add('on');
-        };
-        img.src = url;
-        if (img.complete) { bg.style.backgroundImage = `url("${url}")`; bg.classList.add('on'); }
-      });
-      tile.addEventListener('mouseleave', () => {
-        hideTimer = setTimeout(() => bg.classList.remove('on'), 120);
-      });
-    });
-  });
 
   // Bid accordion: one section open at a time
   document.querySelectorAll('.bid-acc').forEach(acc => {
