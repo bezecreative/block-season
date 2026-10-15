@@ -1090,7 +1090,7 @@ let round = 1, score = 0, top = 0, shots = 8, maxShots = 8, outT = 0, slots = ne
 const targets = [];
 let cooldown = 0, gunKick = 0, flashT = 0, recoilP = 0;
 let scopeHeld = false, scopeToggle = false, scopeT = 0, scopeOn = false, rangeTick = 0, scopeDownAt = 0;
-let bobPhase = 0, lastStep = 0, aimYaw = 0, aimPitch = 0, lookDX = 0, lookDY = 0;
+let bobPhase = 0, lastStep = 0, aimYaw = 0, aimPitch = 0, viewYaw = 0, viewPitch = 0.04, lookDX = 0, lookDY = 0;
 const sway = { x: 0, y: 0 }, joy = { x: 0, y: 0 }, keys = Object.create(null);
 let locked = false, everLocked = false, pendingLock = false, dragLook = false, lockTimer = 0;
 
@@ -1181,7 +1181,7 @@ function beginRound() {
   showMsg('Round\n' + round); renderHud();
 }
 function beginOffice() {
-  slots = new Array(3).fill(0); maxShots = Math.max(5, 7 - Math.floor((round - 1) / 2)); shots = maxShots;
+  slots = new Array(3).fill(0); maxShots = Math.max(3, 5 - Math.floor((round - 1) / 2)); shots = maxShots;
   $('timer').hidden = true; phase = 'intro'; phaseT = 0; phaseDur = Infinity; sfx.next(); // the card stays up until it's closed
   dealPcs();
   showMsg('Let\'s see how your\nwebsite stacks up against\nthe competition.\n\nShoot your website\nto score points.', true); renderHud();
@@ -1452,7 +1452,7 @@ showKeys();
 
 // ---------- input ----------
 function look(dx, dy, s) {
-  const k = s * (camera.fov / baseFov);
+  const k = s * (camera.fov / baseFov) * (scopeT > 0.75 ? 0.8 : 1); // a touch finer through the scope
   P.yaw -= dx * k; P.pitch = clamp(P.pitch - dy * k, -1.45, 1.45);
   lookDX += dx; lookDY += dy;
 }
@@ -1493,6 +1493,7 @@ addEventListener('mousemove', e => {
   if (state !== 'playing' || touchMode) return;
   if (locked || (dragLook && dragBtn >= 0)) {
     const mx = e.movementX || 0, my = e.movementY || 0;
+    if (Math.abs(mx) > 300 || Math.abs(my) > 300) return; // some browsers report a bogus jump now and then; it yanks the scope
     if (!locked) dragDist += Math.abs(mx) + Math.abs(my);
     look(mx, my, 0.0022);
   }
@@ -1548,7 +1549,7 @@ function fire() {
   muzzle.copy(origin).addScaledVector(dir, 1.0); muzzle.x += cy * side; muzzle.z += -sy * side; muzzle.y -= scoped ? 0.06 : 0.17;
   tracer(muzzle, endPt);
   sfx.shot(); if (stage === 'billboard') spookDeer();
-  recoilP += scoped ? 0.006 : 0.012; gunKick = 1; flashT = 0.05;
+  recoilP += scoped ? 0.0025 : 0.012; gunKick = 1; flashT = 0.05;
   if (live) renderHud();
 }
 function bagDeer(d, h) { // bonus points; the deer goes to blocks
@@ -1654,9 +1655,12 @@ function poseView(dt, t) {
   const spd = Math.hypot(P.vx, P.vz), mv = Math.min(1, spd / 5.2) * (P.onGround ? 1 : 0.3), e = scopeT * scopeT * (3 - 2 * scopeT);
   const fov = lerp(baseFov, scopeFov(), e);
   if (Math.abs(fov - camera.fov) > 0.01) { camera.fov = fov; camera.updateProjectionMatrix(); }
-  const wob = reduceMotion ? 0 : scopeT * (1 + spd * 0.7);
-  aimPitch = P.pitch + recoilP + Math.sin(t * 1.3) * 0.0014 * wob;
-  aimYaw = P.yaw + Math.cos(t * 0.9) * 0.0018 * wob;
+  // Through the scope the view eases toward where you aim (about 40 ms behind), which smooths out mouse jitter.
+  // There is no breathing sway: a still mouse is a still crosshair.
+  const follow = scopeT > 0 && !reduceMotion ? 1 - Math.exp(-dt * lerp(60, 24, e)) : 1;
+  viewYaw += (P.yaw - viewYaw) * follow; viewPitch += (P.pitch - viewPitch) * follow;
+  aimPitch = viewPitch + recoilP;
+  aimYaw = viewYaw;
   camera.position.set(P.pos.x, P.pos.y + EYE + (reduceMotion ? 0 : Math.sin(bobPhase * 2) * 0.035 * mv), P.pos.z);
   camera.rotation.set(aimPitch, aimYaw, 0);
   sun.target.position.set(P.pos.x, 0, P.pos.z);
