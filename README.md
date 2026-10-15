@@ -17,8 +17,8 @@ two PWS and two Allterra Arms. The card reads "Let's see if you can
 find your website among your competitors. Shoot your website to score points." Hitting a competitor screen costs 500 points. BoreBuddy screens are never dealt to the front row of machines.
 
 **Stage three, the billboard.** Back outside, a billboard stands far down a two-lane highway, about 360 metres out
-in a valley of rolling high-desert hills, and reads "Ready to stand out? Go with Mox" (the headline in Mox red, #B91800) with a target on it. It takes the scope to read it and hit it. Pickup trucks drive by now and then, and a truck that's shot blows up (no points either way). Deer wander the field and ducks fly over for
-bonus points (does 600, bucks 1,000). There is no clock and no shot limit. Hitting the billboard target loads the
+in a valley of rolling high-desert hills, and reads "Ready to stand out? Go with Mox" (the headline in Mox red, #B91800) with a target on it. It takes the scope to read it and hit it. Pickup trucks drive by now and then, and a truck that's shot blows up (no points either way). A railway crosses the valley about 54 metres out, with a red-brick train depot just past it on the right of the highway. Every so often a steam train (locomotive, tender, four boxcars and a caboose) whistles through in front of the depot, and trucks wait at the crossing until it's gone. Shoot the train and it goes up in a chain of explosions; another one comes along later. Deer wander the field and ducks fly over for
+bonus points (does 600, bucks 1,000). There is no clock and no shot limit. On this stage the rifle fires like an AR: hold the trigger for full auto, 30 rounds to a magazine, then an automatic magazine change (R reloads early). Hitting the billboard target loads the
 proposal page. This stage draws at full resolution, so the billboard reads clean; the first two keep the chunky pixels.
 
 The rifle carries BoreBuddy's AR22 Heavy Precision upper with the 18.5-inch Green Mountain barrel.
@@ -28,11 +28,14 @@ The rifle carries BoreBuddy's AR22 Heavy Precision upper with the 18.5-inch Gree
 | Key | Action |
 |---|---|
 | Mouse | Aim |
-| Space or click | Fire |
+| Space or click | Fire (hold for full auto at the billboard) |
 | Right-click or Q | Scope |
 | ` (backquote) | Show the frame rate |
-| Esc | Pause |
+| Esc | Pause; press it again to exit to the title |
+| R | Reload (billboard only) |
 | M | Sound on or off (also the speaker button in the top-left corner) |
+
+An Exit button sits in the top-right corner during play, and the pause card has Exit game and See the proposal.
 
 On a phone, drag anywhere to aim; on-screen buttons fire and scope. Players stay in one spot and don't walk.
 
