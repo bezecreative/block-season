@@ -1290,7 +1290,7 @@ function openStage() {
     duckAt = [rnd(2.5, timeLeft * 0.4)]; if (round >= 3) duckAt.push(rnd(timeLeft * 0.5, timeLeft * 0.8));
     sfx.rustle();
   } else {
-    timeLeft = Math.max(36, 60 - round * 4);
+    timeLeft = Math.max(18, 30 - round * 2); // half what it was
     tip(touchMode ? 'Scope in. Shoot the BoreBuddy screens, not the competition' : 'Scope in to read the screens. Shoot the BoreBuddy screens, not the competition', 9);
     for (const pc of pcs) hittables.push(pc.g);
     duckAt = [];
@@ -1546,7 +1546,17 @@ function showKeys() { $('keys-desk').hidden = touchMode; $('keys-touch').hidden 
 showKeys();
 
 // ---------- input ----------
+// On some setups (seen in the Claude desktop app on a 75 Hz screen) every mouse report is followed by a near-opposite
+// echo: +10, -9, +10, -9. The view then shakes back and forth while barely moving. Averaging each report with the one
+// before it cancels the echoes and passes real movement through, half a report later.
+let lastDX = 0, lastDY = 0, lastLookAt = 0;
 function look(dx, dy, s) {
+  const now = performance.now();
+  if (now - lastLookAt > 60) lastDX = lastDY = 0; // after a pause, nothing to pair with
+  lastLookAt = now;
+  const ax = (dx + lastDX) / 2, ay = (dy + lastDY) / 2;
+  if (dx * lastDX < 0 && Math.abs(dx + lastDX) < 0.35 * Math.max(Math.abs(dx), Math.abs(lastDX))) diag.echoes++;
+  lastDX = dx; lastDY = dy; dx = ax; dy = ay;
   const k = s * (camera.fov / baseFov) * (scopeT > 0.75 ? 0.45 : 1); // slower through the scope, for calm, fine aim
   P.yaw -= dx * k; P.pitch = clamp(P.pitch - dy * k, -1.45, 1.45);
   lookDX += dx; lookDY += dy;
@@ -1588,7 +1598,7 @@ addEventListener('mouseup', e => {
 // Some Mac and browser setups now and then report a mouse move far bigger than the ones around it. Anything much
 // larger than the recent average is trimmed back, so the view never lurches. Real flicks build up over a few reports.
 let mouseAvg = 0;
-const diag = { events: 0, maxMove: 0, jumps: 0, frames: 0, slowest: 0, hitches: 0, t: 0 }; // for the ` readout
+const diag = { events: 0, maxMove: 0, jumps: 0, echoes: 0, frames: 0, slowest: 0, hitches: 0, t: 0 }; // for the ` readout
 addEventListener('mousemove', e => {
   if (state !== 'playing' || touchMode) return;
   if (locked || (dragLook && dragBtn >= 0)) {
@@ -1761,7 +1771,7 @@ function poseView(dt, t) {
   if (Math.abs(fov - camera.fov) > 0.01) { camera.fov = fov; camera.updateProjectionMatrix(); }
   // Through the scope the view eases toward where you aim (about 70 ms behind), which smooths the motion.
   // There is no breathing sway: a still mouse is a still crosshair.
-  const follow = scopeT > 0 && !reduceMotion ? 1 - Math.exp(-dt * lerp(60, 14, e)) : 1;
+  const follow = 1 - Math.exp(-dt * lerp(45, 14, e)); // always on: it filters the mouse, it isn't decoration
   viewYaw += (P.yaw - viewYaw) * follow; viewPitch += (P.pitch - viewPitch) * follow;
   aimPitch = viewPitch + recoilP;
   aimYaw = viewYaw;
@@ -1830,9 +1840,9 @@ function frame(now) {
   if (raw > 0 && raw < 0.5) { diag.frames++; diag.t += raw; diag.slowest = Math.max(diag.slowest, raw); if (raw > ftAvg * 1.6) diag.hitches++; }
   if (diag.t >= 1) { // a once-a-second report for the ` readout: frame rate, slowest frame, hitches, mouse reports and jumps
     if (fpsShown) $('fps').textContent = Math.round(diag.frames / diag.t) + ' fps  slowest ' + Math.round(diag.slowest * 1000) + 'ms  hitches ' + diag.hitches +
-      '  |  mouse ' + diag.events + '/s  ' + (diag.frames ? (diag.events / diag.frames).toFixed(1) : 0) + '/frame  max ' + Math.round(diag.maxMove) + '  jumps ' + diag.jumps +
+      '  |  mouse ' + diag.events + '/s  ' + (diag.frames ? (diag.events / diag.frames).toFixed(1) : 0) + '/frame  max ' + Math.round(diag.maxMove) + '  jumps ' + diag.jumps + '  echoes ' + diag.echoes + (reduceMotion ? '  reduce-motion' : '') +
       '  |  px ' + (Math.round(renderer.domElement.width) + 'x' + renderer.domElement.height) + (scopeOn ? ' scope' : '') + (quality ? ' q-' + quality : '');
-    diag.events = diag.maxMove = diag.jumps = diag.frames = diag.slowest = diag.hitches = diag.t = 0;
+    diag.events = diag.maxMove = diag.jumps = diag.echoes = diag.frames = diag.slowest = diag.hitches = diag.t = 0;
   }
   if (state === 'playing') { updatePlayer(dt); updateWeapon(dt); updateGame(dt); updateTargets(dt); updateDog(dt); if (stage === 'field') updateRange(dt); else if (stage === 'office') updatePcs(dt); else { updateDeer(dt); updateCars(dt); } }
   else if (state === 'menu') { updateTargets(dt); updateRange(dt); }
