@@ -17,7 +17,7 @@ two PWS and two Allterra Arms. The card reads "Let's see how your
 website stacks up against the competition. Shoot your website to score points." Hitting a competitor screen costs 500 points. BoreBuddy screens are never dealt to the front row of machines.
 
 **Stage three, the billboard.** Back outside, a billboard stands far down a two-lane highway, about 360 metres out
-in a valley of rolling high-desert hills, and reads "Ready to stand out? Go with Mox" (the headline in Mox red, #B91800) with a target on it. It takes the scope to read it and hit it. Pickup trucks drive by now and then. Deer wander the field and ducks fly over for
+in a valley of rolling high-desert hills, and reads "Ready to stand out? Go with Mox" (the headline in Mox red, #B91800) with a target on it. It takes the scope to read it and hit it. Pickup trucks drive by now and then, and a truck that's shot blows up (no points either way). Deer wander the field and ducks fly over for
 bonus points (does 600, bucks 1,000). There is no clock and no shot limit. Hitting the billboard target loads the
 proposal page. This stage draws at full resolution, so the billboard reads clean; the first two keep the chunky pixels.
 
