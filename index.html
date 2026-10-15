@@ -1209,7 +1209,7 @@ function setWorld(w) {
   clearTimeout(tipTimer); $('tip').hidden = true;
   hittables = outdoors ? solids.concat([dogUp]) : officeSolids.slice();
   if (w === 'billboard') { hittables = hittables.filter(o => !startBushParts.has(o)); bbTarget.visible = true; hittables.push(...bbSolids, ...roadSolids, bbTarget); nextCar = rnd(2, 4); }
-  canvas.classList.toggle('sharp', w === 'billboard'); resize();
+  resize();
   P.pos.set(0, 0, 0); P.vx = P.vz = P.vy = 0; P.yaw = w === 'billboard' ? -0.17 : 0; P.pitch = 0.04; // at the billboard, face a touch right: board and road both in view scopeToggle = false; $('tb-scope').classList.remove('on');
 }
 function startGame() {
@@ -1495,7 +1495,7 @@ showKeys();
 
 // ---------- input ----------
 function look(dx, dy, s) {
-  const k = s * (camera.fov / baseFov) * (scopeT > 0.75 ? 0.8 : 1); // a touch finer through the scope
+  const k = s * (camera.fov / baseFov) * (scopeT > 0.75 ? 0.5 : 1); // half as quick through the scope, so a resting hand barely moves it
   P.yaw -= dx * k; P.pitch = clamp(P.pitch - dy * k, -1.45, 1.45);
   lookDX += dx; lookDY += dy;
 }
@@ -1681,7 +1681,7 @@ function updateWeapon(dt) {
   const stepT = reduceMotion ? 1 : dt / 0.26;
   scopeT = want > scopeT ? Math.min(1, scopeT + stepT) : Math.max(0, scopeT - stepT * 1.5);
   const on = scopeT > 0.75;
-  if (on !== scopeOn) { scopeOn = on; rangeTick = 0; }
+  if (on !== scopeOn) { scopeOn = on; rangeTick = 0; resize(); } // the scope draws at full resolution
   if (on) {
     rangeTick -= dt;
     if (rangeTick <= 0) {
@@ -1698,9 +1698,9 @@ function poseView(dt, t) {
   const spd = Math.hypot(P.vx, P.vz), mv = Math.min(1, spd / 5.2) * (P.onGround ? 1 : 0.3), e = scopeT * scopeT * (3 - 2 * scopeT);
   const fov = lerp(baseFov, scopeFov(), e);
   if (Math.abs(fov - camera.fov) > 0.01) { camera.fov = fov; camera.updateProjectionMatrix(); }
-  // Through the scope the view eases toward where you aim (about 40 ms behind), which smooths out mouse jitter.
-  // There is no breathing sway: a still mouse is a still crosshair.
-  const follow = scopeT > 0 && !reduceMotion ? 1 - Math.exp(-dt * lerp(60, 24, e)) : 1;
+  // Through the scope the view eases toward where you aim (about a tenth of a second behind), which irons out
+  // hand tremor. There is no breathing sway: a still mouse is a still crosshair.
+  const follow = scopeT > 0 && !reduceMotion ? 1 - Math.exp(-dt * lerp(60, 10, e)) : 1;
   viewYaw += (P.yaw - viewYaw) * follow; viewPitch += (P.pitch - viewPitch) * follow;
   aimPitch = viewPitch + recoilP;
   aimYaw = viewYaw;
@@ -1739,8 +1739,11 @@ function updateArrows() {
 // ---------- sizing + loop ----------
 function resize() {
   const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight, asp = w / h;
-  // chunky pixels, about 300 lines tall whatever the window; the billboard stage draws at full resolution so the board reads clean
-  const px = stage === 'billboard' ? 1 / Math.min(1.5, devicePixelRatio || 1) : Math.max(2, Math.round(h / 300));
+  // chunky pixels, about 300 lines tall whatever the window. The billboard stage, and any view through the scope, draw at
+  // full resolution: the board reads clean, and aiming glides instead of jumping a fat pixel at a time.
+  const sharp = stage === 'billboard' || scopeOn;
+  const px = sharp ? 1 / Math.min(1.5, devicePixelRatio || 1) : Math.max(2, Math.round(h / 300));
+  canvas.classList.toggle('sharp', sharp);
   renderer.setSize(Math.max(1, Math.round(w / px)), Math.max(1, Math.round(h / px)), false);
   baseFov = asp < 1 ? 88 : 72;
   camera.aspect = asp; camera.fov = lerp(baseFov, scopeFov(), scopeT); camera.updateProjectionMatrix();
