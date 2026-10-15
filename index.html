@@ -31,6 +31,7 @@ body{margin:0;background:var(--sky);color:var(--white);font-family:var(--px);fon
 #view{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none;image-rendering:crisp-edges;image-rendering:pixelated}
 body.playing #view{cursor:crosshair}
 #view.sharp{image-rendering:auto}
+#gunview{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none} /* the rifle, drawn sharp over the pixel-art world */
 
 /* ---------- status bar ---------- */
 #hud{position:absolute;inset:0;pointer-events:none}
@@ -161,6 +162,7 @@ a.mode{display:block;text-decoration:none}
 <body>
 <div id="game">
   <canvas id="view" tabindex="-1" role="img" aria-label="First-person view of a bright green field with tall grass, a big tree and a bush under a flat blue sky"></canvas>
+  <canvas id="gunview" aria-hidden="true"></canvas>
 
   <div id="hud" hidden>
     <div id="pops"></div>
@@ -272,6 +274,10 @@ let touchMode = matchMedia('(hover: none) and (pointer: coarse)').matches;
 renderer.setPixelRatio(1);
 renderer.shadowMap.enabled = true;
 renderer.autoClear = false;
+// The rifle gets its own full-resolution layer so it, and the BoreBuddy logo on it, stay clean while the world keeps its chunky pixels.
+let gunRenderer = null;
+try { gunRenderer = new THREE.WebGLRenderer({ canvas: $('gunview'), alpha: true, antialias: true }); gunRenderer.setPixelRatio(Math.min(2, devicePixelRatio || 1)); gunRenderer.setClearColor(0x000000, 0); }
+catch (e) { gunRenderer = null; $('gunview').hidden = true; } // without a second context the rifle draws in the main pass, as before
 
 function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const srand = mulberry32(1984);
@@ -1494,7 +1500,17 @@ function showKeys() { $('keys-desk').hidden = touchMode; $('keys-touch').hidden 
 showKeys();
 
 // ---------- input ----------
+// Through the scope, a little slack soaks up small back-and-forth mouse movement (a resting hand, a noisy sensor or
+// a shiny desk), so the view only moves once the mouse has really travelled. Out of the scope there is no slack.
+let slackX = 0, slackY = 0;
+const SLACK = 8; // mouse counts
 function look(dx, dy, s) {
+  if (scopeT > 0.75) {
+    slackX += dx; slackY += dy;
+    const m = Math.hypot(slackX, slackY);
+    if (m <= SLACK) return;
+    const f = (m - SLACK) / m; dx = slackX * f; dy = slackY * f; slackX -= dx; slackY -= dy;
+  } else slackX = slackY = 0;
   const k = s * (camera.fov / baseFov) * (scopeT > 0.75 ? 0.5 : 1); // half as quick through the scope, so a resting hand barely moves it
   P.yaw -= dx * k; P.pitch = clamp(P.pitch - dy * k, -1.45, 1.45);
   lookDX += dx; lookDY += dy;
@@ -1747,6 +1763,7 @@ function resize() {
   renderer.setSize(Math.max(1, Math.round(w / px)), Math.max(1, Math.round(h / px)), false);
   baseFov = asp < 1 ? 88 : 72;
   camera.aspect = asp; camera.fov = lerp(baseFov, scopeFov(), scopeT); camera.updateProjectionMatrix();
+  if (gunRenderer) gunRenderer.setSize(Math.max(1, w), Math.max(1, h), false);
   gunCam.fov = asp < 1 ? 78 : 55; gunCam.aspect = asp; gunCam.updateProjectionMatrix();
   gunRestX = Math.min(0.19, Math.tan(gunCam.fov * Math.PI / 360) * 0.54 * asp * 0.5);
 }
@@ -1762,7 +1779,8 @@ function frame(now) {
   if (state !== 'paused') { T += dt; updateDebris(dt); updateTracers(dt); updateFx(dt); poseView(dt, T); }
   renderer.clear();
   renderer.render(scene, camera);
-  if (rifle.visible) { renderer.clearDepth(); renderer.render(gunScene, gunCam); }
+  if (gunRenderer) { gunRenderer.clear(); if (rifle.visible) gunRenderer.render(gunScene, gunCam); }
+  else if (rifle.visible) { renderer.clearDepth(); renderer.render(gunScene, gunCam); }
   if (state === 'playing') updateArrows();
 }
 
