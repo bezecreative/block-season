@@ -106,10 +106,8 @@ body.touch #exitbtn .k{display:none}
 .bar,#msg,#tip,#pops,.arr{z-index:2}
 .corner{z-index:4}
 #fps{position:absolute;left:50%;transform:translateX(-50%);top:62px;z-index:6;font-size:9px;line-height:1.3;max-width:calc(100% - 32px);text-align:center;background:rgba(0,0,0,.75);border-radius:4px;padding:7px 9px 5px}
-#msg.closable{padding:22px 34px 14px}
+#msg.closable{padding:18px 26px 14px}
 #msg-hint{display:block;margin-top:12px;font-size:clamp(7px,1.4vw,9px);color:var(--grass)}
-#msg-x{position:absolute;top:4px;right:6px;pointer-events:auto;appearance:none;background:none;border:0;color:var(--white);font:inherit;font-size:16px;line-height:1;padding:6px 8px;cursor:pointer}
-#msg-x:hover,#msg-x:focus-visible{color:var(--orange);outline:none}
 .ctrls{position:absolute;left:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:2;margin:0;display:grid;gap:5px;background:rgba(0,0,0,.55);border-radius:6px;padding:9px 11px 7px;font-size:8px;line-height:1}
 .ctrls div{display:flex;gap:8px}
 .ctrls dt{color:var(--blue);min-width:6.2em}
@@ -181,7 +179,7 @@ body.touch .p-hint{display:none}
     <div class="arr" id="arrL" hidden></div>
     <div class="arr" id="arrR" hidden></div>
     <div class="cross" id="cross"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i></div>
-    <div id="msg" hidden aria-live="polite"><span id="msg-text"></span><span id="msg-hint" hidden></span><button id="msg-x" type="button" aria-label="Close" hidden>&times;</button></div>
+    <div id="msg" hidden aria-live="polite"><span id="msg-text"></span><span id="msg-hint" hidden></span></div>
     <div id="tip" hidden></div>
     <div id="fps" hidden></div>
     <div class="corner"><button id="pausebtn" type="button" hidden>Pause</button><button id="exitbtn" type="button" aria-label="Exit the game">Exit<span class="k" aria-hidden="true">Esc</span></button></div>
@@ -1437,10 +1435,10 @@ function renderHud() {
 }
 function showMsg(s, closable) {
   const m = $('msg'); $('msg-text').textContent = s; m.hidden = false;
-  m.classList.toggle('closable', !!closable); $('msg-x').hidden = !closable; $('msg-hint').hidden = !closable;
-  if (closable) $('msg-hint').textContent = touchMode ? 'Tap X or Fire to start' : 'Click or press Space to start';
+  m.classList.toggle('closable', !!closable); $('msg-hint').hidden = !closable;
+  if (closable) $('msg-hint').textContent = touchMode ? 'Tap Fire to start' : 'Click or press Space to start';
 }
-function hideMsg() { $('msg').hidden = true; $('msg-x').hidden = true; }
+function hideMsg() { $('msg').hidden = true; }
 const introOpen = () => phase === 'intro' && stage === 'office' && phaseDur === Infinity;
 function closeIntro() { if (introOpen()) phaseDur = phaseT; } // the next frame hides the card and starts the clock
 let tipTimer = 0;
@@ -1753,7 +1751,6 @@ $('resume').addEventListener('click', begin);
 $('quit').addEventListener('click', toTitle);
 $('exitbtn').addEventListener('click', toTitle);
 $('pausebtn').addEventListener('click', () => { if (state === 'playing') setState('paused'); });
-$('msg-x').addEventListener('click', () => { closeIntro(); if (state === 'playing') canvas.focus({ preventScroll: true }); });
 for (const id of ['mutebtn']) $(id).addEventListener('click', () => {
   setMuted(!muted);
   if (state === 'playing') canvas.focus({ preventScroll: true }); // keep the spacebar on the trigger
