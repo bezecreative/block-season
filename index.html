@@ -83,7 +83,7 @@ body.playing #view{cursor:crosshair}
 
 /* ---------- scope ---------- */
 #fade{position:absolute;inset:0;z-index:1;background:#000;opacity:0;pointer-events:none;transition:opacity .3s linear}
-#scope{position:absolute;inset:0;z-index:1;pointer-events:none;transform-origin:50% 50%;will-change:opacity,transform;background:radial-gradient(circle closest-side at 50% 50%,transparent 0 83%,#000 83.5%)}
+#scope{position:absolute;inset:0;z-index:1;pointer-events:none;transform-origin:50% 50%;background:radial-gradient(circle closest-side at 50% 50%,transparent 0 83%,#000 83.5%)}
 #scope::before,#scope::after{content:"";position:absolute;background:#000}
 #scope::before{left:0;right:0;top:50%;height:2px;margin-top:-1px}
 #scope::after{top:0;bottom:0;left:50%;width:2px;margin-left:-1px}
@@ -91,7 +91,7 @@ body.playing #view{cursor:crosshair}
 #scope .pl{left:calc(50% - 41.5vmin);width:29vmin;top:calc(50% - 3px);height:6px}
 #scope .pr{right:calc(50% - 41.5vmin);width:29vmin;top:calc(50% - 3px);height:6px}
 #scope .pb{bottom:calc(50% - 41.5vmin);height:29vmin;left:calc(50% - 3px);width:6px}
-#range{position:absolute;left:50%;top:calc(50% + 43vmin);transform:translateX(-50%);font-size:9px;line-height:1;color:var(--white);white-space:nowrap}
+#range{position:absolute;z-index:1;left:50%;top:calc(50% + 43vmin);transform:translateX(-50%);font-size:9px;line-height:1;color:var(--white);white-space:nowrap;pointer-events:none}
 
 /* ---------- touch controls ---------- */
 #touch{position:absolute;inset:0;z-index:3;touch-action:none}
@@ -192,7 +192,8 @@ a.mode{display:block;text-decoration:none}
   </div>
 
   <button id="mutebtn" type="button" aria-label="Turn sound off" title="Sound on/off (M)"><svg viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><rect x="1" y="4" width="2" height="3"/><rect x="3" y="3" width="1" height="5"/><rect x="4" y="2" width="1" height="7"/><rect x="5" y="1" width="1" height="9"/><g class="w"><rect x="7" y="4" width="1" height="3"/><rect x="9" y="2" width="1" height="7"/></g><g class="x"><rect x="7" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="8" y="4" width="2" height="2"/><rect x="7" y="6" width="1" height="1"/><rect x="10" y="6" width="1" height="1"/></g></svg></button>
-  <div id="scope" hidden><i class="pl"></i><i class="pr"></i><i class="pb"></i><span id="range">-- yd</span></div>
+  <div id="scope" hidden><i class="pl"></i><i class="pr"></i><i class="pb"></i></div>
+  <div id="range" hidden>-- yd</div>
   <div id="fade"></div>
 
   <div id="touch" hidden>
@@ -1244,7 +1245,7 @@ function setState(s) {
   document.body.classList.toggle('touch', touchMode);
   document.body.classList.toggle('playing', s === 'playing');
   if (s !== 'playing') { for (const k in keys) keys[k] = false; scopeHeld = false; joy.x = joy.y = 0; $('stick').hidden = true; }
-  if (s === 'menu' || s === 'pitch') { scopeToggle = false; scopeT = 0; scopeOn = false; $('scope').hidden = true; $('cross').hidden = false; $('top').textContent = pad6(top); }
+  if (s === 'menu' || s === 'pitch') { scopeToggle = false; scopeT = 0; scopeOn = false; $('scope').hidden = true; $('range').hidden = true; $('cross').hidden = false; $('top').textContent = pad6(top); }
 }
 
 // ---------- rounds: each one is the range out in the field, then the office ----------
@@ -1755,15 +1756,17 @@ function updateWeapon(dt) {
   if (on) {
     rangeTick -= dt;
     if (rangeTick <= 0) {
-      rangeTick = 0.12;
+      rangeTick = 0.25;
       ray.set(camera.position, aimDir(aimYaw, aimPitch, v1)); ray.far = 900;
       const h = ray.intersectObjects(hittables, true)[0];
       const fps = Math.round(1 / ftAvg);
-      $('range').textContent = (h ? Math.round(h.distance * YD) : '--') + ' yd' + (fps < 50 ? '  /  ' + fps + ' fps' : ''); // a slow computer shows its frame rate here
+      const txt = (h ? Math.round(h.distance * YD) : '--') + ' yd' + (fps < 50 ? '  /  ' + fps + ' fps' : ''); // a slow computer shows its frame rate here
+      if (rangeEl.textContent !== txt) rangeEl.textContent = txt;
     }
   }
 }
-const scopeEl = $('scope'), crossEl = $('cross'), arrL = $('arrL'), arrR = $('arrR');
+const scopeEl = $('scope'), rangeEl = $('range'), crossEl = $('cross'), arrL = $('arrL'), arrR = $('arrR');
+let scopeOp = '', scopeTf = '';
 function poseView(dt, t) {
   recoilP *= Math.exp(-7 * dt); gunKick *= Math.exp(-10 * dt); flashT -= dt;
   const spd = Math.hypot(P.vx, P.vz), mv = Math.min(1, spd / 5.2) * (P.onGround ? 1 : 0.3), e = scopeT * scopeT * (3 - 2 * scopeT);
@@ -1788,8 +1791,13 @@ function poseView(dt, t) {
   rifle.rotation.set(gunKick * 0.035 * hip, (0.11 + sway.x * 1.5) * hip, 0); // turned a little so the side and barrel show
   rifle.visible = scopeT < 0.72;
   const so = clamp((scopeT - 0.5) / 0.45, 0, 1);
-  if (so <= 0) { if (!scopeEl.hidden) scopeEl.hidden = true; }
-  else { scopeEl.hidden = false; scopeEl.style.opacity = so.toFixed(3); scopeEl.style.transform = reduceMotion ? '' : 'scale(' + (1 + (1 - so) * 1.2).toFixed(3) + ')'; }
+  if (so <= 0) { if (!scopeEl.hidden) { scopeEl.hidden = true; rangeEl.hidden = true; } }
+  else {
+    if (scopeEl.hidden) { scopeEl.hidden = false; rangeEl.hidden = false; }
+    const op = so >= 1 ? '' : so.toFixed(2), tf = so >= 1 || reduceMotion ? '' : 'scale(' + (1 + (1 - so) * 1.2).toFixed(3) + ')';
+    if (op !== scopeOp) { scopeOp = op; scopeEl.style.opacity = op; rangeEl.style.opacity = op; }
+    if (tf !== scopeTf) { scopeTf = tf; scopeEl.style.transform = tf; }
+  }
   const hideCross = scopeT > 0.2; if (crossEl.hidden !== hideCross) crossEl.hidden = hideCross;
   flash.visible = flashT > 0;
   if (flash.visible) flash.rotation.z = rnd(0, TAU);
@@ -1827,7 +1835,8 @@ function resize() {
 addEventListener('resize', resize);
 if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
 
-let last = performance.now(), T = 0;
+let last = performance.now(), T = 0, gunShown = true;
+const gunView = $('gunview');
 let quality = 0, slowT = 0, ftAvg = 1 / 60, fpsShown = false, fpsTick = 0; // quality 0 is full; each step makes pixels 50% bigger
 function frame(now) {
   requestAnimationFrame(frame);
@@ -1849,7 +1858,10 @@ function frame(now) {
   if (state !== 'paused') { T += dt; updateDebris(dt); updateTracers(dt); updateFx(dt); poseView(dt, T); }
   renderer.clear();
   renderer.render(scene, camera);
-  if (gunRenderer) { gunRenderer.clear(); if (rifle.visible) gunRenderer.render(gunScene, gunCam); }
+  if (gunRenderer) { // zoomed in the rifle is hidden, so its layer is too: one less full-screen layer to composite
+    if (gunShown !== rifle.visible) { gunShown = rifle.visible; gunView.style.visibility = gunShown ? '' : 'hidden'; }
+    if (gunShown) { gunRenderer.clear(); gunRenderer.render(gunScene, gunCam); }
+  }
   else if (rifle.visible) { renderer.clearDepth(); renderer.render(gunScene, gunCam); }
   if (state === 'playing') updateArrows();
 }
