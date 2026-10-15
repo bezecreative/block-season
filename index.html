@@ -969,10 +969,42 @@ function updateCars(dt) {
 // A red-brick depot with a hipped roof, a taller centre bay with a dormer and chimney, an arched door, yellow side
 // doors, a flagpole and a lamp post. The line runs behind it, crosses the highway, and disappears into the hills.
 const railway = new THREE.Group(); railway.visible = false; scene.add(railway);
+// The depot's front windows are glass that breaks: whole, they catch the sky; shot, they're a dark hole with jagged
+// edges, and the shards fall out. They're whole again each time you come back to the billboard.
+const panes = [], SHARD = mat(0xbcd4e2);
+function paneMat(broken) {
+  const c = document.createElement('canvas'); c.width = 48; c.height = 64;
+  const x = c.getContext('2d'), gr = x.createLinearGradient(0, 0, 0, 64); gr.addColorStop(0, '#b8cedc'); gr.addColorStop(1, '#58728a');
+  const poly = (pts, fill) => { x.fillStyle = fill; x.beginPath(); pts.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.closePath(); x.fill(); };
+  if (!broken) {
+    x.fillStyle = gr; x.fillRect(0, 0, 48, 64);
+    poly([[10, 0], [22, 0], [0, 36], [0, 17]], 'rgba(255,255,255,.42)'); poly([[28, 0], [32, 0], [6, 44], [4, 41]], 'rgba(255,255,255,.3)');
+  } else {
+    x.fillStyle = '#0b0d10'; x.fillRect(0, 0, 48, 64);
+    for (const pts of [[[0, 0], [23, 0], [10, 9], [14, 18], [0, 25]], [[33, 0], [48, 0], [48, 14], [40, 7]], [[48, 29], [48, 47], [38, 41]],
+      [[0, 64], [0, 49], [7, 55], [14, 47], [18, 58], [27, 52], [34, 64]], [[41, 64], [48, 56], [48, 64]], [[0, 33], [6, 38], [0, 42]]]) poly(pts, gr);
+    x.strokeStyle = 'rgba(255,255,255,.55)'; x.lineWidth = 1; x.beginPath(); x.moveTo(3, 3); x.lineTo(11, 14); x.moveTo(5, 60); x.lineTo(13, 50); x.moveTo(44, 4); x.lineTo(41, 8); x.stroke();
+  }
+  x.fillStyle = '#d9c9a0'; x.fillRect(0, 30, 48, 3); // the sash bar across the middle stays when the glass goes
+  return new THREE.MeshLambertMaterial({ map: new THREE.CanvasTexture(c) });
+}
+const PANE_OK = paneMat(false), PANE_BROKEN = paneMat(true);
+function breakPane(p) {
+  if (p.broken) return;
+  p.broken = true; p.m.material = PANE_BROKEN; unhit(p.m); p.m.updateMatrixWorld();
+  for (let i = 0; i < 14; i++) {
+    const sh = new THREE.Mesh(BOX, SHARD); sh.scale.set(rnd(0.08, 0.26), rnd(0.08, 0.3), 0.02);
+    sh.position.set(rnd(-0.45, 0.45), rnd(-0.45, 0.45), 0.6).applyMatrix4(p.m.matrixWorld); sh.rotation.set(rnd(0, 3), rnd(0, 3), rnd(0, 3));
+    addDebris(sh, rnd(-1.2, 1.2), rnd(-0.5, 1.8), rnd(0.4, 2.4), rnd(1.6, 2.6)); // the windows face you, so the glass falls out toward you
+  }
+  sfx.glass();
+}
+function mendPanes() { for (const p of panes) { p.broken = false; p.m.material = PANE_OK; } }
 const depotSolids = [];
 {
   const dg = new THREE.Group(); dg.position.set(DEPOT_X, 0, DEPOT_Z); railway.add(dg); railway.updateMatrixWorld(true);
   const D = (hex, w, h, d, x, y, z) => B(dg, hex, w, h, d, x, y, z);
+  const pane = (w, h, x, y, z) => { const m = new THREE.Mesh(BOX, PANE_OK); m.scale.set(w, h, 0.1); m.position.set(x, y, z); m.userData.pane = { m, broken: false }; panes.push(m.userData.pane); dg.add(m); };
   const BRICK = 0x9a4630, BRICK_D = 0x6e3022, TRIM = 0xd9c9a0, ROOF = 0x4c4a48, ROOF_D = 0x393735, DOOR_Y = 0xd6a332, DOOR_B = 0x92552a, GLASS = 0x2a2c32;
   // main block and its bands
   D(BRICK, 30, 5, 12, 0, 2.5, 0); D(BRICK_D, 30.1, 0.8, 12.1, 0, 0.4, 0); D(TRIM, 30.15, 0.16, 12.15, 0, 1.6, 0); D(TRIM, 30.2, 0.3, 12.2, 0, 4.85, 0);
@@ -984,17 +1016,17 @@ const depotSolids = [];
   D(ROOF_D, 10.6, 0.35, 4.6, 0, 6.35, 7);
   for (let i = 0; i < 4; i++) D(i % 2 ? ROOF_D : ROOF, 9.8 - i * 1.7, 0.8, 4 - i * 0.55, 0, 6.9 + i * 0.8, 7 - i * 0.15);
   D(ROOF, 8, 2.8, 6.5, 0, 8.4, 2.5); // the centre roof rising above the main ridge
-  D(BRICK, 3.2, 2, 1.3, 0, 8.6, 5.9); for (const sx of [-0.75, 0.75]) { D(TRIM, 1.05, 1.25, 0.08, sx, 8.6, 6.56); D(GLASS, 0.85, 1.05, 0.1, sx, 8.6, 6.6); }
+  D(BRICK, 3.2, 2, 1.3, 0, 8.6, 5.9); for (const sx of [-0.75, 0.75]) { D(TRIM, 1.05, 1.25, 0.08, sx, 8.6, 6.56); pane(0.85, 1.05, sx, 8.6, 6.6); }
   D(ROOF_D, 3.9, 0.4, 1.9, 0, 9.75, 5.8); D(ROOF_D, 2.7, 0.4, 1.4, 0, 10.15, 5.7);
   D(0x8a3c28, 1, 3.2, 1, 1.6, 11, 1.4); D(BRICK_D, 1.35, 0.3, 1.35, 1.6, 12.7, 1.4); // chimney
   for (const sx of [-8.5, 8.5]) { // side dormers on the front slope
-    D(BRICK, 2.2, 1.6, 1.1, sx, 7.1, 5.4); D(TRIM, 1, 1.05, 0.08, sx, 7.1, 5.98); D(GLASS, 0.8, 0.85, 0.1, sx, 7.1, 6.02); D(ROOF_D, 2.9, 0.35, 1.7, sx, 8.05, 5.3);
+    D(BRICK, 2.2, 1.6, 1.1, sx, 7.1, 5.4); D(TRIM, 1, 1.05, 0.08, sx, 7.1, 5.98); pane(0.8, 0.85, sx, 7.1, 6.02); D(ROOF_D, 2.9, 0.35, 1.7, sx, 8.05, 5.3);
   }
   // front: arched centre door, bay windows, yellow doors and a sign on the left, tall windows on the right
-  D(DOOR_B, 2.0, 3.0, 0.15, 0, 1.5, 8.56); D(TRIM, 2.6, 0.3, 0.16, 0, 3.15, 8.57); D(GLASS, 1.8, 0.8, 0.12, 0, 3.65, 8.57); D(TRIM, 2.3, 0.28, 0.16, 0, 4.18, 8.57);
-  for (const sx of [-3, 3]) { D(TRIM, 1.7, 2.1, 0.08, sx, 2.7, 8.53); D(GLASS, 1.4, 1.8, 0.1, sx, 2.7, 8.57); }
+  D(DOOR_B, 2.0, 3.0, 0.15, 0, 1.5, 8.56); D(TRIM, 2.6, 0.3, 0.16, 0, 3.15, 8.57); pane(1.8, 0.8, 0, 3.65, 8.57); D(TRIM, 2.3, 0.28, 0.16, 0, 4.18, 8.57);
+  for (const sx of [-3, 3]) { D(TRIM, 1.7, 2.1, 0.08, sx, 2.7, 8.53); pane(1.4, 1.8, sx, 2.7, 8.57); }
   for (const x of [-12, -9.5]) { D(TRIM, 2.1, 3.0, 0.08, x, 1.55, 6.03); D(DOOR_Y, 1.8, 2.8, 0.15, x, 1.45, 6.07); }
-  for (const x of [-5.5, 6.5, 9.5, 12.5]) { D(TRIM, 2.1, 2.5, 0.08, x, 2.7, 6.03); D(GLASS, 1.8, 2.2, 0.1, x, 2.7, 6.07); D(TRIM, 0.12, 2.2, 0.12, x, 2.7, 6.12); }
+  for (const x of [-5.5, 6.5, 9.5, 12.5]) { D(TRIM, 2.1, 2.5, 0.08, x, 2.7, 6.03); pane(1.8, 2.2, x, 2.7, 6.07); }
   for (const x of [-11, -2, 8, 11]) { D(TRIM, 1.6, 1.8, 0.08, x, 2.7, -6.03); D(GLASS, 1.3, 1.5, 0.1, x, 2.7, -6.07); } // the back
   // platform, flagpole with the flag, and a lamp post
   D(0xc9c5bd, 36, 0.06, 11, 0, 0.03, 12.5); D(0xb6b2a8, 40, 0.3, 1.2, 0, 0.15, 17.6); // the platform, its edge along the track
@@ -1008,8 +1040,9 @@ const depotSolids = [];
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), new THREE.MeshLambertMaterial({ map: new THREE.CanvasTexture(sc) }));
   sign.position.set(DEPOT_X - 10.75, 3.6, DEPOT_Z + 6.1); railway.add(sign);
   if (document.fonts && document.fonts.load) document.fonts.load('900 42px Archivo').then(() => { sx.fillStyle = '#efece4'; sx.fillRect(0, 0, 256, 64); sx.fillStyle = '#2a2a2a'; sx.fillText('DEPOT', 128, 34); sign.material.map.needsUpdate = true; }, () => {});
-  const parts = []; dg.traverse(o => { if (o.isMesh) parts.push(o); });
+  const parts = []; dg.traverse(o => { if (o.isMesh && !o.userData.pane) parts.push(o); });
   bakeStatic(railway, parts, depotSolids.concat(parts)); // a few draws for the whole building
+  for (const p of panes) railway.attach(p.m); // the windows stay separate so each can break
   railway.remove(dg);
   railway.traverse(o => { if (o.isMesh && o !== sign) depotSolids.push(o); });
   // the track: a gravel bed with sleepers, two rails, and crossbucks where it crosses the highway
@@ -1346,6 +1379,7 @@ const sfx = {
   over() { tune([392, 370, 349, 330, 0, 262], 0.22, 0.11); },
   wood() { noise(0.16, 'bandpass', 1500, 500, 0.6); tone(220, 90, 0.1, 0.2, 0, 'triangle'); },
   step() { noise(0.06, 'lowpass', 420, 160, 0.07); },
+  glass() { noise(0.4, 'highpass', 3000, 7500, 0.4); for (const [f, d] of [[3400, 0.03], [4300, 0.11], [2800, 0.19], [3800, 0.27]]) tone(f, f * 0.9, 0.05, 0.045, d, 'triangle'); },
   tink() { tone(1900, 1300, 0.05, 0.08); tone(2600, 2100, 0.04, 0.05, 0.03); },
   whistle() { for (const [f, d] of [[0, 0], [0, 0.95]]) for (const n of [440, 554, 659]) tone(n, n * 0.985, d ? 0.45 : 0.85, 0.035, d, 'square'); noise(2.4, 'lowpass', 260, 120, 0.12); },
   boom() { noise(1.6, 'lowpass', 1400, 60, 1.0); noise(0.35, 'highpass', 900, 3000, 0.25); tone(90, 30, 0.9, 0.22, 0, 'triangle'); },
@@ -1447,7 +1481,7 @@ function setWorld(w) {
   clearTargets(); hideDog(); setRange(false); setPcs(false); clearDeer(); clearCars(); roadsideGrass(w === 'billboard'); $('hud').classList.remove('free');
   clearTimeout(tipTimer); $('tip').hidden = true;
   hittables = outdoors ? solids.concat([dogUp]) : officeSolids.slice();
-  if (w === 'billboard') { hittables = hittables.filter(o => !startBushParts.has(o)); bbTarget.visible = true; hittables.push(...bbSolids, ...roadSolids, ...depotSolids, bbTarget); nextCar = rnd(2, 4); }
+  if (w === 'billboard') { hittables = hittables.filter(o => !startBushParts.has(o)); bbTarget.visible = true; mendPanes(); hittables.push(...bbSolids, ...roadSolids, ...depotSolids, bbTarget); nextCar = rnd(2, 4); }
   resize();
   P.pos.set(0, 0, 0); P.vx = P.vz = P.vy = 0; P.yaw = w === 'billboard' ? -0.17 : 0; P.pitch = 0.04; // at the billboard, face a touch right: board and road both in view scopeToggle = false; $('tb-scope').classList.remove('on');
 }
@@ -1926,6 +1960,7 @@ function onHit(h) {
     dog.dur = dog.t + 0.22; dog.mode = 'hold'; sfx.yelp(); popup(h.point, 'Yipe!');
   } else if (ud.car) { if (ud.car.g) blowUpCar(ud.car, h); else { puff(h.point, [0xfcfcd8, 0x9098a0], 5, 2, 0.1); sfx.tink(); } }
   else if (ud.train) blowUpTrain(h);
+  else if (ud.pane) breakPane(ud.pane);
   else if (!t && !ud.dog) puff(h.point, stage === 'office' ? [0xa8b0bc, 0x6c7684] : ud.road ? [0x6c7078, 0xa89878] : h.object === field ? [0xc88c3c, 0x80d010] : [0x48a808, 0x7c4410], 5, 1.6, 0.12);
 }
 
