@@ -751,7 +751,7 @@ function updatePcs(dt) {
 }
 
 // ---------- the billboard: the last stop. "Ready to stand out? Go with Mox", and a target that opens the proposal ----------
-const billboard = new THREE.Group(); billboard.position.set(-4, 0, -360); billboard.scale.setScalar(1.3); billboard.visible = false; scene.add(billboard); // far down the valley: a scope shot
+const billboard = new THREE.Group(); billboard.position.set(-4, 0, -306); billboard.scale.setScalar(1.3); billboard.visible = false; scene.add(billboard); // far down the valley: a scope shot
 const bbCanvas = document.createElement('canvas'); bbCanvas.width = 2048; bbCanvas.height = 1024;
 const bbTex = new THREE.CanvasTexture(bbCanvas), moxImg = new Image();
 bbTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
