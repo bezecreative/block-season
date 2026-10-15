@@ -13,8 +13,8 @@ Ducks flush out of the grass for bonus points, and the dog fetches the ones you 
 **Stage two, the office.** The scene cuts to a warehouse office with fifteen computers. Eight sit still on desks and
 a mezzanine; seven move, riding a conveyor, hanging from overhead trolleys and rising on scissor lifts. Three screens
 show BoreBuddy's homepage and the other twelve show competitors: three NEMO Arms, three Smith & Wesson, two Ammo²,
-two PWS and two Allterra Arms. The card reads "Let's see how your
-website stacks up against the competition. Shoot your website to score points." Hitting a competitor screen costs 500 points. BoreBuddy screens are never dealt to the front row of machines.
+two PWS and two Allterra Arms. The card reads "Let's see if you can
+find your website among your competitors. Shoot your website to score points." Hitting a competitor screen costs 500 points. BoreBuddy screens are never dealt to the front row of machines.
 
 **Stage three, the billboard.** Back outside, a billboard stands far down a two-lane highway, about 360 metres out
 in a valley of rolling high-desert hills, and reads "Ready to stand out? Go with Mox" (the headline in Mox red, #B91800) with a target on it. It takes the scope to read it and hit it. Pickup trucks drive by now and then, and a truck that's shot blows up (no points either way). Deer wander the field and ducks fly over for
@@ -29,7 +29,8 @@ The rifle carries BoreBuddy's AR22 Heavy Precision upper with the 18.5-inch Gree
 |---|---|
 | Mouse | Aim |
 | Space or click | Fire |
-| Right-click or Q | Scope. Zoomed in, the view holds still and the mouse moves the crosshair; push it to the edge of the glass to pan. |
+| Right-click or Q | Scope |
+| ` (backquote) | Show the frame rate |
 | Esc | Pause |
 | M | Sound on or off (also the speaker button in the top-left corner) |
 

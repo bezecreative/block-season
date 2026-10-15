@@ -85,18 +85,19 @@ body.playing #view{cursor:crosshair}
 #fade{position:absolute;inset:0;z-index:1;background:#000;opacity:0;pointer-events:none;transition:opacity .3s linear}
 #scope{position:absolute;inset:0;z-index:1;pointer-events:none;transform-origin:50% 50%;will-change:opacity,transform;background:radial-gradient(circle closest-side at 50% 50%,transparent 0 83%,#000 83.5%)}
 #scope::before,#scope::after{content:"";position:absolute;background:#000}
-#scope::before{left:0;right:0;top:calc(50% + var(--ry,0px));height:2px;margin-top:-1px}
-#scope::after{top:0;bottom:0;left:calc(50% + var(--rx,0px));width:2px;margin-left:-1px}
+#scope::before{left:0;right:0;top:50%;height:2px;margin-top:-1px}
+#scope::after{top:0;bottom:0;left:50%;width:2px;margin-left:-1px}
 #scope i{position:absolute;background:#000}
-#scope .pl{left:calc(50% - 41.5vmin);width:29vmin;top:calc(50% - 3px + var(--ry,0px));height:6px}
-#scope .pr{right:calc(50% - 41.5vmin);width:29vmin;top:calc(50% - 3px + var(--ry,0px));height:6px}
-#scope .pb{bottom:calc(50% - 41.5vmin);height:29vmin;left:calc(50% - 3px + var(--rx,0px));width:6px}
+#scope .pl{left:calc(50% - 41.5vmin);width:29vmin;top:calc(50% - 3px);height:6px}
+#scope .pr{right:calc(50% - 41.5vmin);width:29vmin;top:calc(50% - 3px);height:6px}
+#scope .pb{bottom:calc(50% - 41.5vmin);height:29vmin;left:calc(50% - 3px);width:6px}
 #range{position:absolute;left:50%;top:calc(50% + 43vmin);transform:translateX(-50%);font-size:9px;line-height:1;color:var(--white);white-space:nowrap}
 
 /* ---------- touch controls ---------- */
 #touch{position:absolute;inset:0;z-index:3;touch-action:none}
 .bar,#msg,#tip,#pops,.arr{z-index:2}
 #pausebtn{z-index:4}
+#fps{position:absolute;right:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:2;font-size:8px;line-height:1;background:rgba(0,0,0,.55);border-radius:4px;padding:6px 7px 4px}
 #msg.closable{padding:22px 34px 14px}
 #msg-hint{display:block;margin-top:12px;font-size:clamp(7px,1.4vw,9px);color:var(--grass)}
 #msg-x{position:absolute;top:4px;right:6px;pointer-events:auto;appearance:none;background:none;border:0;color:var(--white);font:inherit;font-size:16px;line-height:1;padding:6px 8px;cursor:pointer}
@@ -171,6 +172,7 @@ a.mode{display:block;text-decoration:none}
     <div class="cross" id="cross"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i></div>
     <div id="msg" hidden aria-live="polite"><span id="msg-text"></span><span id="msg-hint" hidden></span><button id="msg-x" type="button" aria-label="Close" hidden>&times;</button></div>
     <div id="tip" hidden></div>
+    <div id="fps" hidden></div>
     <button id="pausebtn" type="button" hidden>Pause</button>
     <dl class="ctrls" id="ctrls">
       <div><dt>Mouse</dt><dd>Aim</dd></div>
@@ -276,7 +278,7 @@ renderer.shadowMap.enabled = true;
 renderer.autoClear = false;
 // The rifle gets its own full-resolution layer so it, and the BoreBuddy logo on it, stay clean while the world keeps its chunky pixels.
 let gunRenderer = null;
-try { gunRenderer = new THREE.WebGLRenderer({ canvas: $('gunview'), alpha: true, antialias: true }); gunRenderer.setPixelRatio(Math.min(2, devicePixelRatio || 1)); gunRenderer.setClearColor(0x000000, 0); }
+try { gunRenderer = new THREE.WebGLRenderer({ canvas: $('gunview'), alpha: true, antialias: true }); gunRenderer.setPixelRatio(Math.min(1.5, devicePixelRatio || 1)); gunRenderer.setClearColor(0x000000, 0); }
 catch (e) { gunRenderer = null; $('gunview').hidden = true; } // without a second context the rifle draws in the main pass, as before
 
 function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -332,8 +334,45 @@ field.receiveShadow = true; fieldWorld.add(field); solids.push(field);
   tiles.position.y = 0.02; tiles.receiveShadow = true; fieldWorld.add(tiles);
 }
 
+// Static scenery is built from hundreds of little boxes. bakeStatic() merges them into one mesh per material (and shadow
+// setting), which cuts the draw calls by hundreds and keeps the frame rate up on modest computers. Hits still land on
+// the merged meshes, so shooting scenery works as before.
+function bakeStatic(parent, meshes, solidList) {
+  const buckets = new Map();
+  for (const m of meshes) {
+    if (!m.isMesh || m.geometry !== BOX) continue;
+    m.updateWorldMatrix(true, false); // parents first: the tree's own place, turn and size
+    const key = m.material.uuid + (m.castShadow ? 'c' : '-') + (m.receiveShadow ? 'r' : '-');
+    let b = buckets.get(key); if (!b) buckets.set(key, b = { mat: m.material, cast: m.castShadow, recv: m.receiveShadow, solid: false, list: [] });
+    b.list.push(m);
+  }
+  const geo0 = BOX, pos0 = geo0.attributes.position, nor0 = geo0.attributes.normal, uv0 = geo0.attributes.uv, idx0 = geo0.index;
+  const nm = new THREE.Matrix3(), v = new THREE.Vector3();
+  for (const b of buckets.values()) {
+    const n = b.list.length, nv = pos0.count, ni = idx0.count;
+    const pos = new Float32Array(n * nv * 3), nor = new Float32Array(n * nv * 3), uv = new Float32Array(n * nv * 2), idx = new Uint32Array(n * ni);
+    b.list.forEach((m, j) => {
+      nm.getNormalMatrix(m.matrixWorld);
+      for (let i = 0; i < nv; i++) {
+        const o = (j * nv + i);
+        v.fromBufferAttribute(pos0, i).applyMatrix4(m.matrixWorld); pos[o * 3] = v.x; pos[o * 3 + 1] = v.y; pos[o * 3 + 2] = v.z;
+        v.fromBufferAttribute(nor0, i).applyMatrix3(nm).normalize(); nor[o * 3] = v.x; nor[o * 3 + 1] = v.y; nor[o * 3 + 2] = v.z;
+        uv[o * 2] = uv0.getX(i); uv[o * 2 + 1] = uv0.getY(i);
+      }
+      for (let i = 0; i < ni; i++) idx[j * ni + i] = idx0.getX(i) + j * nv;
+      if (m.parent) m.parent.remove(m);
+      const si = solidList.indexOf(m); if (si >= 0) { solidList.splice(si, 1); b.solid = true; }
+    });
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    g.setIndex(new THREE.BufferAttribute(idx, 1)); g.computeBoundingSphere(); g.computeBoundingBox();
+    const merged = new THREE.Mesh(g, b.mat); merged.castShadow = b.cast; merged.receiveShadow = b.recv;
+    parent.add(merged); if (b.solid) solidList.push(merged);
+  }
+}
+
 // trees and bushes: fat trunk, leaf blobs on the branch ends
-const colliders = [];
+const colliders = [], fieldProps = [];
 function blob(g, x, y, z, s, a, b) {
   B(g, b, 3.0 * s, 0.5 * s, 3.0 * s, x, y - 0.95 * s, z);
   B(g, a, 3.5 * s, 1.6 * s, 3.5 * s, x, y, z);
@@ -346,7 +385,7 @@ function makeTree(x, z, s, yaw) {
   B(g, trunk, 2.6, 0.5, 0.5, -1.4, 4.4, 0).rotation.z = -0.5;
   B(g, trunk, 2.4, 0.5, 0.5, 1.3, 5.6, 0).rotation.z = 0.6;
   blob(g, -2.7, 5.7, 0, 1, leaf, under); blob(g, 2.5, 6.9, 0.3, 0.9, leaf, under); blob(g, 0, 8.6, -0.2, 1.1, leaf, under);
-  fieldWorld.add(g); g.traverse(o => { if (o.isMesh) { o.receiveShadow = true; solids.push(o); } });
+  fieldWorld.add(g); g.traverse(o => { if (o.isMesh) { o.receiveShadow = true; solids.push(o); } }); fieldProps.push(g);
   if (Math.hypot(x, z) < WORLD_R + 2) colliders.push({ x, z, r: 0.62 * s });
   return g;
 }
@@ -354,7 +393,7 @@ function makeBush(x, z, s, yaw) { // returns the bush
   const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = yaw; g.scale.setScalar(s);
   const leaf = 0x48a808, under = 0x2c7c04;
   B(g, under, 2.9, 0.5, 2.3, 0, 0.25, 0); B(g, leaf, 2.7, 1.3, 2.1, 0, 0.95, 0); B(g, leaf, 1.7, 0.8, 1.6, -0.2, 1.9, 0); B(g, leaf, 1.3, 0.9, 1.5, 1.5, 0.75, 0.1);
-  fieldWorld.add(g); g.traverse(o => { if (o.isMesh) { o.receiveShadow = true; solids.push(o); } });
+  fieldWorld.add(g); g.traverse(o => { if (o.isMesh) { o.receiveShadow = true; solids.push(o); } }); fieldProps.push(g);
   if (Math.hypot(x, z) < WORLD_R + 2) colliders.push({ x, z, r: 1.35 * s });
   return g;
 }
@@ -372,6 +411,10 @@ for (const g of offAtBillboard) g.traverse(o => { if (o.isMesh) startBushParts.a
     if (!farFrom(x, z, spots, 13) || (z < -9 && Math.abs(x) < 28) || Math.abs(x - ROAD_X) < 9) continue; // keep the range and the road clear
     spots.push({ x, z }); if (srand() < 0.55) makeTree(x, z, srnd(0.7, 1.2), srnd(0, TAU)); else makeBush(x, z, srnd(0.8, 1.4), srnd(0, TAU)); n++;
   }
+}
+{ // bake every tree and bush except the two that stand down at the billboard
+  const parts = []; for (const g of fieldProps) if (!offAtBillboard.includes(g)) g.traverse(o => { if (o.isMesh) parts.push(o); });
+  bakeStatic(fieldWorld, parts, solids);
 }
 
 // tall grass: a wide ring around the clearing; ducks come up out of it and the dog hides in it.
@@ -485,7 +528,8 @@ function updateRange(dt) {
 
 // ---------- the office: a warehouse floor with ten computers. Six show competitor sites (the targets), three show BoreBuddy ----------
 const officeSolids = [];
-function O(hex, w, h, d, x, y, z, solid) { const m = B(officeWorld, hex, w, h, d, x, y, z); m.receiveShadow = true; if (solid !== false) officeSolids.push(m); return m; }
+let officeStatic = null; // collects the warehouse's fixed boxes while it's built, for baking
+function O(hex, w, h, d, x, y, z, solid) { const m = B(officeWorld, hex, w, h, d, x, y, z); m.receiveShadow = true; if (solid !== false) officeSolids.push(m); if (officeStatic) officeStatic.push(m); return m; }
 function desk(x, y0, z) {
   O(0xd8a048, 2.6, 0.12, 1.4, x, y0 + 1.0, z);
   for (const sx of [-1.2, 1.2]) for (const sz of [-0.6, 0.6]) O(0x7c4410, 0.12, 0.94, 0.12, x + sx, y0 + 0.47, z + sz, false);
@@ -493,6 +537,7 @@ function desk(x, y0, z) {
   O(0x3c50d8, 0.7, 0.12, 0.7, x + 0.2, y0 + 0.55, z + 1.4, false); O(0x3c50d8, 0.7, 0.8, 0.12, x + 0.2, y0 + 0.95, z + 1.75, false);
 }
 const cartons = []; // where the logo decals go, filled in once the logo loads
+officeStatic = [];
 {
   const wall = 0xa8b0bc, wallD = 0x6c7684, steel = 0x586070, tape = 0xf8b800, rackB = 0x2038a8, rackO = 0xfc9838, card = 0xc88c3c, cardD = 0xa86c20;
   const flat = m => { m.castShadow = false; return m; };
@@ -525,6 +570,7 @@ const cartons = []; // where the logo decals go, filled in once the logo loads
   flat(O(tape, 44, 0.1, 0.1, 0, 5.9, -66.1, false)); for (let x = -22; x <= 22; x += 4.4) flat(O(tape, 0.1, 1.1, 0.1, x, 5.35, -66.1, false));
   for (const d of [[-8, 0, -18], [7, 0, -23], [-17, 0, -31], [24, 0, -50], [-4, 0, -53], [-18, 0, -60], [9, 4.8, -69], [-11, 4.8, -69]]) desk(d[0], d[1], d[2]);
 }
+bakeStatic(officeWorld, officeStatic, officeSolids); officeStatic = null; // walls, racks, cartons, desks: a handful of draws
 // What is on each screen: a screenshot file where one is listed in SCREENSHOTS below, otherwise a simplified
 // drawing in that site's colours, labelled by name.
 const screens = {};
@@ -1198,7 +1244,7 @@ function setState(s) {
   document.body.classList.toggle('touch', touchMode);
   document.body.classList.toggle('playing', s === 'playing');
   if (s !== 'playing') { for (const k in keys) keys[k] = false; scopeHeld = false; joy.x = joy.y = 0; $('stick').hidden = true; }
-  if (s === 'menu' || s === 'pitch') { scopeToggle = false; scopeT = 0; scopeOn = false; retX = retY = retTX = retTY = 0; $('scope').hidden = true; $('cross').hidden = false; $('top').textContent = pad6(top); }
+  if (s === 'menu' || s === 'pitch') { scopeToggle = false; scopeT = 0; scopeOn = false; $('scope').hidden = true; $('cross').hidden = false; $('top').textContent = pad6(top); }
 }
 
 // ---------- rounds: each one is the range out in the field, then the office ----------
@@ -1233,7 +1279,7 @@ function beginOffice() {
   slots = new Array(3).fill(0); maxShots = Math.max(3, 5 - Math.floor((round - 1) / 2)); shots = maxShots;
   $('timer').hidden = true; phase = 'intro'; phaseT = 0; phaseDur = Infinity; sfx.next(); // the card stays up until it's closed
   dealPcs();
-  showMsg('Let\'s see how your\nwebsite stacks up against\nthe competition.\n\nShoot your website\nto score points.', true); renderHud();
+  showMsg('Let\'s see if you can\nfind your website among\nyour competitors.\n\nShoot your website\nto score points.', true); renderHud();
 }
 function openStage() {
   phase = 'active'; phaseT = 0; shots = maxShots; outT = 0; shownT = -1; $('timer').hidden = false;
@@ -1500,26 +1546,13 @@ function showKeys() { $('keys-desk').hidden = touchMode; $('keys-touch').hidden 
 showKeys();
 
 // ---------- input ----------
-// The scope. Zoomed in, the magnified view holds still and the mouse moves the crosshair across the glass, at about a
-// screen pixel per mouse count, so a wobbly hand or a noisy mouse only nudges a thin line instead of shaking the world.
-// Push the crosshair to the edge of the glass and the extra movement pans the view. Shots go where the crosshair is.
-let retX = 0, retY = 0, retTX = 0, retTY = 0; // crosshair offset from the centre, in CSS px: shown, and where the mouse put it
-const RET_GAIN = 0.9; // CSS px per mouse count
-const glassR = () => 0.415 * Math.min(canvas.clientWidth || innerWidth, canvas.clientHeight || innerHeight);
 function look(dx, dy, s) {
-  if (scopeT > 0.75) {
-    const lim = glassR() * 0.72;
-    retTX += dx * RET_GAIN; retTY += dy * RET_GAIN;
-    const m = Math.hypot(retTX, retTY);
-    if (m <= lim) return;
-    const ox = retTX * (1 - lim / m), oy = retTY * (1 - lim / m); // the part past the edge turns the view
-    retTX -= ox; retTY -= oy; dx = ox / RET_GAIN; dy = oy / RET_GAIN;
-  }
-  const k = s * (camera.fov / baseFov) * (scopeT > 0.75 ? 0.5 : 1);
+  const k = s * (camera.fov / baseFov) * (scopeT > 0.75 ? 0.6 : 1); // a little slower through the scope, for fine aim
   P.yaw -= dx * k; P.pitch = clamp(P.pitch - dy * k, -1.45, 1.45);
   lookDX += dx; lookDY += dy;
 }
 addEventListener('keydown', e => {
+  if (e.code === 'Backquote' && !e.repeat) { fpsShown = !fpsShown; $('fps').hidden = !fpsShown; } // ` shows the frame rate
   if (e.code === 'KeyM' && !e.repeat) { setMuted(!muted); if (state === 'playing') tip(muted ? 'Sound off' : 'Sound on', 1.5); }
   if (state === 'playing') {
     if (/^(Space|Arrow)/.test(e.code)) e.preventDefault();
@@ -1594,13 +1627,6 @@ press('tb-scope', () => { scopeToggle = !scopeToggle; $('tb-scope').classList.to
 // ---------- shooting ----------
 const ray = new THREE.Raycaster(), dir = new THREE.Vector3(), origin = new THREE.Vector3(), endPt = new THREE.Vector3(), muzzle = new THREE.Vector3();
 function aimDir(yaw, pitch, out) { const cp = Math.cos(pitch); return out.set(-Math.sin(yaw) * cp, Math.sin(pitch), -Math.cos(yaw) * cp); }
-const ndc = new THREE.Vector2(), aimRay = new THREE.Raycaster();
-function aimVector(out, always) { // through the scope's crosshair, wherever it sits on the glass
-  if ((!always && scopeT <= 0.75) || (!retX && !retY)) return aimDir(aimYaw, aimPitch, out);
-  const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight;
-  camera.updateMatrixWorld(); ndc.set(retX / (w / 2), -retY / (h / 2)); aimRay.setFromCamera(ndc, camera);
-  return out.copy(aimRay.ray.direction);
-}
 function fire() {
   if (state === 'playing' && introOpen()) { closeIntro(); return; } // the first shot just closes the warehouse card
   if (state !== 'playing' || cooldown > 0) return;
@@ -1610,7 +1636,7 @@ function fire() {
   if (live) { shots--; if (shots === 0) outT = 0; }
   const scoped = scopeT > 0.75;
   const spread = scoped ? 0 : 0.009 + Math.min(0.015, Math.hypot(P.vx, P.vz) * 0.0018) + (P.onGround ? 0 : 0.015);
-  if (scoped) aimVector(dir); else aimDir(aimYaw + rnd(-spread, spread), aimPitch + rnd(-spread, spread), dir);
+  aimDir(aimYaw + rnd(-spread, spread), aimPitch + rnd(-spread, spread), dir);
   origin.copy(camera.position);
   ray.set(origin, dir); ray.far = 900;
   const hit = ray.intersectObjects(hittables, true)[0];
@@ -1708,18 +1734,12 @@ function updateWeapon(dt) {
   const stepT = reduceMotion ? 1 : dt / 0.26;
   scopeT = want > scopeT ? Math.min(1, scopeT + stepT) : Math.max(0, scopeT - stepT * 1.5);
   const on = scopeT > 0.75;
-  if (on !== scopeOn) {
-    if (!on && (retX || retY)) { // coming out of the scope: face where the crosshair was
-      aimVector(v1, true); P.yaw = viewYaw = Math.atan2(-v1.x, -v1.z); P.pitch = viewPitch = clamp(Math.asin(clamp(v1.y, -1, 1)), -1.45, 1.45);
-    }
-    retX = retY = retTX = retTY = 0;
-    scopeOn = on; rangeTick = 0; resize(); // the scope draws at full resolution
-  }
+  if (on !== scopeOn) { scopeOn = on; rangeTick = 0; }
   if (on) {
     rangeTick -= dt;
     if (rangeTick <= 0) {
       rangeTick = 0.12;
-      ray.set(camera.position, aimVector(v1)); ray.far = 900;
+      ray.set(camera.position, aimDir(aimYaw, aimPitch, v1)); ray.far = 900;
       const h = ray.intersectObjects(hittables, true)[0];
       $('range').textContent = (h ? Math.round(h.distance * YD) : '--') + ' yd';
     }
@@ -1731,10 +1751,9 @@ function poseView(dt, t) {
   const spd = Math.hypot(P.vx, P.vz), mv = Math.min(1, spd / 5.2) * (P.onGround ? 1 : 0.3), e = scopeT * scopeT * (3 - 2 * scopeT);
   const fov = lerp(baseFov, scopeFov(), e);
   if (Math.abs(fov - camera.fov) > 0.01) { camera.fov = fov; camera.updateProjectionMatrix(); }
-  // Through the scope the view eases toward where you aim (about a tenth of a second behind), which irons out
-  // hand tremor. There is no breathing sway: a still mouse is a still crosshair.
-  const follow = scopeT > 0 && !reduceMotion ? 1 - Math.exp(-dt * lerp(60, 10, e)) : 1;
-  const rf = 1 - Math.exp(-dt * 30); retX += (retTX - retX) * rf; retY += (retTY - retY) * rf; // the crosshair eases a hair behind the mouse
+  // Through the scope the view eases toward where you aim (about 50 ms behind), which smooths the motion.
+  // There is no breathing sway: a still mouse is a still crosshair.
+  const follow = scopeT > 0 && !reduceMotion ? 1 - Math.exp(-dt * lerp(60, 20, e)) : 1;
   viewYaw += (P.yaw - viewYaw) * follow; viewPitch += (P.pitch - viewPitch) * follow;
   aimPitch = viewPitch + recoilP;
   aimYaw = viewYaw;
@@ -1752,10 +1771,7 @@ function poseView(dt, t) {
   rifle.visible = scopeT < 0.72;
   const so = clamp((scopeT - 0.5) / 0.45, 0, 1);
   if (so <= 0) { if (!scopeEl.hidden) scopeEl.hidden = true; }
-  else {
-    scopeEl.hidden = false; scopeEl.style.opacity = so.toFixed(3); scopeEl.style.transform = reduceMotion ? '' : 'scale(' + (1 + (1 - so) * 1.2).toFixed(3) + ')';
-    scopeEl.style.setProperty('--rx', retX.toFixed(1) + 'px'); scopeEl.style.setProperty('--ry', retY.toFixed(1) + 'px');
-  }
+  else { scopeEl.hidden = false; scopeEl.style.opacity = so.toFixed(3); scopeEl.style.transform = reduceMotion ? '' : 'scale(' + (1 + (1 - so) * 1.2).toFixed(3) + ')'; }
   const hideCross = scopeT > 0.2; if (crossEl.hidden !== hideCross) crossEl.hidden = hideCross;
   flash.visible = flashT > 0;
   if (flash.visible) flash.rotation.z = rnd(0, TAU);
@@ -1776,10 +1792,10 @@ function updateArrows() {
 // ---------- sizing + loop ----------
 function resize() {
   const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight, asp = w / h;
-  // chunky pixels, about 300 lines tall whatever the window. The billboard stage, and any view through the scope, draw at
-  // full resolution: the board reads clean, and aiming glides instead of jumping a fat pixel at a time.
-  const sharp = stage === 'billboard' || scopeOn;
-  const px = sharp ? 1 / Math.min(1.5, devicePixelRatio || 1) : Math.max(2, Math.round(h / 300));
+  // Chunky pixels, about 300 lines tall whatever the window; the billboard stage draws sharp so the board reads clean.
+  // On a computer that can't hold the frame rate, quality steps down (bigger pixels) to keep the motion smooth.
+  const sharp = stage === 'billboard', q = 1 + quality * 0.5;
+  const px = sharp ? q / Math.min(1.25, devicePixelRatio || 1) : Math.max(2, Math.round(h / 300 * q));
   canvas.classList.toggle('sharp', sharp);
   renderer.setSize(Math.max(1, Math.round(w / px)), Math.max(1, Math.round(h / px)), false);
   baseFov = asp < 1 ? 88 : 72;
@@ -1792,9 +1808,16 @@ addEventListener('resize', resize);
 if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
 
 let last = performance.now(), T = 0;
+let quality = 0, slowT = 0, ftAvg = 1 / 60, fpsShown = false, fpsTick = 0; // quality 0 is full; each step makes pixels 50% bigger
 function frame(now) {
   requestAnimationFrame(frame);
-  const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now;
+  const raw = (now - last) / 1000, dt = Math.min(0.05, Math.max(0, raw)); last = now;
+  if (raw > 0 && raw < 0.5) ftAvg += (raw - ftAvg) * 0.05; // smoothed frame time
+  if (state === 'playing' && quality < 2) { // under ~45 fps for two seconds: take a step down
+    slowT = ftAvg > 1 / 45 ? slowT + dt : 0;
+    if (slowT > 2) { quality++; slowT = 0; resize(); }
+  }
+  if (fpsShown && (fpsTick -= dt) <= 0) { fpsTick = 0.5; $('fps').textContent = Math.round(1 / ftAvg) + ' fps' + (quality ? ' / q-' + quality : ''); }
   if (state === 'playing') { updatePlayer(dt); updateWeapon(dt); updateGame(dt); updateTargets(dt); updateDog(dt); if (stage === 'field') updateRange(dt); else if (stage === 'office') updatePcs(dt); else { updateDeer(dt); updateCars(dt); } }
   else if (state === 'menu') { updateTargets(dt); updateRange(dt); }
   if (state !== 'paused') { T += dt; updateDebris(dt); updateTracers(dt); updateFx(dt); poseView(dt, T); }
