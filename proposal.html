@@ -86,14 +86,14 @@
 
   /* ---------- Header ---------- */
   .top-logo {
-    position: fixed; top: 22px; left: 40px; z-index: 101;
+    position: fixed; top: 22px; left: max(40px, calc(50% - 660px)); z-index: 101; /* the hero column's left edge, so it lines up with the BoreBuddy logo */
     color: #fff; display: inline-flex; pointer-events: auto;
     opacity: 0; transition: opacity 0.5s var(--ease), transform 0.4s var(--ease);
   }
   .top-logo svg { width: 62px; height: auto; display: block; }
   body.loaded .top-logo { opacity: 1; }
   body.scrolled .top-logo { opacity: 0; transform: translateY(-12px); pointer-events: none; }
-  @media (max-width: 980px) { .top-logo { top: 18px; left: 22px; } .top-logo svg { width: 52px; } }
+  @media (max-width: 980px) { .top-logo { top: 18px; left: 24px; } .top-logo svg { width: 52px; } }
   header {
     position: fixed; top: 0; left: 0; right: 0;
     z-index: 100;
@@ -289,7 +289,7 @@
     text-transform: uppercase;
   }
   .hero h1.hero-title { display: flex; flex-direction: column; align-items: flex-start; gap: 0.3em; }
-  .hero-title .ht-for { font-size: clamp(15px, 2.5vw, 38px); } /* half its first size */
+  .hero-title .ht-for { font-size: clamp(18px, 3vw, 45.6px); }
   .hero-title .ht-logo { display: block; width: clamp(120px, 16.8vw, 164px); height: auto; } /* a fifth of its first size; 120px floor keeps it legible on phones */
   .hero .scroll-hint {
     position: absolute; right: 40px; bottom: 8vh; z-index: 2;
@@ -443,6 +443,7 @@
   .logos .wrap { position: relative; z-index: 2; }
   .logos.alt { background: var(--paper-2); border-top: 1px solid var(--line); }
   .logos .head { margin-bottom: 54px; }
+  .logos .head p { margin-top: 18px; max-width: 56ch; font-size: 17px; line-height: 1.7; font-weight: 300; color: var(--ink-soft); }
   .logos h2 { font-size: clamp(30px, 4vw, 52px); font-weight: 400; letter-spacing: -0.02em; margin-top: 12px; }
   .logo-wall {
     display: grid; grid-template-columns: repeat(6, 1fr);
@@ -1207,7 +1208,7 @@
       <a href="#portfolio">Portfolio</a>
       <a href="#bid">Proposal</a>
       <a href="#roster">Roster</a>
-      <a href="#cases">Case Studies</a>
+      <a href="#cases">Recent Projects</a>
       <a href="#philosophy">Creative Philosophy</a>
       <a href="./">Back to the Game</a>
     </nav>
@@ -1235,7 +1236,7 @@
       <div class="menu-nav-row"><a href="#roster">Roster</a></div>
     </div>
     <div class="menu-nav-item">
-      <div class="menu-nav-row"><a href="#cases">Case Studies</a></div>
+      <div class="menu-nav-row"><a href="#cases">Recent Projects</a></div>
     </div>
     <div class="menu-nav-item">
       <div class="menu-nav-row"><a href="#philosophy">Creative Philosophy</a></div>
@@ -1301,7 +1302,8 @@
 <section class="logos" id="portfolio">
   <div class="wrap">
     <div class="head">
-      <span class="eyebrow reveal">Our Roster Has Worked With</span>
+      <span class="eyebrow reveal">Portfolio</span>
+      <p class="reveal d1">Because of our creative philosophy, ethical values, and collaborative approach, our roster has been able to work with these incredible organizations.</p>
     </div>
     <div class="logo-wall cols-5 reveal d1">
       <div class="logo-tile" data-name="Sockeye"><img src="https://res.cloudinary.com/dbwtszgtb/image/upload/v1784218427/Sockeye_Brewing_Logo_Primary_Black_Dark.png" alt="Sockeye" loading="lazy"></div>
@@ -1511,11 +1513,11 @@ With 10 years of experience, and counting, I have had great mentors, and amazing
   </div>
 </section>
 
-<!-- Case Studies: websites we've built -->
+<!-- Recent Projects: websites we've built -->
 <section class="cases" id="cases">
   <div class="wrap">
     <span class="eyebrow reveal">The Proof</span>
-    <h2 class="reveal d1">Case Studies</h2>
+    <h2 class="reveal d1">Recent Projects</h2>
     <div class="project-grid">
       <a class="project reveal" href="https://sockeyebrew.com/" target="_blank" rel="noopener">
         <img src="work/sockeye-brewing.jpg" alt="Sockeye Brewing website" width="1000" height="1000" loading="lazy">
