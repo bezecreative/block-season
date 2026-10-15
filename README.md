@@ -29,7 +29,7 @@ The rifle carries BoreBuddy's AR22 Heavy Precision upper with the 18.5-inch Gree
 |---|---|
 | Mouse | Aim |
 | Space or click | Fire |
-| Right-click or Q | Scope |
+| Right-click or Q | Scope. Zoomed in, the view holds still and the mouse moves the crosshair; push it to the edge of the glass to pan. |
 | Esc | Pause |
 | M | Sound on or off (also the speaker button in the top-left corner) |
 

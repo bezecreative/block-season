@@ -85,12 +85,12 @@ body.playing #view{cursor:crosshair}
 #fade{position:absolute;inset:0;z-index:1;background:#000;opacity:0;pointer-events:none;transition:opacity .3s linear}
 #scope{position:absolute;inset:0;z-index:1;pointer-events:none;transform-origin:50% 50%;will-change:opacity,transform;background:radial-gradient(circle closest-side at 50% 50%,transparent 0 83%,#000 83.5%)}
 #scope::before,#scope::after{content:"";position:absolute;background:#000}
-#scope::before{left:0;right:0;top:50%;height:2px;margin-top:-1px}
-#scope::after{top:0;bottom:0;left:50%;width:2px;margin-left:-1px}
+#scope::before{left:0;right:0;top:calc(50% + var(--ry,0px));height:2px;margin-top:-1px}
+#scope::after{top:0;bottom:0;left:calc(50% + var(--rx,0px));width:2px;margin-left:-1px}
 #scope i{position:absolute;background:#000}
-#scope .pl{left:calc(50% - 41.5vmin);width:29vmin;top:calc(50% - 3px);height:6px}
-#scope .pr{right:calc(50% - 41.5vmin);width:29vmin;top:calc(50% - 3px);height:6px}
-#scope .pb{bottom:calc(50% - 41.5vmin);height:29vmin;left:calc(50% - 3px);width:6px}
+#scope .pl{left:calc(50% - 41.5vmin);width:29vmin;top:calc(50% - 3px + var(--ry,0px));height:6px}
+#scope .pr{right:calc(50% - 41.5vmin);width:29vmin;top:calc(50% - 3px + var(--ry,0px));height:6px}
+#scope .pb{bottom:calc(50% - 41.5vmin);height:29vmin;left:calc(50% - 3px + var(--rx,0px));width:6px}
 #range{position:absolute;left:50%;top:calc(50% + 43vmin);transform:translateX(-50%);font-size:9px;line-height:1;color:var(--white);white-space:nowrap}
 
 /* ---------- touch controls ---------- */
@@ -1198,7 +1198,7 @@ function setState(s) {
   document.body.classList.toggle('touch', touchMode);
   document.body.classList.toggle('playing', s === 'playing');
   if (s !== 'playing') { for (const k in keys) keys[k] = false; scopeHeld = false; joy.x = joy.y = 0; $('stick').hidden = true; }
-  if (s === 'menu' || s === 'pitch') { scopeToggle = false; scopeT = 0; scopeOn = false; $('scope').hidden = true; $('cross').hidden = false; $('top').textContent = pad6(top); }
+  if (s === 'menu' || s === 'pitch') { scopeToggle = false; scopeT = 0; scopeOn = false; retX = retY = retTX = retTY = 0; $('scope').hidden = true; $('cross').hidden = false; $('top').textContent = pad6(top); }
 }
 
 // ---------- rounds: each one is the range out in the field, then the office ----------
@@ -1500,18 +1500,22 @@ function showKeys() { $('keys-desk').hidden = touchMode; $('keys-touch').hidden 
 showKeys();
 
 // ---------- input ----------
-// Through the scope, a little slack soaks up small back-and-forth mouse movement (a resting hand, a noisy sensor or
-// a shiny desk), so the view only moves once the mouse has really travelled. Out of the scope there is no slack.
-let slackX = 0, slackY = 0;
-const SLACK = 8; // mouse counts
+// The scope. Zoomed in, the magnified view holds still and the mouse moves the crosshair across the glass, at about a
+// screen pixel per mouse count, so a wobbly hand or a noisy mouse only nudges a thin line instead of shaking the world.
+// Push the crosshair to the edge of the glass and the extra movement pans the view. Shots go where the crosshair is.
+let retX = 0, retY = 0, retTX = 0, retTY = 0; // crosshair offset from the centre, in CSS px: shown, and where the mouse put it
+const RET_GAIN = 0.9; // CSS px per mouse count
+const glassR = () => 0.415 * Math.min(canvas.clientWidth || innerWidth, canvas.clientHeight || innerHeight);
 function look(dx, dy, s) {
   if (scopeT > 0.75) {
-    slackX += dx; slackY += dy;
-    const m = Math.hypot(slackX, slackY);
-    if (m <= SLACK) return;
-    const f = (m - SLACK) / m; dx = slackX * f; dy = slackY * f; slackX -= dx; slackY -= dy;
-  } else slackX = slackY = 0;
-  const k = s * (camera.fov / baseFov) * (scopeT > 0.75 ? 0.5 : 1); // half as quick through the scope, so a resting hand barely moves it
+    const lim = glassR() * 0.72;
+    retTX += dx * RET_GAIN; retTY += dy * RET_GAIN;
+    const m = Math.hypot(retTX, retTY);
+    if (m <= lim) return;
+    const ox = retTX * (1 - lim / m), oy = retTY * (1 - lim / m); // the part past the edge turns the view
+    retTX -= ox; retTY -= oy; dx = ox / RET_GAIN; dy = oy / RET_GAIN;
+  }
+  const k = s * (camera.fov / baseFov) * (scopeT > 0.75 ? 0.5 : 1);
   P.yaw -= dx * k; P.pitch = clamp(P.pitch - dy * k, -1.45, 1.45);
   lookDX += dx; lookDY += dy;
 }
@@ -1590,6 +1594,13 @@ press('tb-scope', () => { scopeToggle = !scopeToggle; $('tb-scope').classList.to
 // ---------- shooting ----------
 const ray = new THREE.Raycaster(), dir = new THREE.Vector3(), origin = new THREE.Vector3(), endPt = new THREE.Vector3(), muzzle = new THREE.Vector3();
 function aimDir(yaw, pitch, out) { const cp = Math.cos(pitch); return out.set(-Math.sin(yaw) * cp, Math.sin(pitch), -Math.cos(yaw) * cp); }
+const ndc = new THREE.Vector2(), aimRay = new THREE.Raycaster();
+function aimVector(out, always) { // through the scope's crosshair, wherever it sits on the glass
+  if ((!always && scopeT <= 0.75) || (!retX && !retY)) return aimDir(aimYaw, aimPitch, out);
+  const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight;
+  camera.updateMatrixWorld(); ndc.set(retX / (w / 2), -retY / (h / 2)); aimRay.setFromCamera(ndc, camera);
+  return out.copy(aimRay.ray.direction);
+}
 function fire() {
   if (state === 'playing' && introOpen()) { closeIntro(); return; } // the first shot just closes the warehouse card
   if (state !== 'playing' || cooldown > 0) return;
@@ -1599,7 +1610,7 @@ function fire() {
   if (live) { shots--; if (shots === 0) outT = 0; }
   const scoped = scopeT > 0.75;
   const spread = scoped ? 0 : 0.009 + Math.min(0.015, Math.hypot(P.vx, P.vz) * 0.0018) + (P.onGround ? 0 : 0.015);
-  aimDir(aimYaw + rnd(-spread, spread), aimPitch + rnd(-spread, spread), dir);
+  if (scoped) aimVector(dir); else aimDir(aimYaw + rnd(-spread, spread), aimPitch + rnd(-spread, spread), dir);
   origin.copy(camera.position);
   ray.set(origin, dir); ray.far = 900;
   const hit = ray.intersectObjects(hittables, true)[0];
@@ -1697,12 +1708,18 @@ function updateWeapon(dt) {
   const stepT = reduceMotion ? 1 : dt / 0.26;
   scopeT = want > scopeT ? Math.min(1, scopeT + stepT) : Math.max(0, scopeT - stepT * 1.5);
   const on = scopeT > 0.75;
-  if (on !== scopeOn) { scopeOn = on; rangeTick = 0; resize(); } // the scope draws at full resolution
+  if (on !== scopeOn) {
+    if (!on && (retX || retY)) { // coming out of the scope: face where the crosshair was
+      aimVector(v1, true); P.yaw = viewYaw = Math.atan2(-v1.x, -v1.z); P.pitch = viewPitch = clamp(Math.asin(clamp(v1.y, -1, 1)), -1.45, 1.45);
+    }
+    retX = retY = retTX = retTY = 0;
+    scopeOn = on; rangeTick = 0; resize(); // the scope draws at full resolution
+  }
   if (on) {
     rangeTick -= dt;
     if (rangeTick <= 0) {
       rangeTick = 0.12;
-      ray.set(camera.position, aimDir(aimYaw, aimPitch, v1)); ray.far = 900;
+      ray.set(camera.position, aimVector(v1)); ray.far = 900;
       const h = ray.intersectObjects(hittables, true)[0];
       $('range').textContent = (h ? Math.round(h.distance * YD) : '--') + ' yd';
     }
@@ -1717,6 +1734,7 @@ function poseView(dt, t) {
   // Through the scope the view eases toward where you aim (about a tenth of a second behind), which irons out
   // hand tremor. There is no breathing sway: a still mouse is a still crosshair.
   const follow = scopeT > 0 && !reduceMotion ? 1 - Math.exp(-dt * lerp(60, 10, e)) : 1;
+  const rf = 1 - Math.exp(-dt * 30); retX += (retTX - retX) * rf; retY += (retTY - retY) * rf; // the crosshair eases a hair behind the mouse
   viewYaw += (P.yaw - viewYaw) * follow; viewPitch += (P.pitch - viewPitch) * follow;
   aimPitch = viewPitch + recoilP;
   aimYaw = viewYaw;
@@ -1734,7 +1752,10 @@ function poseView(dt, t) {
   rifle.visible = scopeT < 0.72;
   const so = clamp((scopeT - 0.5) / 0.45, 0, 1);
   if (so <= 0) { if (!scopeEl.hidden) scopeEl.hidden = true; }
-  else { scopeEl.hidden = false; scopeEl.style.opacity = so.toFixed(3); scopeEl.style.transform = reduceMotion ? '' : 'scale(' + (1 + (1 - so) * 1.2).toFixed(3) + ')'; }
+  else {
+    scopeEl.hidden = false; scopeEl.style.opacity = so.toFixed(3); scopeEl.style.transform = reduceMotion ? '' : 'scale(' + (1 + (1 - so) * 1.2).toFixed(3) + ')';
+    scopeEl.style.setProperty('--rx', retX.toFixed(1) + 'px'); scopeEl.style.setProperty('--ry', retY.toFixed(1) + 'px');
+  }
   const hideCross = scopeT > 0.2; if (crossEl.hidden !== hideCross) crossEl.hidden = hideCross;
   flash.visible = flashT > 0;
   if (flash.visible) flash.rotation.z = rnd(0, TAU);
