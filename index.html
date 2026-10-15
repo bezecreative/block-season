@@ -97,7 +97,7 @@ body.playing #view{cursor:crosshair}
 #touch{position:absolute;inset:0;z-index:3;touch-action:none}
 .bar,#msg,#tip,#pops,.arr{z-index:2}
 #pausebtn{z-index:4}
-#fps{position:absolute;right:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:2;font-size:8px;line-height:1;background:rgba(0,0,0,.55);border-radius:4px;padding:6px 7px 4px}
+#fps{position:absolute;left:50%;transform:translateX(-50%);top:62px;z-index:6;font-size:9px;line-height:1.3;max-width:calc(100% - 32px);text-align:center;background:rgba(0,0,0,.75);border-radius:4px;padding:7px 9px 5px}
 #msg.closable{padding:22px 34px 14px}
 #msg-hint{display:block;margin-top:12px;font-size:clamp(7px,1.4vw,9px);color:var(--grass)}
 #msg-x{position:absolute;top:4px;right:6px;pointer-events:auto;appearance:none;background:none;border:0;color:var(--white);font:inherit;font-size:16px;line-height:1;padding:6px 8px;cursor:pointer}
@@ -1585,11 +1585,18 @@ addEventListener('mouseup', e => {
   if (dragLook && dragBtn === 0 && e.button === 0 && dragDist < 6 && state === 'playing') fire();
   if (e.button === dragBtn) dragBtn = -1;
 });
+// Some Mac and browser setups now and then report a mouse move far bigger than the ones around it. Anything much
+// larger than the recent average is trimmed back, so the view never lurches. Real flicks build up over a few reports.
+let mouseAvg = 0;
+const diag = { events: 0, maxMove: 0, jumps: 0, frames: 0, slowest: 0, hitches: 0, t: 0 }; // for the ` readout
 addEventListener('mousemove', e => {
   if (state !== 'playing' || touchMode) return;
   if (locked || (dragLook && dragBtn >= 0)) {
-    const mx = e.movementX || 0, my = e.movementY || 0;
-    if (Math.abs(mx) > 300 || Math.abs(my) > 300) return; // some browsers report a bogus jump now and then; it yanks the scope
+    let mx = e.movementX || 0, my = e.movementY || 0;
+    const mag = Math.hypot(mx, my), cap = mouseAvg * 8 + 60;
+    if (mag > cap) { mx *= cap / mag; my *= cap / mag; diag.jumps++; }
+    mouseAvg += (Math.min(mag, cap) - mouseAvg) * 0.2;
+    diag.events++; diag.maxMove = Math.max(diag.maxMove, mag);
     if (!locked) dragDist += Math.abs(mx) + Math.abs(my);
     look(mx, my, 0.0022);
   }
@@ -1820,7 +1827,13 @@ function frame(now) {
     slowT = ftAvg > 1 / 45 ? slowT + dt : 0;
     if (slowT > 2) { quality++; slowT = 0; resize(); }
   }
-  if (fpsShown && (fpsTick -= dt) <= 0) { fpsTick = 0.5; $('fps').textContent = Math.round(1 / ftAvg) + ' fps' + (quality ? ' / q-' + quality : ''); }
+  if (raw > 0 && raw < 0.5) { diag.frames++; diag.t += raw; diag.slowest = Math.max(diag.slowest, raw); if (raw > ftAvg * 1.6) diag.hitches++; }
+  if (diag.t >= 1) { // a once-a-second report for the ` readout: frame rate, slowest frame, hitches, mouse reports and jumps
+    if (fpsShown) $('fps').textContent = Math.round(diag.frames / diag.t) + ' fps  slowest ' + Math.round(diag.slowest * 1000) + 'ms  hitches ' + diag.hitches +
+      '  |  mouse ' + diag.events + '/s  ' + (diag.frames ? (diag.events / diag.frames).toFixed(1) : 0) + '/frame  max ' + Math.round(diag.maxMove) + '  jumps ' + diag.jumps +
+      '  |  px ' + (Math.round(renderer.domElement.width) + 'x' + renderer.domElement.height) + (scopeOn ? ' scope' : '') + (quality ? ' q-' + quality : '');
+    diag.events = diag.maxMove = diag.jumps = diag.frames = diag.slowest = diag.hitches = diag.t = 0;
+  }
   if (state === 'playing') { updatePlayer(dt); updateWeapon(dt); updateGame(dt); updateTargets(dt); updateDog(dt); if (stage === 'field') updateRange(dt); else if (stage === 'office') updatePcs(dt); else { updateDeer(dt); updateCars(dt); } }
   else if (state === 'menu') { updateTargets(dt); updateRange(dt); }
   if (state !== 'paused') { T += dt; updateDebris(dt); updateTracers(dt); updateFx(dt); poseView(dt, T); }
