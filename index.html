@@ -292,7 +292,7 @@ const fieldWorld = new THREE.Group(), officeWorld = new THREE.Group(); // the ra
 officeWorld.visible = false; scene.add(fieldWorld, officeWorld);
 const camera = new THREE.PerspectiveCamera(72, 1, 0.1, 2500);
 camera.rotation.order = 'YXZ';
-let baseFov = 72, scopeMag = 7; // fixed scope power: right-click brings it up, nothing to adjust
+let baseFov = 72, scopeMag = 4; // fixed 4x scope: enough to read far targets, calm enough to aim smoothly
 const scopeFov = () => 2 * Math.atan(Math.tan(baseFov * Math.PI / 360) / scopeMag) * 180 / Math.PI;
 
 const hemi = new THREE.HemisphereLight(0xffffff, 0x9cc060, 0.86); scene.add(hemi);
@@ -1547,7 +1547,7 @@ showKeys();
 
 // ---------- input ----------
 function look(dx, dy, s) {
-  const k = s * (camera.fov / baseFov) * (scopeT > 0.75 ? 0.6 : 1); // a little slower through the scope, for fine aim
+  const k = s * (camera.fov / baseFov) * (scopeT > 0.75 ? 0.45 : 1); // slower through the scope, for calm, fine aim
   P.yaw -= dx * k; P.pitch = clamp(P.pitch - dy * k, -1.45, 1.45);
   lookDX += dx; lookDY += dy;
 }
@@ -1734,14 +1734,15 @@ function updateWeapon(dt) {
   const stepT = reduceMotion ? 1 : dt / 0.26;
   scopeT = want > scopeT ? Math.min(1, scopeT + stepT) : Math.max(0, scopeT - stepT * 1.5);
   const on = scopeT > 0.75;
-  if (on !== scopeOn) { scopeOn = on; rangeTick = 0; }
+  if (on !== scopeOn) { scopeOn = on; rangeTick = 0; resize(); } // the scope draws at screen resolution
   if (on) {
     rangeTick -= dt;
     if (rangeTick <= 0) {
       rangeTick = 0.12;
       ray.set(camera.position, aimDir(aimYaw, aimPitch, v1)); ray.far = 900;
       const h = ray.intersectObjects(hittables, true)[0];
-      $('range').textContent = (h ? Math.round(h.distance * YD) : '--') + ' yd';
+      const fps = Math.round(1 / ftAvg);
+      $('range').textContent = (h ? Math.round(h.distance * YD) : '--') + ' yd' + (fps < 50 ? '  /  ' + fps + ' fps' : ''); // a slow computer shows its frame rate here
     }
   }
 }
@@ -1751,9 +1752,9 @@ function poseView(dt, t) {
   const spd = Math.hypot(P.vx, P.vz), mv = Math.min(1, spd / 5.2) * (P.onGround ? 1 : 0.3), e = scopeT * scopeT * (3 - 2 * scopeT);
   const fov = lerp(baseFov, scopeFov(), e);
   if (Math.abs(fov - camera.fov) > 0.01) { camera.fov = fov; camera.updateProjectionMatrix(); }
-  // Through the scope the view eases toward where you aim (about 50 ms behind), which smooths the motion.
+  // Through the scope the view eases toward where you aim (about 70 ms behind), which smooths the motion.
   // There is no breathing sway: a still mouse is a still crosshair.
-  const follow = scopeT > 0 && !reduceMotion ? 1 - Math.exp(-dt * lerp(60, 20, e)) : 1;
+  const follow = scopeT > 0 && !reduceMotion ? 1 - Math.exp(-dt * lerp(60, 14, e)) : 1;
   viewYaw += (P.yaw - viewYaw) * follow; viewPitch += (P.pitch - viewPitch) * follow;
   aimPitch = viewPitch + recoilP;
   aimYaw = viewYaw;
@@ -1793,9 +1794,11 @@ function updateArrows() {
 function resize() {
   const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight, asp = w / h;
   // Chunky pixels, about 300 lines tall whatever the window; the billboard stage draws sharp so the board reads clean.
+  // Through the scope the view also draws at screen resolution (one image pixel per screen pixel, no retina): with fat
+  // pixels a slow pan advances one pixel on one frame and two on the next, which at 75 fps reads as jumpy, shaky motion.
   // On a computer that can't hold the frame rate, quality steps down (bigger pixels) to keep the motion smooth.
-  const sharp = stage === 'billboard', q = 1 + quality * 0.5;
-  const px = sharp ? q / Math.min(1.25, devicePixelRatio || 1) : Math.max(2, Math.round(h / 300 * q));
+  const sharp = stage === 'billboard' || scopeOn, q = 1 + quality * 0.5;
+  const px = stage === 'billboard' ? q / Math.min(1.25, devicePixelRatio || 1) : scopeOn ? q : Math.max(2, Math.round(h / 300 * q));
   canvas.classList.toggle('sharp', sharp);
   renderer.setSize(Math.max(1, Math.round(w / px)), Math.max(1, Math.round(h / px)), false);
   baseFov = asp < 1 ? 88 : 72;
