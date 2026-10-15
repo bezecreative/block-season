@@ -665,12 +665,17 @@ const SCREENSHOTS = {
   bb: 'screens/borebuddy.jpg', nemo: 'screens/nemo-arms.jpg', sw: 'screens/smith-wesson.jpg',
   ammo: 'screens/ammo-squared.jpg', pws: 'screens/pws.jpg', allterra: 'screens/allterra-arms.jpg'
 };
+// How soft the screenshots look: 0 is the original sharpness; 0.15 draws them 15% smaller with a light blur.
+const SCREEN_SOFTEN = 0.15;
 for (const k in SCREENSHOTS) if (SCREENSHOTS[k]) {
   const im = new Image();
   im.onload = () => {
     const sc = screens[k], w = im.naturalWidth, h = Math.min(im.naturalHeight, w * 0.75), cw = Math.min(w, h / 0.75);
-    sc.shot = true; sc.c.width = 256; sc.c.height = 192;
-    sc.c.getContext('2d').drawImage(im, 0, 0, cw, h, 0, 0, 256, 192);
+    const tw = Math.round(256 * (1 - SCREEN_SOFTEN)), th = Math.round(tw * 0.75);
+    sc.shot = true; sc.c.width = tw; sc.c.height = th;
+    const x = sc.c.getContext('2d');
+    if (SCREEN_SOFTEN > 0) x.filter = 'blur(' + (SCREEN_SOFTEN * 4).toFixed(2) + 'px)';
+    x.drawImage(im, 0, 0, cw, h, 0, 0, tw, th);
     sc.t.needsUpdate = true;
   };
   im.src = SCREENSHOTS[k];
